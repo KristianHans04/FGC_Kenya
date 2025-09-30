@@ -75,9 +75,8 @@ const applicationSchema = z.object({
     .max(50, 'County name is too long'),
   
   // Experience & Interest
-  experience: z.enum(['none', 'beginner', 'intermediate', 'advanced'], {
-    required_error: 'Please select your experience level',
-  }),
+  experience: z.enum(['none', 'beginner', 'intermediate', 'advanced'])
+    .describe('Please select your experience level'),
   
   interests: z.array(z.string()).min(1, 'Please select at least one area of interest'),
   

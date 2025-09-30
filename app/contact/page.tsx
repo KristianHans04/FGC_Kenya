@@ -59,9 +59,8 @@ const contactSchema = z.object({
     .min(5, 'Subject must be at least 5 characters')
     .max(150, 'Subject must be less than 150 characters'),
   
-  category: z.enum(['general', 'sponsorship', 'volunteer', 'media', 'technical', 'other'], {
-    required_error: 'Please select a category',
-  }),
+  category: z.enum(['general', 'sponsorship', 'volunteer', 'media', 'technical', 'other'])
+    .describe('Please select a category'),
   
   message: z.string()
     .min(20, 'Message must be at least 20 characters')
