@@ -1,5 +1,9 @@
+'use client'
+
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 const footerLinks = {
   about: [
@@ -21,7 +25,7 @@ const footerLinks = {
     { name: 'Partner with Us', href: '/contact' },
   ],
   resources: [
-    { name: 'News & Updates', href: '/news' },
+    // { name: 'News & Updates', href: '/news' },
     { name: 'Impact Stories', href: '/impact' },
     { name: 'Learning Resources', href: '/resources' },
     { name: 'Contact Us', href: '/contact' },
@@ -37,6 +41,9 @@ const socialLinks = [
 ]
 
 export default function Footer() {
+  const { theme, systemTheme } = useTheme()
+  const currentTheme = theme === 'system' ? systemTheme : theme
+  
   return (
     <footer className="bg-background border-t border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -44,14 +51,17 @@ export default function Footer() {
           {/* Logo and Description */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-3 mb-4">
-              <div className="relative">
-                <div className="w-10 h-10 bg-kenya-green rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">FG</span>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-kenya-red rounded-full"></div>
+              <div className="relative w-10 h-10">
+                <Image
+                  src="/images/FGC_Logo.svg"
+                  alt="FIRST Global Team Kenya Logo"
+                  width={40}
+                  height={40}
+                  className={`transition-all duration-300 ${currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                />
               </div>
               <div>
-                <p className="text-lg font-bold font-heading">FIRST Global</p>
+                <p className="text-lg font-bold font-heading"><i>FIRST</i> Global</p>
                 <p className="text-xs text-muted-foreground">Team Kenya</p>
               </div>
             </Link>

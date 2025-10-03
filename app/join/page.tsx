@@ -1,6 +1,6 @@
 /**
  * @file page.tsx
- * @description Join/Apply page for FIRST Global Team Kenya with comprehensive form validation
+ * @description Join/Apply page for <i>FIRST</i> Global Team Kenya with comprehensive form validation
  * @author Team Kenya Dev
  */
 
@@ -111,19 +111,20 @@ const interestAreas = [
   { id: 'outreach', label: 'Community Outreach', icon: Heart },
 ]
 
-// Timeline data
+// Timeline data - Updated for October 3rd, 2025
 const timeline = [
-  { date: '1 Jan - 28 Feb', title: 'Applications Open', status: 'active' },
-  { date: '1-15 March', title: 'Initial Screening', status: 'upcoming' },
-  { date: '20-30 March', title: 'Interviews', status: 'upcoming' },
-  { date: '5 April', title: 'Team Announcement', status: 'upcoming' },
-  { date: 'April - September', title: 'Training & Preparation', status: 'upcoming' },
-  { date: 'October 2025', title: 'Competition in Panama', status: 'upcoming' },
+  { date: '1 Jan - 28 Feb', title: 'Applications Open', status: 'completed' },
+  { date: '1-15 March', title: 'Initial Screening', status: 'completed' },
+  { date: '20-30 March', title: 'Interviews', status: 'completed' },
+  { date: '5 April', title: 'Team Announcement', status: 'completed' },
+  { date: 'April - September', title: 'Training & Preparation', status: 'completed' },
+  { date: 'October 29, 2025', title: 'Competition in Panama', status: 'active' },
 ]
 
 export default function JoinPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [applicationsClosed] = useState(true) // Applications are closed as of October 3rd
   
   const {
     register,
@@ -188,7 +189,7 @@ export default function JoinPage() {
               Join Team <span className="text-primary">Kenya</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Be part of Kenya's journey in the FIRST Global Challenge. 
+              Be part of Kenya's journey in the <i>FIRST</i> Global Challenge. 
               Apply now to represent your country on the world stage!
             </p>
           </motion.div>
@@ -296,6 +297,39 @@ export default function JoinPage() {
               Application <span className="text-primary">Form</span>
             </h2>
             
+            {/* Applications Closed Notice */}
+            {applicationsClosed ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card bg-muted/50 border-2 border-primary/20"
+              >
+                <div className="text-center py-12">
+                  <Calendar className="h-16 w-16 text-primary mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold mb-4">Applications Closed</h3>
+                  <p className="text-lg text-muted-foreground mb-6 max-w-md mx-auto">
+                    The application period for the 2025 <i>FIRST</i> Global Challenge team has ended. 
+                    Our team is currently preparing for the competition in Panama City on October 29, 2025.
+                  </p>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      The next recruitment cycle will open in January 2026 for the 2026 competition.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <Link href="/support" className="btn-primary">
+                        Support Our Team
+                        <Heart className="ml-2 h-5 w-5" />
+                      </Link>
+                      <Link href="/resources" className="btn-secondary">
+                        Learn Robotics
+                        <BookOpen className="ml-2 h-5 w-5" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <>
             {/* Status Messages */}
             <div id="form-status" tabIndex={-1} aria-live="polite" aria-atomic="true">
               {submitStatus === 'success' && (
@@ -683,6 +717,8 @@ export default function JoinPage() {
                 </button>
               </div>
             </form>
+            </>
+            )}
           </motion.div>
         </div>
       </section>

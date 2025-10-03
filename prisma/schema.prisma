@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Team Members
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  category  String   // 'Current Team', 'Mentors', 'Alumni'
+  year      String?  // Year of participation
+  bio       String?
+  image     String?
+  linkedIn  String?
+  github    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// News Articles
+model NewsArticle {
+  id          String   @id @default(uuid())
+  title       String
+  excerpt     String
+  content     String?
+  category    String   // 'Competition', 'Outreach', 'Alumni', 'Partnership', 'Workshop'
+  date        DateTime
+  readTime    String
+  author      String
+  image       String?
+  tags        String[] // Array of tags
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Competition Timeline
+model Competition {
+  id           String   @id @default(uuid())
+  year         String
+  location     String
+  theme        String
+  achievement  String
+  highlights   String[] // Array of highlights
+  ranking      Int?
+  teamSize     Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Resources/Learning Materials
+model Resource {
+  id          String   @id @default(uuid())
+  category    String   // 'robotics', 'programming', 'mechanical', 'electrical', 'competition', 'stem'
+  type        String   // 'guide', 'video', 'tutorial', 'course'
+  title       String
+  description String
+  difficulty  String   // 'beginner', 'intermediate', 'advanced', 'all'
+  duration    String
+  format      String   // 'PDF', 'Video', 'Interactive', etc.
+  link        String
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Impact Stories/Testimonials
+model ImpactStory {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  year      String   // Year as team member
+  story     String
+  impact    String   // Short impact description
+  image     String?
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Milestones/Achievements
+model Milestone {
+  id          String   @id @default(uuid())
+  number      String   // e.g., "500+", "85%"
+  label       String   // e.g., "Students Trained"
+  description String?
+  category    String?  // Optional category for grouping
+  order       Int      @default(0) // For ordering display
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Partners/Sponsors
+model Partner {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  logo        String?
+  website     String?
+  type        String   // 'sponsor', 'partner', 'collaborator'
+  level       String?  // 'gold', 'silver', 'bronze', etc.
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Outreach Programs
+model OutreachProgram {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  beneficiaries String   // e.g., "50+ schools", "200+ students monthly"
+  icon          String?  // Icon identifier
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Quick Start Guides
+model QuickStartGuide {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  icon        String   // Icon identifier
+  color       String   // Color class
+  items       String[] // Array of guide items
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// External Links
+model ExternalLink {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  url         String
+  icon        String   // Icon identifier
+  category    String?  // Optional category
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Site Statistics
+model SiteStat {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g., 'years_active', 'students_impacted'
+  value     Int
+  suffix    String?  // e.g., '+', '%'
+  label     String
+  icon      String?  // Icon identifier
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

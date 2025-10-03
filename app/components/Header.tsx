@@ -5,11 +5,13 @@ import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { useTheme } from 'next-themes'
 
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  { name: 'News', href: '/news' },
+  // { name: 'News', href: '/news' },
   { name: 'Impact', href: '/impact' },
   { name: 'Join Us', href: '/join' },
   { name: 'Support', href: '/support' },
@@ -19,6 +21,8 @@ const navigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, systemTheme } = useTheme()
+  const currentTheme = theme === 'system' ? systemTheme : theme
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -26,14 +30,18 @@ export default function Header() {
         <div className="flex items-center justify-between py-4">
           <div className="flex lg:flex-1">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-10 h-10 bg-kenya-green rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">FG</span>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-kenya-red rounded-full"></div>
+              <div className="relative w-12 h-12">
+                <Image
+                  src="/images/FGC_Logo.svg"
+                  alt="FIRST Global Team Kenya Logo"
+                  width={48}
+                  height={48}
+                  className={`transition-all duration-300 ${currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                  priority
+                />
               </div>
               <div>
-                <p className="text-lg font-bold font-heading">FIRST Global</p>
+                <p className="text-lg font-bold font-heading"><i>FIRST</i> Global</p>
                 <p className="text-xs text-muted-foreground">Team Kenya</p>
               </div>
             </Link>
@@ -80,11 +88,15 @@ export default function Header() {
       >
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-kenya-green rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">FG</span>
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-kenya-red rounded-full"></div>
+            <div className="relative w-12 h-12">
+              <Image
+                src="/images/FGC_Logo.svg"
+                alt="FIRST Global Team Kenya Logo"
+                width={48}
+                height={48}
+                className={`transition-all duration-300 ${currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                priority
+              />
             </div>
             <div>
               <p className="text-lg font-bold font-heading">FIRST Global</p>

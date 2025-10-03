@@ -1,6 +1,6 @@
 /**
  * @file page.tsx
- * @description Support page for donations and sponsorship to FIRST Global Team Kenya
+ * @description Support page for donations and sponsorship to <i>FIRST</i> Global Team Kenya
  * @author Team Kenya Dev
  */
 

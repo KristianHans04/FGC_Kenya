@@ -9,14 +9,14 @@ import Link from 'next/link'
 const newsArticles = [
   {
     id: 1,
-    title: 'Team Kenya Prepares for FIRST Global Challenge 2025 in Panama',
-    excerpt: 'Our team is intensively preparing for the upcoming FIRST Global Challenge in Panama City this October. With new strategies and innovations...',
+    title: 'Team Kenya Prepares for FIRST Global Challenge 2025: Eco Equilibrium',
+    excerpt: 'Our team is intensively preparing for the Eco Equilibrium challenge in Panama City this October. With focus on environmental balance and sustainable solutions...',
     category: 'Competition',
     date: '2025-09-15',
     readTime: '5 min read',
     author: 'Team Kenya Admin',
     image: '/images/news/panama-prep.jpg',
-    tags: ['FGC 2025', 'Panama', 'Preparation'],
+    tags: ['FGC 2025', 'Panama', 'Eco Equilibrium', 'Preparation'],
     featured: true,
   },
   {
@@ -69,14 +69,14 @@ const newsArticles = [
   },
   {
     id: 6,
-    title: 'Team Kenya Reflection: Lessons from Greece 2024',
-    excerpt: 'Looking back at our participation in Athens, we share key insights and experiences that shaped our team\'s growth and strategy...',
+    title: 'Team Kenya Reflection: Lessons from Greece 2024 - Feeding the Future',
+    excerpt: 'Looking back at our participation in Athens for the Feeding the Future challenge, we share key insights from our agricultural robotics solutions and experiences that shaped our team\'s growth...',
     category: 'Competition',
     date: '2025-08-15',
     readTime: '7 min read',
     author: 'Team Captain',
     image: '/images/news/greece.jpg',
-    tags: ['FGC 2024', 'Greece', 'Reflection'],
+    tags: ['FGC 2024', 'Greece', 'Feeding the Future', 'Reflection'],
     featured: false,
   },
 ]

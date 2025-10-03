@@ -2,68 +2,73 @@
 
 import { motion } from 'framer-motion'
 import { Quote, GraduationCap, Briefcase, Rocket, Heart, Star, Users } from 'lucide-react'
+import CountUp from '@/app/components/CountUp'
 
 const impactStories = [
   {
     id: 1,
-    name: 'Sarah Muthoni',
-    role: 'Aerospace Engineering Student',
-    year: '2019 Team Member',
-    story: 'Participating in FIRST Global Challenge opened my eyes to the possibilities in engineering. Today, I\'m pursuing aerospace engineering at university, inspired by the problem-solving skills I developed with Team Kenya.',
-    impact: 'Now studying at MIT',
-    image: '/images/stories/sarah.jpg',
+    name: 'Elly Savatia',
+    role: 'Tech Entrepreneur',
+    year: 'Alumni',
+    story: 'My journey with <i>FIRST</i> Global Team Kenya inspired me to use technology to solve real-world problems. Today, I\'m the founder of two companies: Signvrse, which uses AI to bridge the sign language gap, and Precision Motion Labs, focusing on innovative motion solutions.',
+    impact: 'Founded Signvrse & Precision Motion Labs',
+    image: '/images/stories/elly.jpg',
   },
   {
     id: 2,
-    name: 'David Ochieng',
-    role: 'Software Developer',
-    year: '2018 Team Member',
-    story: 'The coding skills I learned while programming our robot became the foundation of my career. FGC taught me that technology can solve real-world problems, and now I\'m developing apps that help farmers in Kenya.',
-    impact: 'Founded AgriTech startup',
-    image: '/images/stories/david.jpg',
+    name: 'Maxwell Okoth',
+    role: 'Prosthetics Innovator',
+    year: 'Alumni',
+    story: 'The engineering skills and humanitarian spirit I gained from Team Kenya led me to found ZeroBionic. We\'re building affordable prosthetic arms for the disabled, combining robotics with social impact to change lives across Kenya.',
+    impact: 'Founder of ZeroBionic',
+    image: '/images/stories/maxwell.jpg',
   },
   {
     id: 3,
-    name: 'Grace Wanjiru',
-    role: 'Robotics Teacher',
-    year: '2017 Team Member',
-    story: 'After experiencing the transformative power of robotics education, I knew I wanted to bring the same opportunities to more students. I now teach robotics at three schools in Nairobi.',
-    impact: 'Teaching 200+ students',
-    image: '/images/stories/grace.jpg',
+    name: 'Florida Korir',
+    role: 'Tech Community Leader',
+    year: 'Alumni',
+    story: 'Team Kenya taught me the importance of knowledge sharing and community building. As the GDSC 2024 Ambassador at Zetech University, I\'m inspiring the next generation of developers and continuing the legacy of innovation.',
+    impact: 'GDSC 2024 Ambassador, Zetech University',
+    image: '/images/stories/florida.jpg',
   },
   {
     id: 4,
-    name: 'James Kamau',
-    role: 'Mechanical Engineer',
-    year: '2020 Team Member',
-    story: 'The virtual competition during COVID-19 taught us resilience and innovation. Despite the challenges, we learned to collaborate remotely and adapt. These skills have been invaluable in my engineering career.',
-    impact: 'Working at Tesla',
-    image: '/images/stories/james.jpg',
+    name: 'Eleanora Matalanga',
+    role: 'Student Tech Leader',
+    year: 'Alumni',
+    story: 'The leadership and technical skills I developed with Team Kenya prepared me to lead at the university level. As GDSC Lead 2024 at DeKut, I\'m building a community of student developers and organizing impactful tech events.',
+    impact: 'GDSC Lead 2024, DeKut',
+    image: '/images/stories/eleanora.jpg',
   },
 ]
 
 const impactMetrics = [
   {
     icon: GraduationCap,
-    value: '85%',
+    value: 85,
+    suffix: '%',
     label: 'Alumni in STEM Fields',
     description: 'Of our alumni pursuing higher education or careers',
   },
   {
     icon: Briefcase,
-    value: '60+',
+    value: 60,
+    suffix: '+',
     label: 'Career Opportunities',
     description: 'Created through our network and partnerships',
   },
   {
     icon: Users,
-    value: '500+',
+    value: 500,
+    suffix: '+',
     label: 'Students Reached',
     description: 'Through direct participation and outreach programs',
   },
   {
     icon: Rocket,
-    value: '20+',
+    value: 20,
+    suffix: '+',
     label: 'Innovation Projects',
     description: 'Initiated by our alumni and current members',
   },
@@ -134,12 +139,6 @@ export default function ImpactPage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
-              Measurable <span className="text-primary">Impact</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our programs create lasting change in the lives of Kenyan youth
-            </p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -150,12 +149,14 @@ export default function ImpactPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="card text-center"
+                className="text-center"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
-                  <metric.icon className="h-6 w-6 text-primary" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+                  <metric.icon className="h-8 w-8 text-primary" />
                 </div>
-                <div className="text-3xl font-bold text-primary mb-2">{metric.value}</div>
+                <div className="text-4xl font-bold text-primary mb-2">
+                  <CountUp end={metric.value} suffix={metric.suffix} />
+                </div>
                 <h3 className="font-semibold mb-2">{metric.label}</h3>
                 <p className="text-sm text-muted-foreground">{metric.description}</p>
               </motion.div>
@@ -217,8 +218,8 @@ export default function ImpactPage() {
         </div>
       </section>
 
-      {/* Outreach Programs */}
-      <section className="py-16 bg-muted/30">
+      {/* Outreach Programs - Commented out for now */}
+      {/* <section className="py-16 bg-muted/30">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -259,7 +260,7 @@ export default function ImpactPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Call to Action */}
       <section className="py-16">

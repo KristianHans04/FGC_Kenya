@@ -5,14 +5,36 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ArrowRight, Users, Target, Globe, Sparkles, Heart, Trophy, Calendar } from 'lucide-react'
 import CountUp from '@/app/components/CountUp'
+import ImageSlideshow from '@/app/components/ImageSlideshow'
+import CountdownTimer from '@/app/components/CountdownTimer'
 
 export default function HomePage() {
+  const teamKenyaActionImages = [
+    '/images/TeamKenyaAction/IMG_0504.jpg',
+    '/images/TeamKenyaAction/IMG_20221028_192857_962.webp',
+    '/images/TeamKenyaAction/PXL_20230617_130508851.jpg',
+    '/images/TeamKenyaAction/PXL_20230826_124047312.jpg',
+    '/images/TeamKenyaAction/WhatsApp Image 2025-06-20 at 18.57.00_9b9dbf6e.jpg'
+  ]
+
   return (
     <>
       {/* Hero Section with Kenyan Flag Pattern */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Background Pattern */}
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/hero/PXL_20230812_161722174.jpg"
+            alt="Team Kenya Hero"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+        
+        {/* Background Pattern Overlay */}
         <div className="absolute inset-0 african-pattern opacity-5"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
         
         {/* Animated Background Shapes */}
         <div className="absolute inset-0 overflow-hidden">
@@ -106,13 +128,13 @@ export default function HomePage() {
                 { label: 'Awards Won', value: 12, suffix: '+', icon: Trophy },
               ].map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-2">
-                    <stat.icon className="h-6 w-6 text-primary" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full mb-2">
+                    <stat.icon className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-3xl font-bold">
+                  <div className="text-3xl font-bold text-white">
                     <CountUp end={stat.value} suffix={stat.suffix} />
                   </div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  <div className="text-sm text-white/90">{stat.label}</div>
                 </div>
               ))}
             </motion.div>
@@ -185,18 +207,14 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-tr from-kenya-green/20 to-kenya-red/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
-                      <Users className="h-16 w-16 text-primary" />
-                    </div>
-                    <p className="text-lg font-semibold">Team Kenya in Action</p>
-                    <p className="text-sm text-muted-foreground">Robotics Competition Highlights</p>
-                  </div>
-                </div>
-              </div>
+              <ImageSlideshow
+                images={teamKenyaActionImages}
+                interval={4000}
+                showControls={true}
+                className="shadow-2xl"
+                aspectRatio="aspect-video"
+                overlay={false}
+              />
               {/* African Pattern Decoration */}
               <div className="absolute -bottom-4 -right-4 w-32 h-32 african-pattern rounded-lg opacity-20"></div>
             </motion.div>
@@ -236,7 +254,7 @@ export default function HomePage() {
                 { year: '2022', location: 'Geneva, Switzerland', highlight: 'Return to In-Person' },
                 { year: '2023', location: 'Singapore', highlight: 'Asian Excellence' },
                 { year: '2024', location: 'Athens, Greece', highlight: 'Mediterranean Success' },
-                { year: '2025', location: 'Panama City, Panama', highlight: 'Upcoming Challenge', upcoming: true },
+                { year: '2025', location: 'Panama City, Panama', highlight: 'Upcoming Challenge', upcoming: true, targetDate: new Date('2025-10-29') },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -250,7 +268,11 @@ export default function HomePage() {
                     <div className={`inline-block p-4 rounded-lg ${item.upcoming ? 'bg-accent/10 border-2 border-accent' : 'bg-card border border-border'} shadow-lg`}>
                       <div className="text-2xl font-bold text-primary mb-1">{item.year}</div>
                       <div className="font-semibold mb-1">{item.location}</div>
-                      <div className="text-sm text-muted-foreground">{item.highlight}</div>
+                      {item.upcoming && item.targetDate ? (
+                        <CountdownTimer targetDate={item.targetDate} label="Competition starts in" />
+                      ) : (
+                        <div className="text-sm text-muted-foreground">{item.highlight}</div>
+                      )}
                     </div>
                   </div>
                   <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-background"></div>

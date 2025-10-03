@@ -187,8 +187,8 @@ const resources = [
     id: 11,
     category: 'competition',
     type: 'guide',
-    title: 'FIRST Global Game Manual 2024',
-    description: 'Official game rules and scoring for the current season',
+    title: '<i>FIRST</i> Global Game Manual 2025',
+    description: 'Official game rules and scoring for Eco Equilibrium season',
     difficulty: 'all',
     duration: '1 hour',
     format: 'PDF',
@@ -201,7 +201,7 @@ const resources = [
     category: 'competition',
     type: 'video',
     title: 'Strategy and Alliance Play',
-    description: 'Winning strategies for FIRST Global competitions',
+    description: 'Winning strategies for <i>FIRST</i> Global competitions',
     difficulty: 'advanced',
     duration: '2 hours',
     format: 'Video',
@@ -239,8 +239,8 @@ const resources = [
 // External links
 const externalLinks = [
   {
-    title: 'FIRST Global Official',
-    description: 'Official FIRST Global website with rules and updates',
+    title: '<i>FIRST</i> Global Official',
+    description: 'Official <i>FIRST</i> Global website with rules and updates',
     url: 'https://first.global',
     icon: Globe,
   },
@@ -282,7 +282,7 @@ const quickStartGuides = [
   },
   {
     title: 'Competition Prep',
-    description: 'Get ready for FIRST Global Challenge',
+    description: 'Get ready for <i>FIRST</i> Global Challenge',
     icon: Trophy,
     color: 'text-accent',
     items: ['Game analysis', 'Robot inspection', 'Team strategies', 'Judging criteria'],
@@ -605,36 +605,6 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {/* Download Section */}
-      <section className="py-16">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center card bg-gradient-to-r from-kenya-green/10 to-kenya-red/10"
-          >
-            <Download className="h-12 w-12 text-primary mx-auto mb-4" aria-hidden="true" />
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Download Resource Pack
-            </h2>
-            <p className="text-lg text-muted-foreground mb-6">
-              Get our complete collection of beginner resources, templates, and guides in one convenient package
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary inline-flex items-center justify-center">
-                <Download className="mr-2 h-5 w-5" aria-hidden="true" />
-                Download Pack (25MB)
-              </button>
-              <Link href="/contact" className="btn-secondary inline-flex items-center justify-center">
-                Request Access
-                <ChevronRight className="ml-2 h-5 w-5" aria-hidden="true" />
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       {/* Contribute CTA */}
       <section className="py-16 bg-muted/30">
