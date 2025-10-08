@@ -321,5 +321,3 @@ For questions or support, contact:
 - Team Kenya mentors and volunteers
 - Supporting partners and sponsors
 - All student participants
-
----
