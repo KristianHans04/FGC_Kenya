@@ -4,7 +4,8 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'res.cloudinary.com'],
   },
-  output: 'standalone',
+  output: 'export',
+  //output: 'standalone'
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb'

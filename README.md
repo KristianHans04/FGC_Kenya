@@ -323,5 +323,3 @@ For questions or support, contact:
 - All student participants
 
 ---
-
-**Built with ❤️ for Team Kenya's future in STEM**
