@@ -63,7 +63,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **ALWAYS** use process.env for sensitive data
 - Store secrets in .env.local (already in .gitignore)
 - Use different keys for development/staging/production
-- Document required env variables in .env.local.example
+- Document required env variables in .env.example
 
 ### 7. Modern Coding Practices
 - **Code Organization**:
