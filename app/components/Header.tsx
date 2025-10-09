@@ -25,10 +25,10 @@ export default function Header() {
   const currentTheme = theme === 'system' ? systemTheme : theme
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
         <div className="flex items-center justify-between py-4">
-          <div className="flex lg:flex-1">
+          <div className="flex flex-1 items-center">
             <Link href="/" className="flex items-center space-x-3">
               <div className="relative w-12 h-12">
                 <Image
@@ -59,7 +59,7 @@ export default function Header() {
             ))}
           </div>
 
-          <div className="flex items-center gap-4 lg:flex-1 lg:justify-end">
+          <div className="flex flex-1 items-center justify-end gap-4">
             <ThemeToggle />
             <Link
               href="/support"
@@ -81,10 +81,10 @@ export default function Header() {
 
       {/* Mobile menu */}
       <motion.div
-        initial={false}
-        animate={mobileMenuOpen ? { x: 0 } : { x: '100%' }}
+        initial={{ y: '-100%' }}
+        animate={mobileMenuOpen ? { y: 0 } : { y: '-100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 lg:hidden"
+        className="fixed inset-x-0 top-0 z-50 h-screen overflow-y-auto bg-background p-6 lg:hidden"
       >
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">

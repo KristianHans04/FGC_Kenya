@@ -93,7 +93,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-xl md:text-2xl text-muted-foreground mb-8"
+              className="text-xl md:text-2xl text-white/90 mb-8 [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]"
             >
               Inspiring the Future of STEM through Robotics
             </motion.p>
@@ -140,9 +140,6 @@ export default function HomePage() {
             </motion.div>
           </div>
         </div>
-
-        {/* Decorative Elements */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
       </section>
 
       {/* About Preview Section */}
