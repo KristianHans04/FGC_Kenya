@@ -29,7 +29,7 @@ cd fgc-kenya
 npm install
 
 # Set up environment variables
-cp .env.local.example .env.local
+cp .env.example .env.local
 # Edit .env.local with your database credentials
 
 # Run development server
