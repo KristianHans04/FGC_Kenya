@@ -275,7 +275,7 @@ const quickStartGuides = [
   },
   {
     title: 'Teacher Resources',
-    description: 'Materials for educators and mentors',
+    description: 'Materials for educators',
     icon: BookMarked,
     color: 'text-kenya-red',
     items: ['Lesson plans', 'Workshop materials', 'Assessment tools', 'Best practices'],

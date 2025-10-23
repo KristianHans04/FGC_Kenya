@@ -311,9 +311,9 @@ This project is licensed under the MIT License.
 ## 📞 Support
 
 For questions or support, contact:
-- Email: info@firstglobalkenya.org
+- Email: teamkenyarobotics254@gmail.com
 - Twitter: @FGCKenya
-- Website: https://firstglobalkenya.org
+- Website: https://fgckenya.com
 
 ## 🎉 Acknowledgments
 

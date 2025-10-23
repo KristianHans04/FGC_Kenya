@@ -122,6 +122,7 @@ const timeline = [
 ]
 
 export default function JoinPage() {
+  console.log('JoinPage rendered');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [applicationsClosed] = useState(true) // Applications are closed as of October 3rd
@@ -142,6 +143,7 @@ export default function JoinPage() {
    * @param data - Validated form data
    */
   const onSubmit = async (data: ApplicationFormData) => {
+    console.log('Submitting application form with data:', data);
     setIsSubmitting(true)
     setSubmitStatus('idle')
     
@@ -215,7 +217,7 @@ export default function JoinPage() {
                 { icon: GraduationCap, title: 'Age', desc: '14-18 years old' },
                 { icon: School, title: 'Education', desc: 'Currently in high school (Form 1-4)' },
                 { icon: Users, title: 'Nationality', desc: 'Kenyan citizen or resident' },
-                { icon: Calendar, title: 'Commitment', desc: 'Available April-October 2025' },
+                { icon: Calendar, title: 'Commitment', desc: 'Available April-October' },
                 { icon: Target, title: 'Passion', desc: 'Interest in STEM and robotics' },
                 { icon: Heart, title: 'Team Spirit', desc: 'Collaborative and dedicated' },
               ].map((item, index) => (
@@ -225,7 +227,7 @@ export default function JoinPage() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="card text-center"
+                  className="card text-center transition-all duration-300 hover:shadow-lg hover:scale-105"
                 >
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
                     <item.icon className="h-6 w-6 text-primary" aria-hidden="true" />
@@ -296,463 +298,416 @@ export default function JoinPage() {
             <h2 className="text-3xl font-bold font-heading text-center mb-8">
               Application <span className="text-primary">Form</span>
             </h2>
-            
-            {/* Applications Closed Notice */}
-            {applicationsClosed ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="card bg-muted/50 border-2 border-primary/20"
-              >
-                <div className="text-center py-12">
-                  <Calendar className="h-16 w-16 text-primary mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold mb-4">Applications Closed</h3>
-                  <p className="text-lg text-muted-foreground mb-6 max-w-md mx-auto">
-                    The application period for the 2025 <i>FIRST</i> Global Challenge team has ended. 
-                    Our team is currently preparing for the competition in Panama City on October 29, 2025.
-                  </p>
-                  <div className="space-y-4">
+
+            <div className="relative">
+              {applicationsClosed && (
+                <div className="absolute inset-0 bg-background/90 flex items-center justify-center z-10 rounded-lg">
+                  <div className="text-center p-8">
+                    <Calendar className="h-16 w-16 text-primary mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold mb-4">Applications Closed</h3>
+                    <p className="text-lg text-muted-foreground mb-6 max-w-md mx-auto">
+                      The application period for the 2025 <i>FIRST</i> Global Challenge team has ended.
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      The next recruitment cycle will open in January 2026 for the 2026 competition.
+                      The next recruitment cycle will open in January 2026.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <Link href="/support" className="btn-primary">
-                        Support Our Team
-                        <Heart className="ml-2 h-5 w-5" />
-                      </Link>
-                      <Link href="/resources" className="btn-secondary">
-                        Learn Robotics
-                        <BookOpen className="ml-2 h-5 w-5" />
-                      </Link>
-                    </div>
                   </div>
                 </div>
-              </motion.div>
-            ) : (
-              <>
-            {/* Status Messages */}
-            <div id="form-status" tabIndex={-1} aria-live="polite" aria-atomic="true">
-              {submitStatus === 'success' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start space-x-3"
-                  role="alert"
-                >
-                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" aria-hidden="true" />
-                  <div>
-                    <h3 className="font-semibold text-green-800 dark:text-green-200">Application Submitted Successfully!</h3>
-                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                      We've received your application. We'll contact you within 2 weeks.
-                    </p>
-                  </div>
-                </motion.div>
               )}
-              
-              {submitStatus === 'error' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start space-x-3"
-                  role="alert"
-                >
-                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" aria-hidden="true" />
-                  <div>
-                    <h3 className="font-semibold text-red-800 dark:text-red-200">Submission Error</h3>
-                    <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                      There was an error submitting your application. Please try again or contact us.
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 card" noValidate>
-              {/* Personal Information */}
-              <fieldset>
-                <legend className="text-xl font-semibold mb-4">Personal Information</legend>
-                
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium mb-2">
-                      First Name <span className="text-red-500" aria-label="required">*</span>
-                    </label>
-                    <input
-                      {...register('firstName')}
-                      type="text"
-                      id="firstName"
-                      aria-required="true"
-                      aria-invalid={!!errors.firstName}
-                      aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-                      className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                    />
-                    {errors.firstName && (
-                      <p id="firstName-error" className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.firstName.message}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium mb-2">
-                      Last Name <span className="text-red-500" aria-label="required">*</span>
-                    </label>
-                    <input
-                      {...register('lastName')}
-                      type="text"
-                      id="lastName"
-                      aria-required="true"
-                      aria-invalid={!!errors.lastName}
-                      aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-                      className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                    />
-                    {errors.lastName && (
-                      <p id="lastName-error" className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.lastName.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Email Address <span className="text-red-500" aria-label="required">*</span>
-                    </label>
-                    <input
-                      {...register('email')}
-                      type="email"
-                      id="email"
-                      aria-required="true"
-                      aria-invalid={!!errors.email}
-                      aria-describedby={errors.email ? 'email-error' : undefined}
-                      className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                    />
-                    {errors.email && (
-                      <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                      Phone Number <span className="text-red-500" aria-label="required">*</span>
-                    </label>
-                    <input
-                      {...register('phone')}
-                      type="tel"
-                      id="phone"
-                      placeholder="+254712345678"
-                      aria-required="true"
-                      aria-invalid={!!errors.phone}
-                      aria-describedby={errors.phone ? 'phone-error' : 'phone-help'}
-                      className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                    />
-                    <p id="phone-help" className="mt-1 text-xs text-muted-foreground">
-                      Format: +254XXXXXXXXX or 07XXXXXXXX
-                    </p>
-                    {errors.phone && (
-                      <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.phone.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-2">
-                    Date of Birth <span className="text-red-500" aria-label="required">*</span>
-                  </label>
-                  <input
-                    {...register('dateOfBirth')}
-                    type="date"
-                    id="dateOfBirth"
-                    aria-required="true"
-                    aria-invalid={!!errors.dateOfBirth}
-                    aria-describedby={errors.dateOfBirth ? 'dob-error' : 'dob-help'}
-                    className="w-full sm:w-auto px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                  />
-                  <p id="dob-help" className="mt-1 text-xs text-muted-foreground">
-                    You must be between 14 and 18 years old
-                  </p>
-                  {errors.dateOfBirth && (
-                    <p id="dob-error" className="mt-1 text-sm text-red-500" role="alert">
-                      {errors.dateOfBirth.message}
-                    </p>
-                  )}
-                </div>
-              </fieldset>
-
-              {/* Educational Information */}
-              <fieldset>
-                <legend className="text-xl font-semibold mb-4">Educational Information</legend>
-                
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="school" className="block text-sm font-medium mb-2">
-                      School Name <span className="text-red-500" aria-label="required">*</span>
-                    </label>
-                    <input
-                      {...register('school')}
-                      type="text"
-                      id="school"
-                      aria-required="true"
-                      aria-invalid={!!errors.school}
-                      aria-describedby={errors.school ? 'school-error' : undefined}
-                      className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                    />
-                    {errors.school && (
-                      <p id="school-error" className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.school.message}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="grade" className="block text-sm font-medium mb-2">
-                      Current Grade/Form <span className="text-red-500" aria-label="required">*</span>
-                    </label>
-                    <select
-                      {...register('grade')}
-                      id="grade"
-                      aria-required="true"
-                      aria-invalid={!!errors.grade}
-                      aria-describedby={errors.grade ? 'grade-error' : undefined}
-                      className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+              <div className={applicationsClosed ? 'max-h-[50vh] overflow-hidden blur-sm' : ''}>
+                {/* Status Messages */}
+                <div id="form-status" tabIndex={-1} aria-live="polite" aria-atomic="true">
+                  {submitStatus === 'success' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start space-x-3"
+                      role="alert"
                     >
-                      <option value="">Select grade</option>
-                      <option value="9">Form 1 (Grade 9)</option>
-                      <option value="10">Form 2 (Grade 10)</option>
-                      <option value="11">Form 3 (Grade 11)</option>
-                      <option value="12">Form 4 (Grade 12)</option>
-                    </select>
-                    {errors.grade && (
-                      <p id="grade-error" className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.grade.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <label htmlFor="county" className="block text-sm font-medium mb-2">
-                    County <span className="text-red-500" aria-label="required">*</span>
-                  </label>
-                  <select
-                    {...register('county')}
-                    id="county"
-                    aria-required="true"
-                    aria-invalid={!!errors.county}
-                    aria-describedby={errors.county ? 'county-error' : undefined}
-                    className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                  >
-                    <option value="">Select county</option>
-                    {counties.map(county => (
-                      <option key={county} value={county}>{county}</option>
-                    ))}
-                  </select>
-                  {errors.county && (
-                    <p id="county-error" className="mt-1 text-sm text-red-500" role="alert">
-                      {errors.county.message}
-                    </p>
+                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" aria-hidden="true" />
+                      <div>
+                        <h3 className="font-semibold text-green-800 dark:text-green-200">Application Submitted Successfully!</h3>
+                        <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                          We've received your application. We'll contact you within 2 weeks.
+                        </p>
+                      </div>
+                    </motion.div>
                   )}
-                </div>
-              </fieldset>
 
-              {/* Experience & Interest */}
-              <fieldset>
-                <legend className="text-xl font-semibold mb-4">Experience & Interest</legend>
-                
-                <div>
-                  <label htmlFor="experience" className="block text-sm font-medium mb-2">
-                    Robotics/Programming Experience <span className="text-red-500" aria-label="required">*</span>
-                  </label>
-                  <select
-                    {...register('experience')}
-                    id="experience"
-                    aria-required="true"
-                    aria-invalid={!!errors.experience}
-                    aria-describedby={errors.experience ? 'experience-error' : undefined}
-                    className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                  >
-                    <option value="">Select experience level</option>
-                    <option value="none">No prior experience</option>
-                    <option value="beginner">Beginner (less than 1 year)</option>
-                    <option value="intermediate">Intermediate (1-2 years)</option>
-                    <option value="advanced">Advanced (more than 2 years)</option>
-                  </select>
-                  {errors.experience && (
-                    <p id="experience-error" className="mt-1 text-sm text-red-500" role="alert">
-                      {errors.experience.message}
-                    </p>
+                  {submitStatus === 'error' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start space-x-3"
+                      role="alert"
+                    >
+                      <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" aria-hidden="true" />
+                      <div>
+                        <h3 className="font-semibold text-red-800 dark:text-red-200">Submission Error</h3>
+                        <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                          There was an error submitting your application. Please try again or contact us.
+                        </p>
+                      </div>
+                    </motion.div>
                   )}
                 </div>
 
-                <div className="mt-4">
-                  <fieldset>
-                    <legend className="block text-sm font-medium mb-2">
-                      Areas of Interest <span className="text-red-500" aria-label="required">*</span>
-                      <span className="text-xs text-muted-foreground ml-2">(Select at least one)</span>
-                    </legend>
-                    <div className="grid sm:grid-cols-2 gap-3 mt-2">
-                      {interestAreas.map(area => (
-                        <label
-                          key={area.id}
-                          className="flex items-center space-x-3 p-3 border border-border rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-                        >
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 card" noValidate>
+                  <fieldset disabled={applicationsClosed}>
+                    {/* Personal Information */}
+                    <fieldset>
+                      <legend className="text-xl font-semibold mb-4">Personal Information</legend>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="firstName" className="block text-sm font-medium mb-2">
+                            First Name <span className="text-red-500" aria-label="required">*</span>
+                          </label>
                           <input
-                            {...register('interests')}
-                            type="checkbox"
-                            value={area.id}
-                            className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
-                            aria-describedby={`${area.id}-label`}
+                            {...register('firstName')}
+                            type="text"
+                            id="firstName"
+                            aria-required="true"
+                            aria-invalid={!!errors.firstName}
+                            aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
                           />
-                          <span id={`${area.id}-label`} className="flex items-center space-x-2">
-                            <area.icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                            <span className="text-sm">{area.label}</span>
+                          {errors.firstName && (
+                            <p id="firstName-error" className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.firstName.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="lastName" className="block text-sm font-medium mb-2">
+                            Last Name <span className="text-red-500" aria-label="required">*</span>
+                          </label>
+                          <input
+                            {...register('lastName')}
+                            type="text"
+                            id="lastName"
+                            aria-required="true"
+                            aria-invalid={!!errors.lastName}
+                            aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                          />
+                          {errors.lastName && (
+                            <p id="lastName-error" className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.lastName.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <label htmlFor="email" className="block text-sm font-medium mb-2">
+                            Email Address <span className="text-red-500" aria-label="required">*</span>
+                          </label>
+                          <input
+                            {...register('email')}
+                            type="email"
+                            id="email"
+                            aria-required="true"
+                            aria-invalid={!!errors.email}
+                            aria-describedby={errors.email ? 'email-error' : undefined}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                          />
+                          {errors.email && (
+                            <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.email.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                            Phone Number <span className="text-red-500" aria-label="required">*</span>
+                          </label>
+                          <input
+                            {...register('phone')}
+                            type="tel"
+                            id="phone"
+                            placeholder="+254712345678"
+                            aria-required="true"
+                            aria-invalid={!!errors.phone}
+                            aria-describedby={errors.phone ? 'phone-error' : 'phone-help'}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                          />
+                          <p id="phone-help" className="mt-1 text-xs text-muted-foreground">
+                            Format: +254XXXXXXXXX or 07XXXXXXXX
+                          </p>
+                          {errors.phone && (
+                            <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.phone.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-2">
+                          Date of Birth <span className="text-red-500" aria-label="required">*</span>
+                        </label>
+                        <input
+                          {...register('dateOfBirth')}
+                          type="date"
+                          id="dateOfBirth"
+                          aria-required="true"
+                          aria-invalid={!!errors.dateOfBirth}
+                          aria-describedby={errors.dateOfBirth ? 'dob-error' : 'dob-help'}
+                          className="w-full sm:w-auto px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                        />
+                        <p id="dob-help" className="mt-1 text-xs text-muted-foreground">
+                          You must be between 14 and 18 years old
+                        </p>
+                        {errors.dateOfBirth && (
+                          <p id="dob-error" className="mt-1 text-sm text-red-500" role="alert">
+                            {errors.dateOfBirth.message}
+                          </p>
+                        )}
+                      </div>
+                    </fieldset>
+
+                    {/* Educational Information */}
+                    <fieldset>
+                      <legend className="text-xl font-semibold mb-4">Educational Information</legend>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="school" className="block text-sm font-medium mb-2">
+                            School Name <span className="text-red-500" aria-label="required">*</span>
+                          </label>
+                          <input
+                            {...register('school')}
+                            type="text"
+                            id="school"
+                            aria-required="true"
+                            aria-invalid={!!errors.school}
+                            aria-describedby={errors.school ? 'school-error' : undefined}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                          />
+                          {errors.school && (
+                            <p id="school-error" className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.school.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="grade" className="block text-sm font-medium mb-2">
+                            Current Grade/Form <span className="text-red-500" aria-label="required">*</span>
+                          </label>
+                          <select
+                            {...register('grade')}
+                            id="grade"
+                            aria-required="true"
+                            aria-invalid={!!errors.grade}
+                            aria-describedby={errors.grade ? 'grade-error' : undefined}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                          >
+                            <option value="">Select grade</option>
+                            <option value="9">Form 1 (Grade 9)</option>
+                            <option value="10">Form 2 (Grade 10)</option>
+                            <option value="11">Form 3 (Grade 11)</option>
+                            <option value="12">Form 4 (Grade 12)</option>
+                          </select>
+                          {errors.grade && (
+                            <p id="grade-error" className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.grade.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <label htmlFor="county" className="block text-sm font-medium mb-2">
+                          County <span className="text-red-500" aria-label="required">*</span>
+                        </label>
+                        <select
+                          {...register('county')}
+                          id="county"
+                          aria-required="true"
+                          aria-invalid={!!errors.county}
+                          aria-describedby={errors.county ? 'county-error' : undefined}
+                          className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                        >
+                          <option value="">Select county</option>
+                          {counties.map(county => (
+                            <option key={county} value={county}>{county}</option>
+                          ))}
+                        </select>
+                        {errors.county && (
+                          <p id="county-error" className="mt-1 text-sm text-red-500" role="alert">
+                            {errors.county.message}
+                          </p>
+                        )}
+                      </div>
+                    </fieldset>
+
+                    {/* Experience & Interest */}
+                    <fieldset>
+                      <legend className="text-xl font-semibold mb-4">Experience & Interest</legend>
+
+                      <div>
+                        <label htmlFor="experience" className="block text-sm font-medium mb-2">
+                          Robotics/Programming Experience <span className="text-red-500" aria-label="required">*</span>
+                        </label>
+                        <select
+                          {...register('experience')}
+                          id="experience"
+                          aria-required="true"
+                          aria-invalid={!!errors.experience}
+                          aria-describedby={errors.experience ? 'experience-error' : undefined}
+                          className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                        >
+                          <option value="">Select experience level</option>
+                          <option value="none">No prior experience</option>
+                          <option value="beginner">Beginner (less than 1 year)</option>
+                          <option value="intermediate">Intermediate (1-2 years)</option>
+                          <option value="advanced">Advanced (more than 2 years)</option>
+                        </select>
+                        {errors.experience && (
+                          <p id="experience-error" className="mt-1 text-sm text-red-500" role="alert">
+                            {errors.experience.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-4">
+                        <fieldset>
+                          <legend className="block text-sm font-medium mb-2">
+                            Areas of Interest <span className="text-red-500" aria-label="required">*</span>
+                            <span className="text-xs text-muted-foreground ml-2">(Select at least one)</span>
+                          </legend>
+                          <div className="grid sm:grid-cols-2 gap-3 mt-2">
+                            {interestAreas.map(area => (
+                              <label
+                                key={area.id}
+                                className="flex items-center space-x-3 p-3 border border-border rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+                              >
+                                <input
+                                  {...register('interests')}
+                                  type="checkbox"
+                                  value={area.id}
+                                  className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
+                                  aria-describedby={`${area.id}-label`}
+                                />
+                                <span id={`${area.id}-label`} className="flex items-center space-x-2">
+                                  <area.icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                                  <span className="text-sm">{area.label}</span>
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                          {errors.interests && (
+                            <p className="mt-1 text-sm text-red-500" role="alert">
+                              {errors.interests.message}
+                            </p>
+                          )}
+                        </fieldset>
+                      </div>
+
+                      <div className="mt-4">
+                        <label htmlFor="motivation" className="block text-sm font-medium mb-2">
+                          Why do you want to join Team Kenya? <span className="text-red-500" aria-label="required">*</span>
+                        </label>
+                        <textarea
+                          {...register('motivation')}
+                          id="motivation"
+                          rows={4}
+                          aria-required="true"
+                          aria-invalid={!!errors.motivation}
+                          aria-describedby={errors.motivation ? 'motivation-error' : 'motivation-help'}
+                          className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                          placeholder="Tell us about your passion for STEM, robotics, and representing Kenya..."
+                        />
+                        <p id="motivation-help" className="mt-1 text-xs text-muted-foreground">
+                          100-500 characters
+                        </p>
+                        {errors.motivation && (
+                          <p id="motivation-error" className="mt-1 text-sm text-red-500" role="alert">
+                            {errors.motivation.message}
+                          </p>
+                        )}
+                      </div>
+                    </fieldset>
+
+                    {/* Consent & Terms */}
+                    <fieldset>
+                      <legend className="text-xl font-semibold mb-4">Consent & Terms</legend>
+
+                      <div className="space-y-3">
+                        <label className="flex items-start space-x-3">
+                          <input
+                            {...register('parentConsent')}
+                            type="checkbox"
+                            className="w-4 h-4 mt-1 text-primary border-border rounded focus:ring-primary"
+                            aria-describedby="consent-text"
+                          />
+                          <span id="consent-text" className="text-sm">
+                            I confirm that I have my parent/guardian's consent to apply for Team Kenya
+                            <span className="text-red-500" aria-label="required"> *</span>
                           </span>
                         </label>
-                      ))}
+                        {errors.parentConsent && (
+                          <p className="ml-7 text-sm text-red-500" role="alert">
+                            {errors.parentConsent.message}
+                          </p>
+                        )}
+
+                        <label className="flex items-start space-x-3">
+                          <input
+                            {...register('termsAccepted')}
+                            type="checkbox"
+                            className="w-4 h-4 mt-1 text-primary border-border rounded focus:ring-primary"
+                            aria-describedby="terms-text"
+                          />
+                          <span id="terms-text" className="text-sm">
+                            I accept the{' '}
+                            <Link href="/terms" className="text-primary hover:text-primary-light underline">
+                              terms and conditions
+                            </Link>
+                            {' '}and understand the commitment required
+                            <span className="text-red-500" aria-label="required"> *</span>
+                          </span>
+                        </label>
+                        {errors.termsAccepted && (
+                          <p className="ml-7 text-sm text-red-500" role="alert">
+                            {errors.termsAccepted.message}
+                          </p>
+                        )}
+                      </div>
+                    </fieldset>
+
+                    {/* Submit Button */}
+                    <div className="flex justify-center pt-6">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || applicationsClosed}
+                        className="btn-primary min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-busy={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="animate-spin h-5 w-5 mr-2" aria-hidden="true" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            Submit Application
+                            <CheckCircle className="ml-2 h-5 w-5" aria-hidden="true" />
+                          </>
+                        )}
+                      </button>
                     </div>
-                    {errors.interests && (
-                      <p className="mt-1 text-sm text-red-500" role="alert">
-                        {errors.interests.message}
-                      </p>
-                    )}
                   </fieldset>
-                </div>
-
-                <div className="mt-4">
-                  <label htmlFor="motivation" className="block text-sm font-medium mb-2">
-                    Why do you want to join Team Kenya? <span className="text-red-500" aria-label="required">*</span>
-                  </label>
-                  <textarea
-                    {...register('motivation')}
-                    id="motivation"
-                    rows={4}
-                    aria-required="true"
-                    aria-invalid={!!errors.motivation}
-                    aria-describedby={errors.motivation ? 'motivation-error' : 'motivation-help'}
-                    className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                    placeholder="Tell us about your passion for STEM, robotics, and representing Kenya..."
-                  />
-                  <p id="motivation-help" className="mt-1 text-xs text-muted-foreground">
-                    100-500 characters
-                  </p>
-                  {errors.motivation && (
-                    <p id="motivation-error" className="mt-1 text-sm text-red-500" role="alert">
-                      {errors.motivation.message}
-                    </p>
-                  )}
-                </div>
-              </fieldset>
-
-              {/* Consent & Terms */}
-              <fieldset>
-                <legend className="text-xl font-semibold mb-4">Consent & Terms</legend>
-                
-                <div className="space-y-3">
-                  <label className="flex items-start space-x-3">
-                    <input
-                      {...register('parentConsent')}
-                      type="checkbox"
-                      className="w-4 h-4 mt-1 text-primary border-border rounded focus:ring-primary"
-                      aria-describedby="consent-text"
-                    />
-                    <span id="consent-text" className="text-sm">
-                      I confirm that I have my parent/guardian's consent to apply for Team Kenya
-                      <span className="text-red-500" aria-label="required"> *</span>
-                    </span>
-                  </label>
-                  {errors.parentConsent && (
-                    <p className="ml-7 text-sm text-red-500" role="alert">
-                      {errors.parentConsent.message}
-                    </p>
-                  )}
-
-                  <label className="flex items-start space-x-3">
-                    <input
-                      {...register('termsAccepted')}
-                      type="checkbox"
-                      className="w-4 h-4 mt-1 text-primary border-border rounded focus:ring-primary"
-                      aria-describedby="terms-text"
-                    />
-                    <span id="terms-text" className="text-sm">
-                      I accept the{' '}
-                      <Link href="/terms" className="text-primary hover:text-primary-light underline">
-                        terms and conditions
-                      </Link>
-                      {' '}and understand the commitment required
-                      <span className="text-red-500" aria-label="required"> *</span>
-                    </span>
-                  </label>
-                  {errors.termsAccepted && (
-                    <p className="ml-7 text-sm text-red-500" role="alert">
-                      {errors.termsAccepted.message}
-                    </p>
-                  )}
-                </div>
-              </fieldset>
-
-              {/* Submit Button */}
-              <div className="flex justify-center pt-6">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn-primary min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-busy={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="animate-spin h-5 w-5 mr-2" aria-hidden="true" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      Submit Application
-                      <CheckCircle className="ml-2 h-5 w-5" aria-hidden="true" />
-                    </>
-                  )}
-                </button>
+                </form>
               </div>
-            </form>
-            </>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Volunteer Section */}
-      <section className="py-16" id="volunteer">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h2 className="text-3xl font-bold font-heading mb-6">
-              Become a <span className="text-primary">Mentor</span> or <span className="text-secondary">Volunteer</span>
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Not a student? You can still contribute! We need experienced mentors, 
-              technical experts, and volunteers to support Team Kenya's journey.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-secondary">
-                <Heart className="mr-2 h-5 w-5" aria-hidden="true" />
-                Volunteer With Us
-              </Link>
-              <Link href="/support" className="btn-primary">
-                <Users className="mr-2 h-5 w-5" aria-hidden="true" />
-                Become a Sponsor
-              </Link>
             </div>
           </motion.div>
         </div>
-      </section>
-    </>
+      </section>    </>
   )
 }

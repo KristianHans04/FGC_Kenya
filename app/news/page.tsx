@@ -46,7 +46,7 @@ const newsArticles = [
   {
     id: 4,
     title: 'New Partnership with Tech Company Boosts Team Resources',
-    excerpt: 'We are excited to announce a new partnership that will provide our team with cutting-edge robotics equipment and mentorship opportunities...',
+    excerpt: 'We are excited to announce a new partnership that will provide our team with cutting-edge robotics equipment and opportunities...',
     category: 'Partnership',
     date: '2025-08-28',
     readTime: '6 min read',

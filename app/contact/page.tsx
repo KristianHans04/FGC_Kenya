@@ -59,7 +59,7 @@ const contactSchema = z.object({
     .min(5, 'Subject must be at least 5 characters')
     .max(150, 'Subject must be less than 150 characters'),
   
-  category: z.enum(['general', 'sponsorship', 'volunteer', 'media', 'technical', 'other'])
+  category: z.enum(['general', 'sponsorship', 'media', 'technical', 'other'])
     .describe('Please select a category'),
   
   message: z.string()
@@ -79,8 +79,8 @@ const contactInfo = [
   {
     icon: Mail,
     title: 'Email',
-    details: 'info@firstglobalkenya.org',
-    link: 'mailto:info@firstglobalkenya.org',
+    details: 'teamkenyarobotics254@gmail.com',
+    link: 'mailto:teamkenyarobotics254@gmail.com',
   },
   {
     icon: Phone,
@@ -123,11 +123,7 @@ const faqItems = [
     answer: 'We offer various sponsorship packages and donation options. Visit our support page for more information.',
     link: '/support',
   },
-  {
-    question: 'Can I volunteer as a mentor?',
-    answer: 'Yes! We welcome experienced professionals to mentor our students. Contact us to learn about volunteer opportunities.',
-    link: '/join#volunteer',
-  },
+
   {
     question: 'Where can I find learning resources?',
     answer: 'Check our resources page for tutorials, documentation, and learning materials for robotics and STEM.',
@@ -139,13 +135,14 @@ const faqItems = [
 const contactCategories = [
   { value: 'general', label: 'General Inquiry' },
   { value: 'sponsorship', label: 'Sponsorship & Donations' },
-  { value: 'volunteer', label: 'Volunteer Opportunities' },
+
   { value: 'media', label: 'Media & Press' },
   { value: 'technical', label: 'Technical Support' },
   { value: 'other', label: 'Other' },
 ]
 
 export default function ContactPage() {
+  console.log('ContactPage rendered');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
@@ -164,6 +161,7 @@ export default function ContactPage() {
    * @param data - Validated form data
    */
   const onSubmit = async (data: ContactFormData) => {
+    console.log('Submitting contact form with data:', data);
     setIsSubmitting(true)
     setSubmitStatus('idle')
 

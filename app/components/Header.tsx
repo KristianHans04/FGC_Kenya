@@ -15,7 +15,7 @@ const navigation = [
   { name: 'Impact', href: '/impact' },
   { name: 'Join Us', href: '/join' },
   { name: 'Support', href: '/support' },
-  { name: 'Resources', href: '/resources' },
+  // { name: 'Resources', href: '/resources' },
   { name: 'Contact', href: '/contact' },
 ]
 

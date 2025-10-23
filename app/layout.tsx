@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'FIRST Global Team Kenya',
     description: 'Inspiring the Future of STEM through Robotics',
-    url: 'https://firstglobalkenya.org',
+    url: 'https://fgckenya.com',
     siteName: 'FIRST Global Team Kenya',
     images: [
       {
@@ -61,6 +61,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  console.log('RootLayout rendered');
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

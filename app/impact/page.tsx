@@ -87,12 +87,7 @@ const outreachPrograms = [
     beneficiaries: '200+ students monthly',
     icon: GraduationCap,
   },
-  {
-    title: 'Mentorship Program',
-    description: 'Pairing experienced members with newcomers',
-    beneficiaries: '100+ mentees',
-    icon: Heart,
-  },
+
   {
     title: 'Rural Outreach',
     description: 'Bringing STEM education to underserved communities',
@@ -102,11 +97,20 @@ const outreachPrograms = [
 ]
 
 export default function ImpactPage() {
+  console.log('ImpactPage rendered');
   return (
     <>
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 african-pattern opacity-5"></div>
+        <div
+          className="absolute inset-0 opacity-50 dark:opacity-20"
+          style={{ 
+            backgroundImage: 'url(/images/SVG/FlagRibbon.svg)',
+            backgroundSize: '100%',
+            backgroundRepeat: 'repeat',
+            backgroundPosition: 'center'
+          }}
+        ></div>
         <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -132,23 +136,13 @@ export default function ImpactPage() {
       {/* Impact Metrics */}
       <section className="py-16 bg-muted/30">
         <div className="container px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-          </motion.div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {impactMetrics.map((metric, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
                 className="text-center"
               >
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
@@ -170,9 +164,8 @@ export default function ImpactPage() {
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
@@ -188,9 +181,8 @@ export default function ImpactPage() {
               <motion.div
                 key={story.id}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
                 className="card"
               >
                 <div className="flex items-start space-x-4 mb-4">
@@ -284,7 +276,7 @@ export default function ImpactPage() {
                 Support Our Mission
               </a>
               <a href="/join" className="btn-secondary">
-                Join as Volunteer
+                Join as a Student
               </a>
             </div>
           </motion.div>

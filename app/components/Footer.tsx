@@ -16,12 +16,10 @@ const footerLinks = {
     { name: 'FIRST Global Challenge', href: '/about#fgc' },
     { name: 'Outreach Programs', href: '/impact' },
     { name: 'Workshops', href: '/resources' },
-    { name: 'Mentorship', href: '/join' },
   ],
   support: [
     { name: 'Donate', href: '/support' },
     { name: 'Sponsor', href: '/support#sponsor' },
-    { name: 'Volunteer', href: '/join#volunteer' },
     { name: 'Partner with Us', href: '/contact' },
   ],
   resources: [
@@ -41,6 +39,7 @@ const socialLinks = [
 ]
 
 export default function Footer() {
+  console.log('Footer rendered');
   const { theme, systemTheme } = useTheme()
   const currentTheme = theme === 'system' ? systemTheme : theme
   
@@ -159,10 +158,10 @@ export default function Footer() {
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <a
-                  href="mailto:info@firstglobalkenya.org"
+                  href="mailto:teamkenyarobotics254@gmail.com"
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  info@firstglobalkenya.org
+                  teamkenyarobotics254@gmail.com
                 </a>
               </div>
               <div className="flex items-center space-x-3">
