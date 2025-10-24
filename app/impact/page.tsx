@@ -134,7 +134,7 @@ export default function ImpactPage() {
       </section>
 
       {/* Impact Metrics */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-muted/30 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {impactMetrics.map((metric, index) => (
@@ -160,7 +160,7 @@ export default function ImpactPage() {
       </section>
 
       {/* Success Stories */}
-      <section className="py-16">
+      <section className="py-16 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -255,7 +255,7 @@ export default function ImpactPage() {
       </section> */}
 
       {/* Call to Action */}
-      <section className="py-16">
+      <section className="py-16 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

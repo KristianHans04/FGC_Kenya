@@ -130,7 +130,7 @@ export default function AboutPage() {
       </section>
 
       {/* Mission & Vision */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-muted/30 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <motion.div
@@ -198,7 +198,7 @@ export default function AboutPage() {
 
       {/* Competition Timeline */}
       <section 
-        className="py-16 relative" 
+        className="py-16 relative overflow-hidden" 
         id="fgc"
       >
         <div 
@@ -237,9 +237,9 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 className="relative mb-8 last:mb-0"
               >
-                <div className="flex items-start gap-6">
+                <div className="flex items-start gap-4 sm:gap-6">
                   {/* Year Badge */}
-                  <div className="flex-shrink-0 w-24 text-right">
+                  <div className="flex-shrink-0 w-20 sm:w-24 text-right">
                     <div className="inline-flex items-center justify-center px-3 py-1 bg-primary text-white rounded-full text-sm font-bold">
                       {event.year}
                     </div>
@@ -302,7 +302,7 @@ export default function AboutPage() {
 
                 {/* Connecting Line */}
                 {index < timeline.length - 1 && (
-                  <div className="absolute left-[60px] top-10 bottom-0 w-0.5 bg-gradient-to-b from-primary to-transparent"></div>
+                  <div className="absolute left-[48px] sm:left-[60px] top-10 bottom-0 w-0.5 bg-gradient-to-b from-primary to-transparent"></div>
                 )}
               </motion.div>
             ))}

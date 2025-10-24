@@ -199,7 +199,7 @@ export default function JoinPage() {
       </section>
 
       {/* Eligibility Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-muted/30 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -242,7 +242,7 @@ export default function JoinPage() {
       </section>
 
       {/* Application Timeline */}
-      <section className="py-16">
+      <section className="py-16 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -286,7 +286,7 @@ export default function JoinPage() {
       </section>
 
       {/* Application Form */}
-      <section className="py-16 bg-muted/30" id="application-form">
+      <section className="py-16 bg-muted/30 overflow-hidden" id="application-form">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -212,7 +212,7 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Information */}
-      <section className="py-16 bg-muted/30 overflow-hidden">
+      <section className="py-16 bg-muted/30">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
@@ -247,25 +247,16 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form & Map */}
-      <section className="py-16 overflow-hidden">
+      <section className="py-16">
         <div className="container px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Contact Form - Temporarily Disabled (Backend Not Ready) */}
-            {/* <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 text-center">Send us a Message</h2>
-              <p className="text-center text-muted-foreground mb-8">
-                Our contact form is coming soon. In the meantime, please reach out via email or social media.
-              </p>
-            </div> */}
-
-            {/* Map & Additional Info - Centered */}
-            <div className="grid lg:grid-cols-2 gap-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12">
+              {/* Contact Form */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
-                className="space-y-6"
               >
                 <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 const footerLinks = {
@@ -15,7 +15,7 @@ const footerLinks = {
   programs: [
     { name: 'FIRST Global Challenge', href: '/about#fgc' },
     { name: 'Outreach Programs', href: '/impact' },
-    { name: 'Workshops', href: '/resources' },
+    // { name: 'Workshops', href: '/resources' },
   ],
   support: [
     { name: 'Donate', href: '/support' },
@@ -25,17 +25,16 @@ const footerLinks = {
   resources: [
     // { name: 'News & Updates', href: '/news' },
     { name: 'Impact Stories', href: '/impact' },
-    { name: 'Learning Resources', href: '/resources' },
+    // { name: 'Learning Resources', href: '/resources' },
     { name: 'Contact Us', href: '/contact' },
   ],
 }
 
 const socialLinks = [
-  { name: 'Facebook', href: '#', icon: Facebook },
-  { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'Instagram', href: '#', icon: Instagram },
-  { name: 'LinkedIn', href: '#', icon: Linkedin },
-  { name: 'YouTube', href: '#', icon: Youtube },
+  { name: 'Facebook', href: 'https://m.facebook.com/fgckenya/', icon: Facebook },
+  { name: 'X', href: 'https://x.com/fgc_kenya?lang=en', icon: Twitter },
+  { name: 'Instagram', href: 'https://www.instagram.com/fgc_kenya/', icon: Instagram },
+  { name: 'YouTube', href: 'https://www.youtube.com/@fgc_kenya', icon: Youtube },
 ]
 
 export default function Footer() {
@@ -156,15 +155,15 @@ export default function Footer() {
                 </p>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
+                <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <a
                   href="mailto:teamkenyarobotics254@gmail.com"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors break-all"
                 >
                   teamkenyarobotics254@gmail.com
                 </a>
               </div>
-              <div className="flex items-center space-x-3">
+              {/* <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <a
                   href="tel:+254700000000"
@@ -172,7 +171,7 @@ export default function Footer() {
                 >
                   +254 700 000 000
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

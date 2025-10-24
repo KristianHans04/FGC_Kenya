@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* About Preview Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -220,7 +220,7 @@ export default function HomePage() {
       </section>
 
       {/* Competition Timeline */}
-      <section className="py-20 relative">
+      <section className="py-20 relative overflow-hidden">
         {/* SVG Background */}
         <div 
           className="absolute inset-0 opacity-50 dark:opacity-20"
@@ -250,8 +250,10 @@ export default function HomePage() {
           </motion.div>
 
           <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-kenya-green via-kenya-red to-kenya-black"></div>
+            {/* Timeline Line for large screens */}
+            <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-kenya-green via-kenya-red to-kenya-black"></div>
+            {/* Timeline Line for small screens */}
+            <div className="lg:hidden absolute left-4 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-kenya-green via-kenya-red to-kenya-black"></div>
 
             {/* Timeline Items */}
             <div className="space-y-12">
@@ -271,9 +273,9 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className={`relative flex items-center ${index % 2 === 0 ? 'justify-start' : 'justify-end'}`}
+                  className={`relative lg:flex items-center ${index % 2 === 0 ? 'lg:justify-start' : 'lg:justify-end'}`}
                 >
-                  <div className={`w-5/12 ${index % 2 === 0 ? 'text-right pr-8' : 'text-left pl-8'}`}>
+                  <div className={`w-full pl-12 lg:w-5/12 lg:pl-0 ${index % 2 === 0 ? 'lg:text-right lg:pr-8' : 'lg:text-left lg:pl-8'}`}>
                     <div 
                       className={`relative inline-block p-6 rounded-lg ${item.upcoming ? 'bg-accent/10 border-2 border-accent' : 'bg-card border border-border'} shadow-lg overflow-hidden`}
                     >
@@ -317,7 +319,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-background"></div>
+                  <div className="absolute left-4 lg:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-background"></div>
                 </motion.div>
               ))}
             </div>
@@ -326,7 +328,7 @@ export default function HomePage() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-20 bg-gradient-to-br from-kenya-green/10 to-kenya-red/10">
+      <section className="py-20 bg-gradient-to-br from-kenya-green/10 to-kenya-red/10 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

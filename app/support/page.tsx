@@ -68,7 +68,7 @@ export default function SupportPage() {
       </section>
 
       {/* Why Your Support Matters */}
-      <section className="py-16">
+      <section className="py-16 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
@@ -82,7 +82,7 @@ export default function SupportPage() {
       </section>
 
       {/* Ways to Support Us */}
-      <section className="py-16 bg-muted/30" id="support">
+      <section className="py-16 bg-muted/30 overflow-hidden" id="support">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Individual Donations */}
@@ -99,14 +99,18 @@ export default function SupportPage() {
                 Every contribution, big or small, makes a difference. Help us buy robot parts, fund travel, and run workshops.
               </p>
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {['$25', '$50', '$100'].map(amount => (
-                    <button key={amount} className="btn-secondary">{amount}</button>
+                    <Link key={amount} href="https://www.mchanga.africa/fundraiser/98925" target="_blank" rel="noopener noreferrer">
+                      <button className="btn-secondary w-full">{amount}</button>
+                    </Link>
                   ))}
                 </div>
                 <div className="flex items-center space-x-2">
                   <input type="text" placeholder="Custom Amount" className="w-full px-3 py-2 border border-border rounded-md bg-background" />
-                  <button className="btn-primary">Donate</button>
+                  <Link href="https://www.mchanga.africa/fundraiser/98925" target="_blank" rel="noopener noreferrer">
+                    <button className="btn-primary">Donate</button>
+                  </Link>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
                   <Shield className="inline h-4 w-4 mr-1" />
@@ -142,7 +146,7 @@ export default function SupportPage() {
       </section>
 
       {/* Your Impact Section */}
-      <section className="py-16">
+      <section className="py-16 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-heading text-center mb-12">
@@ -187,7 +191,7 @@ export default function SupportPage() {
       </section>
       
       {/* Our Partners */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-muted/30 overflow-hidden">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold font-heading mb-8">
