@@ -111,14 +111,14 @@ const interestAreas = [
   { id: 'outreach', label: 'Community Outreach', icon: Heart },
 ]
 
-// Timeline data - Updated for October 3rd, 2025
+// Timeline data - Updated for Panama 2025 completion
 const timeline = [
   { date: '1 Jan - 28 Feb', title: 'Applications Open', status: 'completed' },
   { date: '1-15 March', title: 'Initial Screening', status: 'completed' },
   { date: '20-30 March', title: 'Interviews', status: 'completed' },
   { date: '5 April', title: 'Team Announcement', status: 'completed' },
-  { date: 'April - September', title: 'Training & Preparation', status: 'completed' },
-  { date: 'October 29, 2025', title: 'Competition in Panama', status: 'active' },
+  { date: 'April - October', title: 'Training & Preparation', status: 'completed' },
+  { date: 'October 29, 2025', title: 'Panama Competition - Silver Medal 🥈', status: 'completed' },
 ]
 
 export default function JoinPage() {

@@ -32,8 +32,8 @@ const timeline = [
 
     flag: '🇦🇪',
     theme: 'Ocean Opportunities',
-    achievement: 'Excellence in Engineering Documentation Award',
-    highlights: ['Award recognition', 'Middle East debut', 'Technical excellence'],
+    achievement: 'Excellence in Engineering Documentation Award & Outstanding Mentor Award (Lumona Mulengwa)',
+    highlights: ['Engineering Documentation Award', 'Outstanding Mentor Award', 'Technical excellence'],
   },
   {
     year: '2020',
@@ -56,8 +56,8 @@ const timeline = [
 
     flag: '🇨🇭',
     theme: 'Carbon Capture',
-    achievement: 'Return to in-person competition',
-    highlights: ['Strong comeback', 'Environmental focus', 'Global networking'],
+    achievement: 'International Enthusiasm Award & Return to in-person competition',
+    highlights: ['International Enthusiasm Award', 'Strong comeback', 'Global networking'],
   },
   {
     year: '2023',
@@ -86,15 +86,15 @@ const timeline = [
 
     flag: '🇵🇦',
     theme: 'Eco Equilibrium',
-    achievement: 'Upcoming competition focused on environmental balance',
-    highlights: ['Environmental solutions', 'Ecosystem protection', 'Sustainable innovation'],
+    achievement: 'Silver Medal - 1st Runners Up in FIRST Global Winning Alliances',
+    highlights: ['Silver Medal Win', 'Alliance Champions', 'Environmental solutions'],
   },
 ]
 
 const milestones = [
   { number: '500+', label: 'Students Trained' },
-  { number: '8', label: 'Global Competitions' },
-  { number: '12+', label: 'Awards & Recognitions' },
+  { number: '9', label: 'Global Competitions' },
+  { number: '13+', label: 'Awards & Recognitions' },
   { number: '20+', label: 'Partner Organizations' },
   { number: '100+', label: 'Outreach Programs' },
 ]
@@ -223,7 +223,7 @@ export default function AboutPage() {
               Competition <span className="text-primary">Journey</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Eight years of representing Kenya at the <i>FIRST</i> Global Challenge
+              Nine years of representing Kenya at the <i>FIRST</i> Global Challenge, culminating in our silver medal victory in Panama 2025
             </p>
           </motion.div>
 

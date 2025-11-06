@@ -122,10 +122,10 @@ export default function HomePage() {
               className="grid grid-cols-2 md:grid-cols-4 gap-6"
             >
               {[
-                { label: 'Years Active', value: 8, suffix: '+', icon: Calendar },
+                { label: 'Years Active', value: 9, suffix: '+', icon: Calendar },
                 { label: 'Students Impacted', value: 500, suffix: '+', icon: Users },
-                { label: 'Global Competitions', value: 8, icon: Globe },
-                { label: 'Awards Won', value: 12, suffix: '+', icon: Trophy },
+                { label: 'Global Competitions', value: 9, icon: Globe },
+                { label: 'Awards Won', value: 13, suffix: '+', icon: Trophy },
               ].map((stat, index) => (
                 <div key={index} className="text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full mb-2">
@@ -245,7 +245,7 @@ export default function HomePage() {
               Our Global <span className="text-primary">Journey</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From our debut in Washington D.C. to upcoming challenges in Panama, Team Kenya continues to make its mark on the global stage.
+              From our debut in Washington D.C. to winning silver in Panama, Team Kenya continues to make its mark on the global stage.
             </p>
           </motion.div>
 
@@ -265,7 +265,8 @@ export default function HomePage() {
                 { year: '2022', location: 'Geneva, Switzerland', city: 'Geneva', flag: '🇨🇭', highlight: 'Return to In-Person' },
                 { year: '2023', location: 'Singapore', city: 'Singapore', flag: '🇸🇬', highlight: 'Asian Excellence' },
                 { year: '2024', location: 'Athens, Greece', city: 'Athens', flag: '🇬🇷', highlight: 'Mediterranean Success' },
-                { year: '2025', location: 'Panama City, Panama', city: 'Panama', flag: '🇵🇦', highlight: 'Upcoming Challenge', upcoming: true, targetDate: new Date('2025-10-29') },
+                { year: '2025', location: 'Panama City, Panama', city: 'Panama', flag: '🇵🇦', highlight: 'Silver Medal - 1st Runners Up!' },
+                // { year: '2026', location: 'TBA', highlight: 'Upcoming Challenge', upcoming: true, targetDate: new Date('2026-10-01') }, // Uncomment and update when next location is announced
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -277,7 +278,7 @@ export default function HomePage() {
                 >
                   <div className={`w-full pl-12 lg:w-5/12 lg:pl-0 ${index % 2 === 0 ? 'lg:text-right lg:pr-8' : 'lg:text-left lg:pl-8'}`}>
                     <div 
-                      className={`relative inline-block p-6 rounded-lg ${item.upcoming ? 'bg-accent/10 border-2 border-accent' : 'bg-card border border-border'} shadow-lg overflow-hidden`}
+                      className="relative inline-block p-6 rounded-lg bg-card border border-border shadow-lg overflow-hidden"
                     >
                       {/* Background layers for city and flag images */}
                       {item.city && (
@@ -311,11 +312,12 @@ export default function HomePage() {
                           {item.flag && <span className="text-2xl">{item.flag}</span>}
                           <span>{item.location}</span>
                         </div>
-                        {item.upcoming && item.targetDate ? (
+                        {/* Countdown Timer - Commented out until next competition location is announced */}
+                        {/* {item.upcoming && item.targetDate ? (
                           <CountdownTimer targetDate={item.targetDate} label="Competition starts in" />
-                        ) : (
+                        ) : ( */}
                           <div className="text-sm text-muted-foreground">{item.highlight}</div>
-                        )}
+                        {/* )} */}
                       </div>
                     </div>
                   </div>
