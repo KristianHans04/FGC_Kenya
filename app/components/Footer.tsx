@@ -23,9 +23,8 @@ const footerLinks = {
     { name: 'Partner with Us', href: '/contact' },
   ],
   resources: [
-    // { name: 'News & Updates', href: '/news' },
+    { name: 'Media & Stories', href: '/media' },
     { name: 'Impact Stories', href: '/impact' },
-    // { name: 'Learning Resources', href: '/resources' },
     { name: 'Contact Us', href: '/contact' },
   ],
 }

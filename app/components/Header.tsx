@@ -11,11 +11,10 @@ import { useTheme } from 'next-themes'
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  // { name: 'News', href: '/news' },
+  { name: 'Media', href: '/media' },
   { name: 'Impact', href: '/impact' },
   { name: 'Join Us', href: '/join' },
   { name: 'Support', href: '/support' },
-  // { name: 'Resources', href: '/resources' },
   { name: 'Contact', href: '/contact' },
 ]
 
@@ -84,7 +83,7 @@ export default function Header() {
         initial={{ y: '-100%' }}
         animate={mobileMenuOpen ? { y: 0 } : { y: '-100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed inset-x-0 top-0 z-50 h-screen overflow-y-auto bg-background p-6 lg:hidden"
+        className="fixed left-0 right-0 top-0 z-50 h-screen overflow-y-auto overflow-x-hidden bg-background p-6 lg:hidden w-full"
       >
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3">
