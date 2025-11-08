@@ -1,0 +1,337 @@
+{
+  "stories": [
+    {
+      "id": "panama-2025-silver-medal",
+      "title": "Team Kenya Wins Silver Medal at Panama 2025: A Historic Achievement",
+      "slug": "panama-2025-silver-medal",
+      "excerpt": "In an extraordinary display of innovation and teamwork, Team Kenya secured the silver medal (1st Runners Up) at the FIRST Global Challenge 2025 in Panama City, marking our best performance to date.",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "October 15, 2025, will be remembered as a historic day for Kenyan robotics. In the vibrant city of Panama City, Team Kenya achieved what many considered impossible - securing the silver medal at the FIRST Global Challenge 2025, competing against teams from over 190 countries."
+        },
+        {
+          "type": "heading",
+          "text": "The Journey to Excellence"
+        },
+        {
+          "type": "paragraph",
+          "text": "The 2025 challenge, themed 'Eco Equilibrium,' focused on environmental sustainability and ecological balance. Our team spent months designing and building a robot capable of simulating ecosystem restoration tasks, from water purification to reforestation automation."
+        },
+        {
+          "type": "image",
+          "url": "/images/media/panama-robot.jpg",
+          "alt": "Team Kenya's award-winning robot at Panama 2025",
+          "caption": "Our innovative robot designed for the Eco Equilibrium challenge"
+        },
+        {
+          "type": "paragraph",
+          "text": "What set our team apart was not just technical excellence, but our unique approach to problem-solving inspired by Kenya's own conservation efforts. We incorporated lessons from successful Kenyan environmental initiatives like the Green Belt Movement and integrated local innovations in sustainable technology."
+        },
+        {
+          "type": "heading",
+          "text": "The Competition Experience"
+        },
+        {
+          "type": "paragraph",
+          "text": "Over three intense days of competition, our team demonstrated exceptional performance across all categories. Our robot consistently scored in the top tier during qualification matches, and our alliance strategy proved crucial in the playoff rounds."
+        },
+        {
+          "type": "blockquote",
+          "text": "This silver medal represents years of hard work, dedication, and the support of an entire nation. We competed against the best, and we proved that Kenyan innovation can stand on any global stage.",
+          "author": "Team Captain, FIRST Global Team Kenya 2025"
+        },
+        {
+          "type": "paragraph",
+          "text": "The final match was a nail-biter, with scores remaining close throughout. Our team's strategic thinking and precise robot control kept us competitive until the very last second. When the final buzzer sounded and the results were announced, the entire Kenyan delegation erupted in celebration."
+        },
+        {
+          "type": "heading",
+          "text": "Recognition and Impact"
+        },
+        {
+          "type": "paragraph",
+          "text": "Beyond the silver medal, Team Kenya received the Intercultural Award, recognizing our efforts to build bridges between teams and share our Kenyan culture with participants from around the world. Our pit area became a hub of cultural exchange, with team members sharing Kenyan music, language lessons, and even teaching others some of our traditional games."
+        },
+        {
+          "type": "paragraph",
+          "text": "This achievement has already inspired countless young Kenyans. Within days of our win, applications to join Team Kenya for 2026 increased by over 300%. Schools across the country have reached out, eager to start robotics clubs and STEM programs."
+        },
+        {
+          "type": "heading",
+          "text": "Looking Ahead"
+        },
+        {
+          "type": "paragraph",
+          "text": "This silver medal is not just a trophy - it's a testament to what Kenyan youth can achieve with the right support and opportunities. As we celebrate this historic moment, we're already preparing for the next challenge, determined to bring home the gold."
+        },
+        {
+          "type": "paragraph",
+          "text": "To everyone who supported us - sponsors, mentors, families, and fans - thank you. This medal belongs to all of Kenya."
+        }
+      ],
+      "author": "Kristian Hans",
+      "authorBio": "Technical Mentor for Team Kenya",
+      "publishedDate": "2025-10-18T10:00:00Z",
+      "updatedDate": "2025-10-18T10:00:00Z",
+      "category": "Competition",
+      "tags": ["FGC 2025", "Panama", "Silver Medal", "Achievement", "Eco Equilibrium"],
+      "featured": true,
+      "thumbnail": "/images/media/thumbnails/panama-celebration.jpg",
+      "readTimeMinutes": 8
+    },
+    {
+      "id": "stem-outreach-milestone",
+      "title": "100 Schools Reached: Our STEM Outreach Program Transforms Education Across Kenya",
+      "slug": "stem-outreach-milestone",
+      "excerpt": "Team Kenya's outreach program has successfully reached 100 schools across the country, introducing over 10,000 students to robotics and STEM education.",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Since launching our STEM outreach program in 2020, Team Kenya has been on a mission to democratize access to robotics and technology education across Kenya. Today, we're proud to announce that we've reached a significant milestone: 100 schools all over Kenya"
+        },
+        {
+          "type": "heading",
+          "text": "From Urban Centers to Rural Communities"
+        },
+        {
+          "type": "paragraph",
+          "text": "Our outreach program doesn't discriminate by geography. We've traveled from Nairobi's bustling suburbs to far locations such as Mombasa, bringing the excitement of robotics to every corner of Kenya. Each visit includes hands-on workshops, robot demonstrations, and inspirational talks from team members and mentors."
+        },
+        {
+          "type": "image",
+          "url": "/images/media/outreach-workshop.jpg",
+          "alt": "Students engaged in a robotics workshop",
+          "caption": "Students from Kisumu building their first robot during our workshop"
+        },
+        {
+          "type": "paragraph",
+          "text": "What started as simple demonstrations has evolved into comprehensive programs. We now offer multi-day workshops, teacher training sessions, and ongoing support to help schools establish their own robotics clubs."
+        },
+        {
+          "type": "heading",
+          "text": "Student Success Stories"
+        },
+        {
+          "type": "paragraph",
+          "text": "The impact has been transformative. Students who had never considered STEM careers are now pursuing engineering and computer science. Teachers report increased engagement in math and science classes. Parents see their children's confidence grow as they master new technical skills."
+        },
+        {
+          "type": "blockquote",
+          "text": "Before Team Kenya visited our school, I thought robotics was only for students in Nairobi. Now I'm teaching Python to my classmates and we're building our own robots. I want to study mechatronics engineering.",
+          "author": "Student from Thika High School"
+        },
+        {
+          "type": "paragraph",
+          "text": "Several students from our outreach program have gone on to join Team Kenya, bringing diverse perspectives and experiences. Others have started tech clubs, coding bootcamps, and innovation hubs in their communities."
+        },
+        {
+          "type": "heading",
+          "text": "The Road to 200 Schools"
+        },
+        {
+          "type": "paragraph",
+          "text": "We're not stopping at 100. Our goal is to reach 200 schools by 2027, with enhanced programming including virtual mentorship, online resources, and regional robotics competitions. We're also developing a curriculum that aligns with Kenya's Competency-Based Curriculum (CBC) to ensure sustainability."
+        },
+        {
+          "type": "paragraph",
+          "text": "With continued support from our sponsors and partners, we believe every Kenyan student should have the opportunity to explore STEM fields and discover their potential as innovators and problem-solvers."
+        }
+      ],
+      "author": "Kelvin Gitau",
+      "authorBio": "Team Lead for Team Kenya",
+      "publishedDate": "2025-09-10T14:30:00Z",
+      "updatedDate": "2025-09-10T14:30:00Z",
+      "category": "Outreach",
+      "tags": ["Outreach", "Education", "STEM", "Schools", "Community"],
+      "featured": true,
+      "thumbnail": "/images/media/thumbnails/outreach-celebration.jpg",
+      "readTimeMinutes": 6
+    },
+    {
+      "id": "alumni-spotlight-elly-savatia",
+      "title": "Alumni Spotlight: Elly Savatia - From Team Captain to Award-Winning Social Innovator",
+      "slug": "alumni-spotlight-elly-savatia",
+      "excerpt": "From leading Team Kenya at the 2019 Dubai competition to winning the 2025 Africa Prize for Engineering Innovation, Elly Savatia's journey exemplifies how robotics education sparks world-changing innovation.",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "In 2019, Elly Savatia stood in Dubai as the captain of Team Kenya at the FIRST Global Robotics Competition, leading his team through the complex challenges of designing, assembling, and programming a competition robot. Today, he stands as the Founder and CEO of Signvrse, a social enterprise revolutionizing communication for the deaf community through AI-powered sign language translation."
+        },
+        {
+          "type": "heading",
+          "text": "Leadership at FIRST Global 2019"
+        },
+        {
+          "type": "paragraph",
+          "text": "As captain of Team Kenya in 2019, Elly took on the comprehensive responsibility of leading the team's robot development from concept to competition. His role encompassed designing the robot's concept, coordinating the assembly process, and programming the systems that would compete on the international stage in Dubai."
+        },
+        {
+          "type": "image",
+          "url": "/images/media/elly-team.jpg",
+          "alt": "Elly Savatia with Team Kenya at FIRST Global 2019",
+          "caption": "Elly as Team Kenya captain at the 2019 FIRST Global Competition in Dubai"
+        },
+        {
+          "type": "paragraph",
+          "text": "The leadership experience and technical skills he developed during his time with Team Kenya would become the foundation for his future innovations. More importantly, it instilled in him a problem-solving mindset and a commitment to using technology to serve communities."
+        },
+        {
+          "type": "heading",
+          "text": "Bridging Communication Gaps: Terp 360"
+        },
+        {
+          "type": "paragraph",
+          "text": "Elly's flagship innovation, Terp 360, is an AI-powered application that translates speech and text into Kenyan Sign Language using realistic 3D avatars. Often described as 'Google Translate for sign language,' this groundbreaking technology addresses a critical need in Kenya and across Africa."
+        },
+        {
+          "type": "blockquote",
+          "text": "You don't build solutions and take them to the people, you build with them. Technology should serve everyone.",
+          "author": "Elly Savatia"
+        },
+        {
+          "type": "paragraph",
+          "text": "Through Signvrse, Elly is not just creating a product - he's building Kenya's largest sign language dataset, creating a vital resource for future AI and technology development across the region. The impact is transformative: companies that cannot afford interpreters can now ensure accessibility at scale."
+        },
+        {
+          "type": "heading",
+          "text": "A Track Record of Innovation"
+        },
+        {
+          "type": "paragraph",
+          "text": "Elly's innovative spirit emerged early. At just 16 years old, while still in high school, he invented 'The Stair Ramp' - an assistive technology robotic staircase that converts into a ramp for wheelchair users. This early project demonstrated his commitment to inclusive design and solving real-world accessibility challenges."
+        },
+        {
+          "type": "paragraph",
+          "text": "His passion for mentorship also runs deep. In 2019, the same year he competed with Team Kenya, Elly volunteered with Young Scientists Kenya (YSK), mentoring high school students in STEM and robotics - paying forward the knowledge and inspiration he had gained."
+        },
+        {
+          "type": "heading",
+          "text": "International Recognition"
+        },
+        {
+          "type": "paragraph",
+          "text": "Elly's work has earned him numerous prestigious awards and recognitions. In 2025, he won the Africa Prize for Engineering Innovation from the Royal Academy of Engineering, receiving £50,000 to scale Terp 360. He has also been honored with Kenya's Presidential Innovation Award, the Commonwealth Secretary General's Award for Innovation, and recognition as one of the Top 11 AI innovations in Africa."
+        },
+        {
+          "type": "blockquote",
+          "text": "I'm totally grateful for this and it is a testament to the innovative assistive technology work that is coming from Africa. I'm really looking forward to the excellence that will come out of Signvrse and the African continent.",
+          "author": "Elly Savatia, on winning the 2025 Africa Prize"
+        },
+        {
+          "type": "paragraph",
+          "text": "As a 2024 Mandela Washington Fellow, YALI Fellow, and One Young World Ambassador, Elly continues to inspire and lead the next generation of African innovators."
+        },
+        {
+          "type": "heading",
+          "text": "Building Movements, Creating Impact"
+        },
+        {
+          "type": "paragraph",
+          "text": "Beyond his work at Signvrse, Elly founded and serves as President of Innovate 4 SDGs, a nonprofit mobilizing youth to address the United Nations Sustainable Development Goals. His leadership extends from his Climate Action Club in high school to winning the Unicef Generation-Unlimited Innovation Challenge and the Kenya Drone Business Competition in 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Elly Savatia embodies everything Team Kenya stands for: using STEM education as a launchpad for innovation that serves communities, solving real problems with technology, and inspiring others to follow. From captain of a robotics team to captain of social change, his journey shows current Team Kenya members the incredible impact they can make."
+        },
+        {
+          "type": "paragraph",
+          "text": "We couldn't be prouder to call Elly a Team Kenya alumnus. His story reminds us why we do this work - because today's robotics students become tomorrow's world-changers."
+        }
+      ],
+      "author": "Misha Mari",
+      "authorBio": "Team Kenya 2025 student",
+      "publishedDate": "2025-09-05T09:00:00Z",
+      "updatedDate": "2025-11-08T20:00:00Z",
+      "category": "Alumni",
+      "tags": ["Alumni", "2019", "Dubai", "AI Innovation", "Social Impact", "Accessibility", "Awards"],
+      "featured": false,
+      "thumbnail": "/images/media/thumbnails/elly-portrait.jpg",
+      "readTimeMinutes": 7
+    },
+    {
+      "id": "greece-2024-reflection",
+      "title": "Reflections from Athens: Lessons from FIRST Global Challenge 2024",
+      "slug": "greece-2024-reflection",
+      "excerpt": "Team Kenya shares insights, challenges, and growth from the 2024 Feeding the Future challenge in Athens, Greece.",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The 2024 FIRST Global Challenge in Athens, Greece, themed 'Feeding the Future,' presented unique challenges focused on agricultural technology and food security - issues close to Kenya's heart as an agricultural nation."
+        },
+        {
+          "type": "heading",
+          "text": "The Challenge"
+        },
+        {
+          "type": "paragraph",
+          "text": "The game required robots to simulate various agricultural processes: planting seeds, managing irrigation, harvesting crops, and optimizing resource distribution. It was a complex challenge that demanded both mechanical precision and strategic thinking."
+        },
+        {
+          "type": "paragraph",
+          "text": "Our team approached the challenge by drawing inspiration from Kenyan farming innovations. We studied local solutions to agricultural challenges and incorporated those insights into our robot design and strategy."
+        },
+        {
+          "type": "image",
+          "url": "/images/media/greece-team.jpg",
+          "alt": "Team Kenya at Athens competition",
+          "caption": "Team Kenya with our robot at the Athens competition venue"
+        },
+        {
+          "type": "heading",
+          "text": "What We Learned"
+        },
+        {
+          "type": "paragraph",
+          "text": "While we didn't place on the podium in Athens, the experience was invaluable. We learned crucial lessons about robot reliability, alliance communication, and adapting strategy mid-competition. Our mechanical design performed well, but software issues during critical matches taught us the importance of thorough testing."
+        },
+        {
+          "type": "blockquote",
+          "text": "Athens taught us that success isn't just about technical excellence - it's about resilience, adaptability, and learning from setbacks. These lessons directly contributed to our silver medal in Panama.",
+          "author": "Team Captain, Reflecting on the Journey"
+        },
+        {
+          "type": "paragraph",
+          "text": "We also formed lasting friendships with teams from Egypt, Nigeria, and South Africa. These connections led to knowledge-sharing partnerships that continue today, with teams exchanging design ideas and best practices."
+        },
+        {
+          "type": "heading",
+          "text": "Cultural Exchange"
+        },
+        {
+          "type": "paragraph",
+          "text": "Beyond competition, Athens offered incredible cultural experiences. We explored ancient Greek sites, learned about the history of democracy and philosophy, and shared Kenyan culture with teams from around the world. Our traditional dance performance at the cultural night was a highlight."
+        },
+        {
+          "type": "paragraph",
+          "text": "Team members visited agricultural research centers in Greece and met with local farmers, gaining perspective on how different countries approach food security. These insights broadened our understanding of global agricultural challenges."
+        },
+        {
+          "type": "heading",
+          "text": "Path to Improvement"
+        },
+        {
+          "type": "paragraph",
+          "text": "After Athens, we conducted a thorough review of our performance. We identified specific areas for improvement: software testing protocols, driver training procedures, and alliance communication strategies. We implemented new practices based on these lessons."
+        },
+        {
+          "type": "paragraph",
+          "text": "The team also worked on building mental resilience and handling pressure better. We brought in sports psychologists and practiced competition scenarios to prepare for high-stakes moments."
+        },
+        {
+          "type": "paragraph",
+          "text": "Looking back, Athens 2024 was a crucial stepping stone. The experience, lessons learned, and growth we underwent as a team directly contributed to our historic silver medal performance in Panama 2025. Every challenge we faced in Athens prepared us for greater success."
+        }
+      ],
+      "author": "Priscilla Nganga",
+      "authorBio": "Co-Team Lead for Team Kenya",
+      "publishedDate": "2025-08-15T16:00:00Z",
+      "updatedDate": "2025-08-15T16:00:00Z",
+      "category": "Competition",
+      "tags": ["FGC 2024", "Greece", "Feeding the Future", "Reflection", "Lessons"],
+      "featured": false,
+      "thumbnail": "/images/media/thumbnails/greece-robot.jpg",
+      "readTimeMinutes": 7
+    }
+  ]
+}
