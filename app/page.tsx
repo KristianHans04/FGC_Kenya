@@ -7,6 +7,8 @@ import { ArrowRight, Users, Target, Globe, Sparkles, Heart, Trophy, Calendar } f
 import CountUp from '@/app/components/CountUp'
 import ImageSlideshow from '@/app/components/ImageSlideshow'
 import CountdownTimer from '@/app/components/CountdownTimer'
+import MediaCarousel from '@/app/components/MediaCarousel'
+import { getFeaturedStories } from '@/app/lib/media'
 
 export default function HomePage() {
   const teamKenyaActionImages = [
@@ -16,6 +18,8 @@ export default function HomePage() {
     '/images/TeamKenyaAction/PXL_20230826_124047312.jpg',
     '/images/TeamKenyaAction/WhatsApp Image 2025-06-20 at 18.57.00_9b9dbf6e.jpg'
   ]
+
+  const featuredStories = getFeaturedStories(3)
 
   return (
     <>
@@ -48,7 +52,7 @@ export default function HomePage() {
               repeat: Infinity,
               ease: "linear"
             }}
-            className="absolute -top-20 -right-20 w-96 h-96 bg-kenya-green/10 rounded-full blur-3xl"
+            className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-kenya-green/10 rounded-full blur-3xl"
           />
           <motion.div
             animate={{
@@ -60,7 +64,7 @@ export default function HomePage() {
               repeat: Infinity,
               ease: "linear"
             }}
-            className="absolute -bottom-20 -left-20 w-96 h-96 bg-kenya-red/10 rounded-full blur-3xl"
+            className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-kenya-red/10 rounded-full blur-3xl"
           />
         </div>
 
@@ -213,7 +217,7 @@ export default function HomePage() {
                 overlay={false}
               />
               {/* African Pattern Decoration */}
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 african-pattern rounded-lg opacity-20"></div>
+              <div className="absolute bottom-0 right-0 w-24 h-24 sm:w-32 sm:h-32 african-pattern rounded-lg opacity-20"></div>
             </motion.div>
           </div>
         </div>
@@ -328,6 +332,50 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured Media Stories Carousel */}
+      {featuredStories.length > 0 && (
+        <section className="py-20 bg-muted/30 overflow-hidden">
+          <div className="container px-4 sm:px-6 lg:px-8 max-w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
+                Latest <span className="text-primary">Stories</span>
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Discover the latest updates, achievements, and inspiring stories from Team Kenya
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <MediaCarousel stories={featuredStories} autoPlayInterval={6000} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="text-center mt-8"
+            >
+              <Link href="/media" className="btn-secondary">
+                View All Stories
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* Call to Action Section */}
       <section className="py-20 bg-gradient-to-br from-kenya-green/10 to-kenya-red/10 overflow-hidden">

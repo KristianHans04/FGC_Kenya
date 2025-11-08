@@ -45,8 +45,24 @@
   --radius-3xl: 1.5rem;
 }
 
-* {
+*, *::before, *::after {
   border-color: var(--color-border);
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal scroll globally */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure all sections and containers don't overflow */
+section, div {
+  max-width: 100%;
 }
 
 body {
@@ -78,7 +94,8 @@ body {
 
 /* Utility Classes */
 .container {
-  @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl w-full;
+  box-sizing: border-box;
 }
 
 .btn-primary {
