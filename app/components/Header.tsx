@@ -1,12 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Menu, X, User, LogOut, Settings, Users, ChevronDown } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
+import { useAuth } from '@/app/lib/contexts/AuthContext'
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -18,10 +19,40 @@ const navigation = [
   { name: 'Contact', href: '/contact' },
 ]
 
+/**
+ * Header component
+ * Displays the main navigation bar with logo, links, theme toggle, and mobile menu
+ * 
+ * @returns {JSX.Element} The header component
+ */
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { theme, systemTheme } = useTheme()
   const currentTheme = theme === 'system' ? systemTheme : theme
+  const { user, isAuthenticated, logout } = useAuth()
+  const userMenuRef = useRef<HTMLDivElement>(null)
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setUserMenuOpen(false)
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -60,12 +91,72 @@ export default function Header() {
 
           <div className="flex flex-1 items-center justify-end gap-4">
             <ThemeToggle />
+
+            {isAuthenticated ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="text-sm font-medium hidden sm:block">
+                    {user?.firstName || user?.email?.split('@')[0]}
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50">
+                    <div className="py-1">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+
+                      {user?.role === 'ADMIN' && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Admin Panel
+                        </Link>
+                      )}
+
+                      <hr className="my-1" />
+
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden lg:inline-flex btn-primary text-sm"
+              >
+                Login
+              </Link>
+            )}
+
             <Link
               href="/support"
-              className="hidden lg:inline-flex btn-primary text-sm"
+              className="hidden lg:inline-flex btn-secondary text-sm"
             >
               Donate
             </Link>
+
             <button
               type="button"
               className="lg:hidden -m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
@@ -124,11 +215,57 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
+
+              {isAuthenticated && (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-muted"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4 inline mr-2" />
+                    Dashboard
+                  </Link>
+
+                  {user?.role === 'ADMIN' && (
+                    <Link
+                      href="/admin"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-muted"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Users className="h-4 w-4 inline mr-2" />
+                      Admin Panel
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setMobileMenuOpen(false)
+                    }}
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-muted text-left w-full"
+                  >
+                    <LogOut className="h-4 w-4 inline mr-2" />
+                    Logout
+                  </button>
+                </>
+              )}
             </div>
-            <div className="py-6">
+
+            <div className="py-6 space-y-3">
+              {!isAuthenticated && (
+                <Link
+                  href="/login"
+                  className="btn-primary w-full text-center block"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
+
               <Link
                 href="/support"
-                className="btn-primary w-full text-center"
+                className="btn-secondary w-full text-center block"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Support Team Kenya

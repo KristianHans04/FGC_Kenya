@@ -7,6 +7,14 @@ interface CountdownTimerProps {
   label?: string
 }
 
+/**
+ * CountdownTimer component
+ * Displays a countdown to a specific target date
+ * 
+ * @param {Date} targetDate - The date to count down to
+ * @param {string} [label='Time remaining'] - Label text to display above the timer
+ * @returns {JSX.Element} The countdown timer component
+ */
 export default function CountdownTimer({ targetDate, label = 'Time remaining' }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,

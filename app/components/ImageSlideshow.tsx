@@ -14,6 +14,18 @@ interface ImageSlideshowProps {
   overlay?: boolean
 }
 
+/**
+ * ImageSlideshow component
+ * Displays a slideshow of images with auto-play and manual navigation controls
+ * 
+ * @param {string[]} images - Array of image URLs to display
+ * @param {number} [interval=5000] - Time in milliseconds between slides during auto-play
+ * @param {boolean} [showControls=true] - Whether to show navigation arrows and dots
+ * @param {string} [className=''] - Additional CSS classes
+ * @param {string} [aspectRatio='aspect-video'] - Aspect ratio class for the container
+ * @param {boolean} [overlay=false] - Whether to show a gradient overlay
+ * @returns {JSX.Element | null} The slideshow component or null if no images
+ */
 export default function ImageSlideshow({
   images,
   interval = 5000,

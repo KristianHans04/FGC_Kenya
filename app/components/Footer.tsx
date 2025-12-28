@@ -36,8 +36,14 @@ const socialLinks = [
   { name: 'YouTube', href: 'https://www.youtube.com/@fgc_kenya', icon: Youtube },
 ]
 
+/**
+ * Footer component
+ * Displays the site footer with links, social media icons, and copyright info
+ * Supports light/dark mode and responsive layout
+ * 
+ * @returns {JSX.Element} The footer component
+ */
 export default function Footer() {
-  console.log('Footer rendered');
   const { theme, systemTheme } = useTheme()
   const currentTheme = theme === 'system' ? systemTheme : theme
   

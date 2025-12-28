@@ -4,6 +4,13 @@ import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
+/**
+ * ThemeToggle component
+ * Button to toggle between light and dark themes
+ * Displays a sun icon in light mode and moon icon in dark mode
+ * 
+ * @returns {JSX.Element | null} The theme toggle button or null if not mounted
+ */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)

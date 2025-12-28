@@ -11,6 +11,16 @@ interface CountUpProps {
   prefix?: string
 }
 
+/**
+ * CountUp component
+ * Animates a number counting up from 0 to a target value when in view
+ * 
+ * @param {number} end - The target number to count up to
+ * @param {number} [duration=2000] - Duration of the animation in milliseconds
+ * @param {string} [suffix=''] - Text to append after the number
+ * @param {string} [prefix=''] - Text to prepend before the number
+ * @returns {JSX.Element} The animated count up component
+ */
 export default function CountUp({ end, duration = 2000, suffix = '', prefix = '' }: CountUpProps) {
   const [count, setCount] = useState(0)
   const ref = useRef(null)

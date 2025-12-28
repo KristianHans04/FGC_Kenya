@@ -6,13 +6,16 @@ import { Share2, X } from 'lucide-react'
 
 /**
  * ShareButton component for social media sharing
- * @param title - Content title to share
- * @param text - Content description to share
+ * Opens a modal with sharing options for various platforms
+ * 
+ * @param {string} title - Content title to share
+ * @param {string} text - Content description to share
+ * @returns {JSX.Element} The share button component
  */
 export default function ShareButton({ title, text }: { title: string; text: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const shareMessage = `I really think you should read this: ${title} 🚀`
+  const shareMessage = `I really think you should read this: ${title}`
   const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
 
   const shareLinks = [
