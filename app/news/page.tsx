@@ -1,9 +1,20 @@
+import type { Metadata } from 'next'
 'use client'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, ArrowRight, Search, Filter, Tag } from 'lucide-react'
 import Link from 'next/link'
+
+
+
+/**
+ * NewsPage component
+ * Displays news articles with filtering and search functionality
+ * Features a grid layout with article cards, category filtering, and search capabilities
+ *
+ * @returns {JSX.Element} The news page component
+ */
 
 // Mock data - In production, this would come from an API
 const newsArticles = [
@@ -83,6 +94,13 @@ const newsArticles = [
 
 const categories = ['All', 'Competition', 'Outreach', 'Alumni', 'Partnership', 'Workshop']
 
+/**
+ * NewsPage component
+ * Displays news articles with search and filtering capabilities
+ * Features featured stories and a list of regular updates
+ * 
+ * @returns {JSX.Element} The news page component
+ */
 export default function NewsPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')

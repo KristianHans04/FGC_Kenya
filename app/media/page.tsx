@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, ArrowRight, Search, Filter, Tag, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getAllStories, getAllCategories, formatDate, formatRelativeDate, MediaStory } from '@/app/lib/media'
-import type { Metadata } from 'next'
+
+
+
 
 const STORIES_PER_PAGE = 6
 

@@ -4,6 +4,12 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Shield, Eye, Lock, Database, UserCheck, Mail } from 'lucide-react'
 
+/**
+ * PrivacyPolicyPage component
+ * Displays the privacy policy information
+ * 
+ * @returns {JSX.Element} The privacy policy page component
+ */
 export default function PrivacyPolicyPage() {
   return (
     <>
