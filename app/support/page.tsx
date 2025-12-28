@@ -4,9 +4,48 @@
  * @author Team Kenya Dev
  */
 
-'use client'
-
+import type { Metadata } from 'next'
 import { motion } from 'framer-motion'
+
+export const metadata: Metadata = {
+  title: 'Support Us - FIRST Global Team Kenya',
+  description: 'Help support FIRST Global Team Kenya through donations and sponsorship. Your contribution helps inspire the next generation of Kenyan innovators in STEM education.',
+  keywords: 'FIRST Global, Team Kenya, Donate, Support, Sponsorship, STEM Education, Kenya',
+  authors: [{ name: 'FIRST Global Team Kenya' }],
+  openGraph: {
+    title: 'Support FIRST Global Team Kenya',
+    description: 'Help us inspire Kenyan youth through robotics education',
+    url: 'https://fgckenya.com/support',
+    siteName: 'FIRST Global Team Kenya',
+    images: [
+      {
+        url: '/images/og-support.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Support FIRST Global Team Kenya',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Support FIRST Global Team Kenya',
+    description: 'Help us inspire Kenyan youth in STEM',
+    images: ['/images/twitter-support.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+}
 import { 
   Heart, 
   Gift, 
@@ -38,8 +77,13 @@ const currentSponsors = [
   { name: 'TME Education', tier: 'Education', logo: '/images/Logo/tmeeducation-logo.d6f6a1fb.png' },
 ]
 
+/**
+ * SupportPage component
+ * Displays information on how to support the team (donations, sponsorship)
+ * 
+ * @returns {JSX.Element} The support page component
+ */
 export default function SupportPage() {
-  console.log('SupportPage rendered');
   return (
     <>
       {/* Hero Section */}

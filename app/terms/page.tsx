@@ -4,6 +4,12 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { FileText, Scale, AlertTriangle, UserCheck, Code, Mail } from 'lucide-react'
 
+/**
+ * TermsOfServicePage component
+ * Displays the terms of service agreement
+ * 
+ * @returns {JSX.Element} The terms of service page component
+ */
 export default function TermsOfServicePage() {
   return (
     <>

@@ -51,6 +51,67 @@ export const metadata: Metadata = {
  * @returns {JSX.Element} The impact page component
  */
 export default function ImpactPage() {
+  const impactMetrics = [
+    {
+      icon: Users,
+      value: 500,
+      suffix: '+',
+      label: 'Students Reached',
+      description: 'Through our outreach programs and workshops'
+    },
+    {
+      icon: GraduationCap,
+      value: 50,
+      suffix: '+',
+      label: 'Schools Partnered',
+      description: 'Across Kenya bringing STEM education'
+    },
+    {
+      icon: Briefcase,
+      value: 25,
+      suffix: '+',
+      label: 'Successful Alumni',
+      description: 'Pursuing STEM careers worldwide'
+    },
+    {
+      icon: Heart,
+      value: 10,
+      suffix: '+',
+      label: 'Years of Impact',
+      description: 'Transforming lives through robotics'
+    }
+  ]
+
+  const impactStories = [
+    {
+      id: '1',
+      name: 'Sarah Wanjiku',
+      role: 'Software Engineer at Google',
+      year: '2018 Alumni',
+      story: 'FIRST Global Team Kenya gave me the confidence to pursue computer science. The robotics challenges taught me problem-solving skills that I use every day in my career.',
+      impact: 'Leading AI initiatives at Google',
+      image: '/images/team/member1.jpg'
+    },
+    {
+      id: '2',
+      name: 'David Kiprop',
+      role: 'Robotics Engineer at Boston Dynamics',
+      year: '2019 Alumni',
+      story: 'The hands-on experience with robotics and the mentorship I received shaped my path to becoming an engineer. I\'m grateful for the opportunities Team Kenya provided.',
+      impact: 'Developing advanced robotics systems',
+      image: '/images/team/member2.jpg'
+    },
+    {
+      id: '3',
+      name: 'Grace Achieng',
+      role: 'STEM Teacher & FIRST Coach',
+      year: '2020 Alumni',
+      story: 'Team Kenya inspired me to give back to the community. Now I coach the next generation of innovators and watch them discover their potential in STEM.',
+      impact: 'Mentoring 200+ students annually',
+      image: '/images/team/member3.jpg'
+    }
+  ]
+
   return (
     <>
       {/* Hero Section */}
