@@ -10,6 +10,13 @@ import CountdownTimer from '@/app/components/CountdownTimer'
 import MediaCarousel from '@/app/components/MediaCarousel'
 import { getFeaturedStories } from '@/app/lib/media'
 
+/**
+ * HomePage component
+ * The main landing page of the application
+ * Features a hero section, about preview, competition timeline, featured stories, and call to action
+ * 
+ * @returns {JSX.Element} The home page component
+ */
 export default function HomePage() {
   const teamKenyaActionImages = [
     '/images/TeamKenyaAction/IMG_0504.jpg',

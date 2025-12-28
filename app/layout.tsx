@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/app/components/ThemeProvider'
+import { AuthProvider } from '@/app/lib/contexts/AuthContext'
 import Header from '@/app/components/Header'
 import Footer from '@/app/components/Footer'
 
@@ -56,12 +57,20 @@ export const metadata: Metadata = {
   },
 }
 
+/**
+ * RootLayout component
+ * The main layout wrapper for the entire application
+ * Includes the HTML structure, fonts, theme provider, header, and footer
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render
+ * @returns {JSX.Element} The root layout structure
+ */
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  console.log('RootLayout rendered');
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -79,11 +88,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="min-h-screen flex flex-col overflow-x-hidden">
-            <Header />
-            <main className="flex-grow overflow-x-hidden w-full">{children}</main>
-            <Footer />
-          </div>
+          <AuthProvider>
+            <div className="min-h-screen flex flex-col overflow-x-hidden">
+              <Header />
+              <main className="flex-grow overflow-x-hidden w-full">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
