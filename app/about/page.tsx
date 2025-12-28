@@ -99,8 +99,14 @@ const milestones = [
   { number: '100+', label: 'Outreach Programs' },
 ]
 
+/**
+ * AboutPage component
+ * Displays information about the team's history, mission, vision, and achievements
+ * Includes a timeline of competitions and impact statistics
+ * 
+ * @returns {JSX.Element} The about page component
+ */
 export default function AboutPage() {
-  console.log('AboutPage rendered');
   return (
     <>
       {/* Hero Section */}
