@@ -11,11 +11,11 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Clock, 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
   Send,
   Facebook,
   Twitter,
@@ -41,32 +41,32 @@ const contactSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name must be less than 100 characters')
     .regex(/^[a-zA-Z\s-']+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
-  
+
   email: z.string()
     .email('Please enter a valid email address')
     .min(5, 'Email address is too short')
     .max(100, 'Email address is too long'),
-  
+
   phone: z.string()
     .optional()
     .refine((val) => {
       if (!val) return true
       return /^(\+254|0)[17]\d{8}$/.test(val)
     }, 'Please enter a valid Kenyan phone number (e.g., +254712345678 or 0712345678)'),
-  
+
   subject: z.string()
     .min(5, 'Subject must be at least 5 characters')
     .max(150, 'Subject must be less than 150 characters'),
-  
+
   category: z.enum(['general', 'sponsorship', 'media', 'technical', 'other'])
     .describe('Please select a category'),
-  
+
   message: z.string()
     .min(20, 'Message must be at least 20 characters')
     .max(1000, 'Message must be less than 1000 characters'),
-  
+
   newsletter: z.boolean().optional(),
-  
+
   privacy: z.boolean()
     .refine((val) => val === true, 'You must accept the privacy policy'),
 })
@@ -81,12 +81,6 @@ const contactInfo = [
     details: 'teamkenyarobotics254@gmail.com',
     link: 'mailto:teamkenyarobotics254@gmail.com',
   },
-  // {
-  //   icon: Phone,
-  //   title: 'Phone',
-  //   details: '+254 700 123 456',
-  //   link: 'tel:+254700123456',
-  // },
   {
     icon: MapPin,
     title: 'Address',
@@ -121,7 +115,6 @@ const faqItems = [
     answer: 'We offer various sponsorship packages and donation options. Visit our support page for more information.',
     link: '/support',
   },
-
   {
     question: 'Where can I find learning resources?',
     answer: 'Check our resources page for tutorials, documentation, and learning materials for robotics and STEM.',
@@ -133,14 +126,18 @@ const faqItems = [
 const contactCategories = [
   { value: 'general', label: 'General Inquiry' },
   { value: 'sponsorship', label: 'Sponsorship & Donations' },
-
   { value: 'media', label: 'Media & Press' },
   { value: 'technical', label: 'Technical Support' },
   { value: 'other', label: 'Other' },
 ]
 
+/**
+ * ContactPage component
+ * Displays contact information, FAQ, and a contact form
+ * 
+ * @returns {JSX.Element} The contact page component
+ */
 export default function ContactPage() {
-  console.log('ContactPage rendered');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
@@ -159,7 +156,6 @@ export default function ContactPage() {
    * @param data - Validated form data
    */
   const onSubmit = async (data: ContactFormData) => {
-    console.log('Submitting contact form with data:', data);
     setIsSubmitting(true)
     setSubmitStatus('idle')
 
