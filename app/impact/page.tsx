@@ -1,103 +1,56 @@
-'use client'
-
+import type { Metadata } from 'next'
 import { motion } from 'framer-motion'
 import { Quote, GraduationCap, Briefcase, Rocket, Heart, Star, Users } from 'lucide-react'
 import CountUp from '@/app/components/CountUp'
 
-const impactStories = [
-  {
-    id: 1,
-    name: 'Elly Savatia',
-    role: 'Tech Entrepreneur',
-    year: 'Alumni',
-    story: 'My journey with <i>FIRST</i> Global Team Kenya inspired me to use technology to solve real-world problems. Today, I\'m the founder of two companies: Signvrse, which uses AI to bridge the sign language gap, and Precision Motion Labs, focusing on innovative motion solutions.',
-    impact: 'Founded Signvrse & Precision Motion Labs',
-    image: '/images/stories/elly.jpg',
+export const metadata: Metadata = {
+  title: 'Our Impact - FIRST Global Team Kenya',
+  description: 'Discover how FIRST Global Team Kenya is transforming lives through STEM education. Read inspiring stories of alumni success and our community outreach impact.',
+  keywords: 'FIRST Global, Team Kenya, Impact, STEM Education, Alumni, Success Stories, Outreach, Kenya',
+  authors: [{ name: 'FIRST Global Team Kenya' }],
+  openGraph: {
+    title: 'Our Impact - FIRST Global Team Kenya',
+    description: 'Transforming lives through STEM education and robotics',
+    url: 'https://fgckenya.com/impact',
+    siteName: 'FIRST Global Team Kenya',
+    images: [
+      {
+        url: '/images/og-impact.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'FIRST Global Team Kenya Impact Stories',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
   },
-  {
-    id: 2,
-    name: 'Maxwell Okoth',
-    role: 'Prosthetics Innovator',
-    year: 'Alumni',
-    story: 'The engineering skills and humanitarian spirit I gained from Team Kenya led me to found ZeroBionic. We\'re building affordable prosthetic arms for the disabled, combining robotics with social impact to change lives across Kenya.',
-    impact: 'Founder of ZeroBionic',
-    image: '/images/stories/maxwell.jpg',
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Impact of FIRST Global Team Kenya',
+    description: 'Inspiring stories of STEM education and innovation',
+    images: ['/images/twitter-impact.jpg'],
   },
-  {
-    id: 3,
-    name: 'Florida Korir',
-    role: 'Tech Community Leader',
-    year: 'Alumni',
-    story: 'Team Kenya taught me the importance of knowledge sharing and community building. As the GDSC 2024 Ambassador at Zetech University, I\'m inspiring the next generation of developers and continuing the legacy of innovation.',
-    impact: 'GDSC 2024 Ambassador, Zetech University',
-    image: '/images/stories/florida.jpg',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
-  {
-    id: 4,
-    name: 'Eleanora Matalanga',
-    role: 'Student Tech Leader',
-    year: 'Alumni',
-    story: 'The leadership and technical skills I developed with Team Kenya prepared me to lead at the university level. As GDSC Lead 2024 at DeKut, I\'m building a community of student developers and organizing impactful tech events.',
-    impact: 'GDSC Lead 2024, DeKut',
-    image: '/images/stories/eleanora.jpg',
-  },
-]
+}
 
-const impactMetrics = [
-  {
-    icon: GraduationCap,
-    value: 85,
-    suffix: '%',
-    label: 'Alumni in STEM Fields',
-    description: 'Of our alumni pursuing higher education or careers',
-  },
-  {
-    icon: Briefcase,
-    value: 60,
-    suffix: '+',
-    label: 'Career Opportunities',
-    description: 'Created through our network and partnerships',
-  },
-  {
-    icon: Users,
-    value: 500,
-    suffix: '+',
-    label: 'Students Reached',
-    description: 'Through direct participation and outreach programs',
-  },
-  {
-    icon: Rocket,
-    value: 20,
-    suffix: '+',
-    label: 'Innovation Projects',
-    description: 'Initiated by our alumni and current members',
-  },
-]
-
-const outreachPrograms = [
-  {
-    title: 'School Robotics Clubs',
-    description: 'Establishing robotics clubs in schools across Kenya',
-    beneficiaries: '50+ schools',
-    icon: Users,
-  },
-  {
-    title: 'Weekend Workshops',
-    description: 'Free workshops for students interested in STEM',
-    beneficiaries: '200+ students monthly',
-    icon: GraduationCap,
-  },
-
-  {
-    title: 'Rural Outreach',
-    description: 'Bringing STEM education to underserved communities',
-    beneficiaries: '15+ counties',
-    icon: Star,
-  },
-]
-
+/**
+ * ImpactPage component
+ * Displays impact stories and statistics about the team's outreach and educational efforts
+ * Features alumni success stories, impact metrics, and community engagement highlights
+ *
+ * @returns {JSX.Element} The impact page component
+ */
 export default function ImpactPage() {
-  console.log('ImpactPage rendered');
   return (
     <>
       {/* Hero Section */}
