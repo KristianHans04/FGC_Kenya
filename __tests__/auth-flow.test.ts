@@ -38,16 +38,14 @@ describe('Authentication Flow Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    // Mock crypto functions
-    ;(global as any).crypto = {
-      randomBytes: jest.fn(() => Buffer.from('1234567890123456')),
-      createHash: jest.fn(() => ({
-        update: jest.fn(() => ({
-          digest: jest.fn(() => 'mock-hash'),
-        })),
+    // Mock crypto functions using the existing setup
+    ;(global as any).crypto.randomBytes.mockReturnValue(Buffer.from('1234567890123456'))
+    ;(global as any).crypto.createHash.mockReturnValue({
+      update: jest.fn(() => ({
+        digest: jest.fn(() => 'mock-hash'),
       })),
-      timingSafeEqual: jest.fn(() => true),
-    }
+    })
+    ;(global as any).crypto.timingSafeEqual.mockReturnValue(true)
   })
 
   describe('Request OTP', () => {
