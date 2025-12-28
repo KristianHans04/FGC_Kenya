@@ -3,8 +3,7 @@ import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/app/components/ThemeProvider'
 import { AuthProvider } from '@/app/lib/contexts/AuthContext'
-import Header from '@/app/components/Header'
-import Footer from '@/app/components/Footer'
+
 import LayoutContent from '@/app/components/LayoutContent'
 
 const inter = Inter({ 
@@ -89,13 +88,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <div className="min-h-screen flex flex-col overflow-x-hidden">
-              <Header />
-              <main className="flex-grow overflow-x-hidden w-full">{children}</main>
-              <Footer />
-            </div>
-          </AuthProvider>
+           <AuthProvider>
+             <LayoutContent>{children}</LayoutContent>
+           </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
