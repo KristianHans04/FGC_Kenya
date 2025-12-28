@@ -14,9 +14,7 @@ const nextConfig = {
     domains: ['localhost', 'res.cloudinary.com'],
   },
 
-  // Enable static export mode for GitHub Pages/Render deployment
-  // This generates the 'out' directory with all static files
-  output: 'export',
+
 
   // Experimental features configuration
   experimental: {

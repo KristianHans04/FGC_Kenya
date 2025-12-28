@@ -45,7 +45,7 @@ Object.defineProperty(global, 'crypto', {
   },
 })
 
-// Mock NextRequest for tests
+// Mock Request for tests
 global.Request = class MockRequest {
   constructor(input, init = {}) {
     this.url = input
@@ -55,16 +55,60 @@ global.Request = class MockRequest {
   }
 
   async json() {
-    return JSON.parse(this.body)
+    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body
   }
 
   async text() {
-    return this.body
+    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body)
   }
 }
 
-// Mock NextRequest
-global.NextRequest = global.Request
+// Mock NextRequest directly
+global.NextRequest = class MockNextRequest {
+  constructor(input, init = {}) {
+    this.url = input
+    this.method = init.method || 'GET'
+    this.headers = new Map(Object.entries(init.headers || {}))
+    this.body = init.body
+    this.nextUrl = new URL(input)
+    this.cookies = {
+      get: jest.fn(),
+      set: jest.fn(),
+      delete: jest.fn(),
+    }
+  }
+
+  async json() {
+    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body
+  }
+
+  async text() {
+    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body)
+  }
+}
+
+// Mock Response for Next.js API routes
+global.Response = class MockResponse {
+  constructor(body, init = {}) {
+    this.body = body
+    this.status = init.status || 200
+    this.statusText = init.statusText || 'OK'
+    this.headers = new Map(Object.entries(init.headers || {}))
+    this.ok = this.status >= 200 && this.status < 300
+  }
+
+  async json() {
+    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body
+  }
+
+  async text() {
+    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body)
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'Response'
+  }
+}
 
 // Mock environment variables
 process.env = {
