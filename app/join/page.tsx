@@ -6,11 +6,14 @@
 
 'use client'
 
+import type { Metadata } from 'next'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
+
 import { 
   Users, 
   GraduationCap, 
@@ -121,10 +124,20 @@ const timeline = [
   { date: 'October 29, 2025', title: 'Panama Competition - Silver Medal 🥈', status: 'completed' },
 ]
 
+/**
+ * JoinPage component
+ * Displays the application form for new students to join the team
+ * Includes eligibility requirements and timeline
+ * 
+ * @returns {JSX.Element} The join page component
+ */
 export default function JoinPage() {
-  console.log('JoinPage rendered');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [currentStep, setCurrentStep] = useState<'form' | 'ai-questions' | 'complete'>('form')
+  const [aiQuestions, setAiQuestions] = useState<string[]>([])
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>({})
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false)
   const [applicationsClosed] = useState(true) // Applications are closed as of October 3rd
   
   const {
@@ -142,31 +155,73 @@ export default function JoinPage() {
    * Handle form submission with security measures
    * @param data - Validated form data
    */
-  const onSubmit = async (data: ApplicationFormData) => {
-    console.log('Submitting application form with data:', data);
-    setIsSubmitting(true)
-    setSubmitStatus('idle')
-    
-    try {
-      // TODO: Implement actual API call with CSRF token
-      // const csrfToken = await getCsrfToken()
-      // await submitApplication(data, csrfToken)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      setSubmitStatus('success')
-      reset()
-      
-      // Scroll to success message for accessibility
-      document.getElementById('form-status')?.focus()
-    } catch (error) {
-      console.error('Application submission error:', error)
-      setSubmitStatus('error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+   const onSubmit = async (data: ApplicationFormData) => {
+     if (currentStep === 'form') {
+       // Generate AI questions
+       await generateAIQuestions(data)
+     } else if (currentStep === 'ai-questions') {
+       // Submit application with AI answers
+       await submitApplication(data)
+     }
+   }
+
+   const generateAIQuestions = async (data: ApplicationFormData) => {
+     setIsGeneratingQuestions(true)
+
+     try {
+       const response = await fetch('/api/ai/questions', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+           applicationData: data,
+           context: 'FIRST Global Challenge application review for robotics competition'
+         })
+       })
+
+       if (response.ok) {
+         const result = await response.json()
+         if (result.success && result.data.questions) {
+           setAiQuestions(result.data.questions)
+           setCurrentStep('ai-questions')
+         } else {
+           throw new Error(result.error?.message || 'Failed to generate questions')
+         }
+       } else {
+         throw new Error('Failed to generate questions')
+       }
+     } catch (error) {
+       console.error('AI question generation error:', error)
+       setSubmitStatus('error')
+     } finally {
+       setIsGeneratingQuestions(false)
+     }
+   }
+
+   const submitApplication = async (data: ApplicationFormData) => {
+     setIsSubmitting(true)
+     setSubmitStatus('idle')
+
+     try {
+       // TODO: Implement actual API call with CSRF token and AI answers
+       // const csrfToken = await getCsrfToken()
+       // await submitApplication(data, questionAnswers, csrfToken)
+
+       // Simulate API call
+       await new Promise(resolve => setTimeout(resolve, 2000))
+
+       setSubmitStatus('success')
+       setCurrentStep('complete')
+       reset()
+
+       // Scroll to success message for accessibility
+       document.getElementById('form-status')?.focus()
+     } catch (error) {
+       console.error('Application submission error:', error)
+       setSubmitStatus('error')
+     } finally {
+       setIsSubmitting(false)
+     }
+   }
 
   const selectedInterests = watch('interests') || []
 
@@ -352,7 +407,33 @@ export default function JoinPage() {
                   )}
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 card" noValidate>
+                {/* Step Indicator */}
+                {currentStep !== 'complete' && (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-center space-x-4">
+                      <div className={`flex items-center ${currentStep === 'form' ? 'text-primary' : 'text-muted-foreground'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                          currentStep === 'form' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                        }`}>
+                          1
+                        </div>
+                        <span className="ml-2 text-sm font-medium">Application Form</span>
+                      </div>
+                      <div className="w-8 h-px bg-border"></div>
+                      <div className={`flex items-center ${currentStep === 'ai-questions' ? 'text-primary' : 'text-muted-foreground'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                          currentStep === 'ai-questions' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                        }`}>
+                          2
+                        </div>
+                        <span className="ml-2 text-sm font-medium">AI Questions</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'form' && (
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 card" noValidate>
                   <fieldset disabled={applicationsClosed}>
                     {/* Personal Information */}
                     <fieldset>
@@ -689,21 +770,104 @@ export default function JoinPage() {
                         className="btn-primary min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-busy={isSubmitting}
                       >
-                        {isSubmitting ? (
+                        {isGeneratingQuestions ? (
                           <>
-                            <Loader2 className="animate-spin h-5 w-5 mr-2" aria-hidden="true" />
-                            Submitting...
+                            <Loader2 className="animate-spin h-4 w-4 mr-2" aria-hidden="true" />
+                            Generating Questions...
                           </>
                         ) : (
                           <>
-                            Submit Application
-                            <CheckCircle className="ml-2 h-5 w-5" aria-hidden="true" />
+                            Continue to Questions
+                            <Rocket className="ml-2 h-5 w-5" aria-hidden="true" />
                           </>
                         )}
                       </button>
                     </div>
                   </fieldset>
                 </form>
+                )}
+
+                {currentStep === 'ai-questions' && (
+                  <div className="card space-y-6">
+                    <div className="text-center mb-6">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
+                        <Rocket className="h-6 w-6 text-primary" />
+                      </div>
+                      <h2 className="text-xl font-semibold">Personalized Questions</h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Based on your application, here are some questions to help us understand you better
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {aiQuestions.map((question, index) => (
+                        <div key={index} className="space-y-2">
+                          <label className="block text-sm font-medium">
+                            Question {index + 1}: {question}
+                          </label>
+                          <textarea
+                            value={questionAnswers[`question_${index}`] || ''}
+                            onChange={(e) => setQuestionAnswers(prev => ({
+                              ...prev,
+                              [`question_${index}`]: e.target.value
+                            }))}
+                            rows={4}
+                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background resize-none"
+                            placeholder="Provide a thoughtful answer..."
+                            required
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep('form')}
+                        className="btn-secondary"
+                      >
+                        ← Back to Form
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSubmit(onSubmit)()}
+                        disabled={isSubmitting || Object.keys(questionAnswers).length < aiQuestions.length}
+                        className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            Submit Application
+                            <CheckCircle className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'complete' && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="card text-center"
+                  >
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full mb-4">
+                      <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
+                    <p className="text-muted-foreground mb-4">
+                      Thank you for applying to join FIRST Global Team Kenya. We'll review your application and get back to you within 2 weeks.
+                    </p>
+                    <Link href="/dashboard" className="btn-primary">
+                      View Dashboard
+                    </Link>
+                  </motion.div>
+                )}
               </div>
             </div>
           </motion.div>
