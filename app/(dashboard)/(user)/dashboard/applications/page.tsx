@@ -22,6 +22,7 @@ import {
   Search,
   ChevronDown
 } from 'lucide-react'
+import { PROGRAMS, APPLICATION_STATUSES } from '@/app/lib/constants'
 
 interface Application {
   id: string
@@ -65,11 +66,7 @@ const statusConfig = {
   }
 }
 
-const programs = [
-  { id: 'fgc-2026', name: 'FGC 2026', description: 'FIRST Global Challenge 2026' },
-  { id: 'fgc-2027', name: 'FGC 2027', description: 'FIRST Global Challenge 2027' },
-  { id: 'mentor', name: 'Mentor Program', description: 'Mentorship and leadership program' }
-]
+const programs = Object.values(PROGRAMS)
 
 export default function MyApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([])
