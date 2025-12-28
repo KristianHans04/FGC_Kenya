@@ -10,6 +10,98 @@ This website represents Kenya's national team in the FIRST Global Challenge robo
 - **Dual Deployment**: Full-stack version with backend APIs and static version for GitHub Pages
 - **Dark/Light Mode**: Built-in theme switching
 - **SEO Optimized**: Meta tags, structured data, and performance optimizations
+- **2026 Season Application System**: Complete backend for student applications, admin review, and OTP authentication
+
+## 🎯 2026 Season Application System
+
+The website now includes a comprehensive application system for the 2026 FIRST Global Challenge season:
+
+### ✨ Features Implemented
+- **OTP Email Authentication**: Secure login without passwords using email-based OTP
+- **Student Applications**: Complete application form with validation and file uploads
+- **Admin Dashboard**: Review, accept, reject, and shortlist applications
+- **Email Notifications**: Automated emails for all application status changes
+- **Audit Logging**: Complete audit trail of all system actions
+- **Rate Limiting**: Protection against abuse and spam
+- **Security**: Comprehensive security measures and input validation
+
+### 🔐 Authentication Flow
+1. User enters email address
+2. System sends 6-digit OTP code via email
+3. User verifies OTP to complete authentication
+4. JWT tokens issued for session management
+5. Automatic token refresh and session validation
+
+### 📝 Application Process
+1. **Eligibility Check**: Age 14-18, Kenyan citizen/resident, current high school student
+2. **Application Form**: Personal info, education, experience, interests, motivation
+3. **Document Upload**: Resume and recommendation letters (optional)
+4. **Submission**: Applications submitted for review
+5. **Admin Review**: Comprehensive review interface with notes and scoring
+6. **Status Updates**: Email notifications for all status changes
+7. **Acceptance/Rejection**: Final decisions communicated via email
+
+### 👨‍💼 Admin Features
+- **Application Review**: Full application details with filtering and search
+- **Bulk Actions**: Update multiple applications at once
+- **Interview Scheduling**: Schedule and track interviews
+- **Statistics Dashboard**: Application metrics and analytics
+- **Audit Trail**: Complete logging of all admin actions
+
+### 🔌 API Endpoints
+
+#### Authentication
+- `POST /api/auth/request-otp` - Request OTP for login
+- `POST /api/auth/verify-otp` - Verify OTP and authenticate
+- `POST /api/auth/refresh` - Refresh access token
+- `POST /api/auth/logout` - Logout user
+- `GET /api/auth/me` - Get current user info
+
+#### Applications (Users)
+- `GET /api/applications` - List user's applications
+- `POST /api/applications` - Create new application
+- `GET /api/applications/[id]` - Get specific application
+- `PUT /api/applications/[id]` - Update draft application
+- `POST /api/applications/[id]/submit` - Submit application
+
+#### Admin Applications
+- `GET /api/admin/applications` - List all applications (admin)
+- `POST /api/admin/applications/bulk-update` - Bulk status updates
+- `GET /api/admin/applications/[id]` - Get application details
+- `PUT /api/admin/applications/[id]/review` - Review/update application
+
+### 🛠️ Setup Instructions
+
+#### Database Setup
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to database
+npx prisma db push
+
+# (Optional) Seed database with initial data
+npm run db:seed
+```
+
+#### Environment Variables
+Copy `.env.example` to `.env.local` and configure:
+
+```bash
+# Required
+DATABASE_URL="postgresql://user:pass@localhost:5432/fgc_kenya"
+JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASS="your-app-password"
+
+# Optional (defaults provided)
+ADMIN_NOTIFICATION_EMAILS="admin1@example.com,admin2@example.com"
+```
+
+#### Email Configuration
+The system uses Nodemailer for email delivery. Configure SMTP settings in `.env.local`:
+- Gmail: Use app passwords for security
+- Other providers: Update EMAIL_HOST, EMAIL_PORT, EMAIL_SECURE accordingly
 
 ## 🚀 Quick Start
 
