@@ -71,7 +71,7 @@ async function main() {
         location: 'Geneva, Switzerland',
         theme: 'Carbon Capture',
         achievement: 'Return to in-person competition',
-        highlights: ['Strong comeback', 'Environmental focus', 'Global networking'],
+        highlights: JSON.stringify(['Strong comeback', 'Environmental focus', 'Global networking']),
       },
       {
         year: '2023',

@@ -6,9 +6,344 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+// =============================================================================
+// USER AND AUTHENTICATION MODELS
+// =============================================================================
+
+/**
+ * User model for authentication
+ * Uses email-based OTP authentication (no passwords)
+ */
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  phone         String?
+  role          UserRole  @default(USER)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  otpCodes      OTPCode[]
+  sessions      Session[]
+  applications  Application[]
+  auditLogs     AuditLog[]    @relation("UserAuditLogs")
+  adminActions  AuditLog[]    @relation("AdminAuditLogs")
+
+  @@index([email])
+  @@index([role])
+}
+
+/**
+ * User roles for authorization
+ */
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+/**
+ * OTP codes for email-based authentication
+ */
+model OTPCode {
+  id        String      @id @default(uuid())
+  code      String
+  type      OTPType     @default(LOGIN)
+  expiresAt DateTime
+  used      Boolean     @default(false)
+  usedAt    DateTime?
+  attempts  Int         @default(0)
+  createdAt DateTime    @default(now())
+
+  // Relations
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, code])
+  @@index([expiresAt])
+}
+
+/**
+ * OTP types for different purposes
+ */
+enum OTPType {
+  LOGIN
+  VERIFY_EMAIL
+  ACCOUNT_RECOVERY
+}
+
+/**
+ * User sessions for JWT management
+ */
+model Session {
+  id           String    @id @default(uuid())
+  token        String    @unique
+  refreshToken String?   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  isValid      Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// =============================================================================
+// APPLICATION MODELS FOR 2026 SEASON
+// =============================================================================
+
+/**
+ * Student applications for FIRST Global Team Kenya 2026
+ */
+model Application {
+  id              String            @id @default(uuid())
+  season          String            @default("2026")
+  status          ApplicationStatus @default(DRAFT)
+  
+  // Personal Information
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  dateOfBirth     DateTime
+  gender          String?
+  nationality     String            @default("Kenyan")
+  
+  // Educational Information
+  school          String
+  grade           String
+  county          String
+  
+  // Experience & Interest
+  experience      ExperienceLevel
+   interests       Json              // JSON array of interest IDs
+   motivation      String
+  
+  // Additional Information
+  previouslyApplied Boolean         @default(false)
+  hearAboutUs     String?
+   additionalInfo  String?
+  
+  // Documents (URLs to uploaded files)
+  resumeUrl       String?
+  recommendationUrl String?
+  
+  // Consent
+  parentConsent   Boolean           @default(false)
+  termsAccepted   Boolean           @default(false)
+  parentEmail     String?
+  parentPhone     String?
+  
+  // Admin Review
+   reviewNotes     String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  interviewDate   DateTime?
+   interviewNotes  String?
+  finalScore      Float?
+  
+  // Timestamps
+  submittedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  statusHistory   ApplicationStatusHistory[]
+
+  @@unique([userId, season])
+  @@index([status])
+  @@index([season])
+  @@index([submittedAt])
+}
+
+/**
+ * Application status values
+ */
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  ACCEPTED
+  REJECTED
+  WAITLISTED
+  WITHDRAWN
+}
+
+/**
+ * Experience levels for applicants
+ */
+enum ExperienceLevel {
+  NONE
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+/**
+ * Track application status changes
+ */
+model ApplicationStatusHistory {
+  id            String            @id @default(uuid())
+  previousStatus ApplicationStatus?
+  newStatus     ApplicationStatus
+   notes         String?
+  changedBy     String?           // Admin user ID
+  createdAt     DateTime          @default(now())
+
+  // Relations
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+// =============================================================================
+// AUDIT AND LOGGING
+// =============================================================================
+
+/**
+ * Audit log for tracking all important actions
+ */
+model AuditLog {
+  id          String      @id @default(uuid())
+  action      AuditAction
+  entityType  String      // 'User', 'Application', etc.
+  entityId    String
+  details     Json?       // Additional context
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  userId      String?
+  user        User?       @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
+  adminId     String?
+  admin       User?       @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+/**
+ * Types of audit actions
+ */
+enum AuditAction {
+  // Authentication
+  OTP_REQUESTED
+  OTP_VERIFIED
+  OTP_FAILED
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  SESSION_CREATED
+  SESSION_REVOKED
+  
+  // User Management
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  USER_ROLE_CHANGED
+  
+  // Application Management
+  APPLICATION_CREATED
+  APPLICATION_UPDATED
+  APPLICATION_SUBMITTED
+  APPLICATION_STATUS_CHANGED
+  APPLICATION_REVIEWED
+  APPLICATION_ACCEPTED
+  APPLICATION_REJECTED
+  APPLICATION_SHORTLISTED
+  APPLICATION_WITHDRAWN
+  
+  // Admin Actions
+  ADMIN_VIEWED_APPLICATION
+  ADMIN_EXPORTED_DATA
+  ADMIN_BULK_ACTION
+}
+
+// =============================================================================
+// EMAIL AND NOTIFICATION MODELS
+// =============================================================================
+
+/**
+ * Email queue for async email sending
+ */
+model EmailQueue {
+  id          String      @id @default(uuid())
+  to          String
+  subject     String
+  template    String
+  data        Json
+  status      EmailStatus @default(PENDING)
+  attempts    Int         @default(0)
+  maxAttempts Int         @default(3)
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum EmailStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+}
+
+// =============================================================================
+// SYSTEM SETTINGS
+// =============================================================================
+
+/**
+ * Application season settings
+ */
+model SeasonSettings {
+  id                    String    @id @default(uuid())
+  season                String    @unique
+  applicationOpenDate   DateTime
+  applicationCloseDate  DateTime
+  reviewStartDate       DateTime?
+  interviewStartDate    DateTime?
+  announcementDate      DateTime?
+  isActive              Boolean   @default(false)
+  maxApplications       Int       @default(500)
+  currentApplications   Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([season])
+  @@index([isActive])
+}
+
+// =============================================================================
+// EXISTING CONTENT MODELS (Preserved from original schema)
+// =============================================================================
 
 // Team Members
 model TeamMember {
@@ -36,7 +371,7 @@ model NewsArticle {
   readTime    String
   author      String
   image       String?
-  tags        String[] // Array of tags
+   tags        Json     // JSON array of tags
   featured    Boolean  @default(false)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -50,7 +385,7 @@ model Competition {
   location     String
   theme        String
   achievement  String
-  highlights   String[] // Array of highlights
+   highlights   Json     // JSON array of highlights
   ranking      Int?
   teamSize     Int?
   createdAt    DateTime @default(now())
@@ -133,7 +468,7 @@ model QuickStartGuide {
   description String
   icon        String   // Icon identifier
   color       String   // Color class
-  items       String[] // Array of guide items
+   items       Json     // JSON array of guide items
   order       Int      @default(0)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
