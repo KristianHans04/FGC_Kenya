@@ -3,10 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sunadggznzkqtetisdte.supabase.co'
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-// Create a single supabase client for interacting with your database
+/**
+ * Supabase client instance
+ * Initialized with environment variables for project URL and anonymous key
+ */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Helper function to handle Supabase queries with error handling
+/**
+ * Helper function to handle Supabase queries with consistent error handling
+ * Wraps a Supabase query promise and catches/logs errors
+ * 
+ * @template T - The expected return type of the data
+ * @param {() => Promise<{ data: T | null; error: any }>} queryFn - Function that returns a Supabase query promise
+ * @returns {Promise<T | null>} The query data or null if an error occurred
+ */
 export async function supabaseQuery<T>(
   queryFn: () => Promise<{ data: T | null; error: any }>
 ): Promise<T | null> {
