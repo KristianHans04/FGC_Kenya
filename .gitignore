@@ -136,3 +136,6 @@ redis_data/
 
 # Sentry Config File
 .sentryclirc
+
+# AI Documentations Master
+AI_DOCUMENTATIONS.mdtemp_docs/
