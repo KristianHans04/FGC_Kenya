@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/db'
-import { generateOTP } from '@/app/lib/auth/otp'
+import { generateOTPCode } from '@/app/lib/auth/otp'
 import { sendEmail } from '@/app/lib/email'
 import { SECURITY, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'
 import { z } from 'zod'
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             message: 'Invalid input data',
-            details: validationResult.error.errors,
+            details: validationResult.error.format(),
           },
         },
         { status: 400 }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Generate new OTP
-        const otp = generateOTP()
+        const otp = generateOTPCode()
         const expiresAt = new Date(Date.now() + SECURITY.OTP_EXPIRY_MINUTES * 60 * 1000)
 
         await prisma.oTPCode.create({
@@ -82,12 +82,16 @@ export async function POST(request: NextRequest) {
         await sendEmail({
           to: email,
           subject: 'Verify Your Email - FIRST Global Team Kenya',
-          template: 'otp_login',
-          data: {
-            name: firstName,
-            otp,
-            expiryMinutes: SECURITY.OTP_EXPIRY_MINUTES,
-          },
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2>Welcome ${firstName}!</h2>
+              <p>Your verification code is:</p>
+              <h1 style="font-size: 32px; letter-spacing: 5px; text-align: center; background: #f0f0f0; padding: 20px; border-radius: 8px;">${otp}</h1>
+              <p>This code will expire in ${SECURITY.OTP_EXPIRY_MINUTES} minutes.</p>
+              <p>If you didn't request this, please ignore this email.</p>
+            </div>
+          `,
+          text: `Welcome ${firstName}! Your verification code is: ${otp}. This code will expire in ${SECURITY.OTP_EXPIRY_MINUTES} minutes.`
         })
 
         return NextResponse.json(
@@ -129,7 +133,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Generate OTP for email verification
-    const otp = generateOTP()
+    const otp = generateOTPCode()
     const expiresAt = new Date(Date.now() + SECURITY.OTP_EXPIRY_MINUTES * 60 * 1000)
 
     await prisma.oTPCode.create({
@@ -145,12 +149,19 @@ export async function POST(request: NextRequest) {
     await sendEmail({
       to: email,
       subject: 'Welcome to FIRST Global Team Kenya - Verify Your Email',
-      template: 'welcome',
-      data: {
-        name: firstName,
-        otp,
-        expiryMinutes: SECURITY.OTP_EXPIRY_MINUTES,
-      },
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #16a34a;">Welcome to FIRST Global Team Kenya!</h1>
+          <p>Hi ${firstName},</p>
+          <p>Thank you for creating an account. Please verify your email address using the code below:</p>
+          <h2 style="font-size: 32px; letter-spacing: 5px; text-align: center; background: #f0f0f0; padding: 20px; border-radius: 8px; color: #333;">${otp}</h2>
+          <p>This code will expire in ${SECURITY.OTP_EXPIRY_MINUTES} minutes.</p>
+          <p>Once verified, you can start your application to join the team!</p>
+          <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">If you didn't create an account, please ignore this email.</p>
+        </div>
+      `,
+      text: `Welcome to FIRST Global Team Kenya! Hi ${firstName}, Your verification code is: ${otp}. This code will expire in ${SECURITY.OTP_EXPIRY_MINUTES} minutes.`
     })
 
     return NextResponse.json(
