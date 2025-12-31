@@ -1,10 +1,16 @@
-/**
- * Mentor Dashboard - Cohort-specific access
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Mentor Dashboard',
+  description: 'Mentor portal for FIRST Global Team Kenya',
+  noIndex: true,
+})
+fect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,

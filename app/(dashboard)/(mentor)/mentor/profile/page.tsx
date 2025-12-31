@@ -1,6 +1,15 @@
-'use client'
-
 import { useState, useEffect } from 'react'
+import { 
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Mentor Profile',
+  description: 'Manage your mentor profile',
+  noIndex: true,
+})
+ct'
 import { 
   User,
   Mail,
@@ -248,7 +257,7 @@ export default function MentorProfilePage() {
           <div className="bg-card rounded-lg border p-6">
             <h3 className="font-semibold mb-4">Areas of Expertise</h3>
             <div className="flex flex-wrap gap-2">
-              {displayProfile.expertise.map(skill => (
+              {displayProfile?.expertise?.map(skill => (
                 <span key={skill} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
                   {skill}
                 </span>
@@ -268,7 +277,7 @@ export default function MentorProfilePage() {
               Achievements
             </h3>
             <div className="space-y-3">
-              {displayProfile.achievements.map((achievement, index) => (
+              {displayProfile?.achievements?.map((achievement, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
                     <Award className="h-4 w-4 text-yellow-600" />
@@ -292,7 +301,7 @@ export default function MentorProfilePage() {
               Certifications
             </h3>
             <div className="space-y-3">
-              {displayProfile.certifications.map((cert, index) => (
+              {displayProfile?.certifications?.map((cert, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <Shield className="h-4 w-4 text-blue-600" />
