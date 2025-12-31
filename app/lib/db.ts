@@ -17,13 +17,13 @@ declare global {
 /**
  * Create Prisma client with appropriate logging based on environment
  */
-const createPrismaClient = (): PrismaClient => {
-  return new PrismaClient({
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+const createPrismaClient = () => {
+  // For SQLite, we don't need an adapter
+  const client = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
+  
+  return client
 }
 
 /**
