@@ -7,8 +7,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
-import { Button } from '@/app/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card'
+import { Button } from '@/app/components/ui/Button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { X, Save } from 'lucide-react'
@@ -32,7 +32,7 @@ export default function MediaEditor({ article, onClose, onSave }: MediaEditorPro
       <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{article ? 'Edit Article' : 'New Article'}</CardTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
