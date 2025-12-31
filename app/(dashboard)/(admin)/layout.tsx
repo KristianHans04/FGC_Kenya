@@ -4,24 +4,22 @@
  * @author Team Kenya Dev
  */
 
-'use client'
-
 import Sidebar from '@/app/components/Sidebar'
-import { withAdminAuth } from '@/app/lib/auth/withAuth'
+import { AdminAuthGuard } from '@/app/components/auth/AuthGuard'
 
-function AdminDashboardLayout({
+export default function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar variant="admin" />
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-    </div>
+    <AdminAuthGuard>
+      <div className="min-h-screen bg-background flex">
+        <Sidebar variant="admin" />
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </AdminAuthGuard>
   )
 }
-
-export default withAdminAuth(AdminDashboardLayout)
