@@ -202,7 +202,7 @@ export default function Sidebar({ variant, className }: SidebarProps) {
                   {user?.email?.split('@')[0]}
                 </p>
                 <p className="text-xs text-muted-foreground capitalize">
-                  {user?.role?.toLowerCase()}
+                  {user?.currentRole?.toLowerCase()}
                 </p>
               </motion.div>
             )}

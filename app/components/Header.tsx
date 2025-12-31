@@ -122,7 +122,7 @@ export default function Header() {
                         Dashboard
                       </Link>
 
-                      {user?.role === 'ADMIN' && (
+                      {user?.currentRole === 'ADMIN' && (
                         <Link
                           href="/admin"
                           className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted"
@@ -232,7 +232,7 @@ export default function Header() {
                     Dashboard
                   </Link>
 
-                  {user?.role === 'ADMIN' && (
+                  {user?.currentRole === 'ADMIN' && (
                     <Link
                       href="/admin"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-muted"
