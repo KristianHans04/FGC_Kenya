@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -9,6 +7,15 @@ import ImageSlideshow from '@/app/components/ImageSlideshow'
 import CountdownTimer from '@/app/components/CountdownTimer'
 import MediaCarousel from '@/app/components/MediaCarousel'
 import { getFeaturedStories } from '@/app/lib/media'
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Home',
+  description: 'Welcome to FIRST Global Team Kenya - Inspiring young innovators through robotics and STEM education',
+})
+pp/lib/media'
 
 /**
  * HomePage component
