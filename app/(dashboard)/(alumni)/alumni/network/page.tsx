@@ -1,15 +1,8 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { Users, Award, Calendar, Briefcase, User } from 'lucide-react'
 
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Alumni Network',
-  description: 'Connect with fellow alumni',
-  noIndex: true,
-})
-lucide-react'
 
 export default function AlumniNetworkPage() {
   const [loading, setLoading] = useState(true)
