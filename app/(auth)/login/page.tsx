@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { Mail, Shield, ArrowLeft, AlertCircle, CheckCircle, Loader2, ArrowRight } from 'lucide-react'
@@ -27,8 +27,14 @@ export default function LoginPage() {
   const router = useRouter()
 
   // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard')
+    }
+  }, [isAuthenticated, router])
+
+  // Don't render the login form if already authenticated
   if (isAuthenticated) {
-    router.push('/dashboard')
     return null
   }
 
