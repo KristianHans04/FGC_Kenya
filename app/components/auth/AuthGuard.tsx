@@ -33,6 +33,14 @@ export default function AuthGuard({
   const pathname = usePathname()
 
   useEffect(() => {
+    console.log('AuthGuard check:', { 
+      isLoading, 
+      isAuthenticated, 
+      user,
+      allowedRoles,
+      pathname
+    })
+    
     // Skip during loading
     if (isLoading) return
 
@@ -48,6 +56,10 @@ export default function AuthGuard({
     // Check role-based access
     if (isAuthenticated && allowedRoles.length > 0 && user) {
       if (!allowedRoles.includes(user.currentRole as any)) {
+        console.log('Role mismatch, redirecting:', { 
+          userRole: user.currentRole, 
+          allowedRoles 
+        })
         // Redirect based on user role
         if (user.currentRole === 'ADMIN' || user.currentRole === 'SUPER_ADMIN') {
           router.push('/admin')
@@ -77,6 +89,11 @@ export default function AuthGuard({
 
   // If role check fails, don't render
   if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.currentRole as any)) {
+    console.log('AuthGuard: Role check failed', { 
+      userRole: user.currentRole, 
+      allowedRoles,
+      user 
+    })
     return null
   }
 
