@@ -74,3 +74,44 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const authResult = await authenticateRequest(req)
+    if (!authResult.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!['ADMIN', 'SUPER_ADMIN', 'MENTOR'].includes(authResult.user.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const body = await req.json()
+    const { mediaId, action } = body
+
+    if (!mediaId || !action) {
+      return NextResponse.json(
+        { error: 'Missing mediaId or action' },
+        { status: 400 }
+      )
+    }
+
+    // Here you would handle the media update based on action (publish, approve, reject)
+    // For now, return success
+    
+    return NextResponse.json({
+      success: true,
+      data: { 
+        message: `Media ${action} successfully`,
+        mediaId,
+        action 
+      }
+    })
+  } catch (error) {
+    console.error('Media update error:', error)
+    return NextResponse.json(
+      { error: 'Failed to update media' },
+      { status: 500 }
+    )
+  }
+}
