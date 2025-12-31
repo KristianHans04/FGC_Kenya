@@ -1,16 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { motion } from 'framer-motion'
 import { Trophy, Award, Users, Target, Globe, Calendar, MapPin, Star } from 'lucide-react'
 import Image from 'next/image'
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'About Us',
-  description: 'Learn about FIRST Global Team Kenya, our mission, values, and the team driving STEM education in Kenya',
-})
- 'next/image'
 
 
 const timeline = [
