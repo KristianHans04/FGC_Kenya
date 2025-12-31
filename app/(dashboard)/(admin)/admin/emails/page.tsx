@@ -1,16 +1,8 @@
+'use client'
+
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Email Management',
-  description: 'Manage email communications',
-  noIndex: true,
-})
-ort { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function AdminEmailsPage() {
   const router = useRouter()

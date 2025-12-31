@@ -1,15 +1,6 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Payment Management',
-  description: 'Track and manage payments',
-  noIndex: true,
-})
-ct'
 import { 
   DollarSign, 
   CreditCard, 
@@ -41,29 +32,31 @@ export default function PaymentsPage() {
 
   const fetchPayments = async () => {
     try {
-      // Mock data for now
-      setPayments([
-        {
-          id: '1',
-          userId: 'user1',
-          userName: 'John Doe',
-          userEmail: 'john@example.com',
-          amount: 50000,
-          currency: 'KES',
-          status: 'completed',
-          type: 'application_fee',
-          reference: 'PAY-2024-001',
-          createdAt: new Date().toISOString(),
-          completedAt: new Date().toISOString()
-        }
-      ])
-      
-      setStats({
-        totalRevenue: 250000,
-        pendingAmount: 50000,
-        successRate: 95.5,
-        monthlyGrowth: 12.3
-      })
+      const response = await fetch('/api/admin/payments')
+      if (response.ok) {
+        const data = await response.json()
+        setPayments(data.data?.payments || [])
+        
+        // Calculate stats from the fetched data
+        const completed = data.data?.payments?.filter((p: any) => p.status === 'completed') || []
+        const pending = data.data?.payments?.filter((p: any) => p.status === 'pending') || []
+        const totalRevenue = completed.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+        const pendingAmount = pending.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+        const successRate = data.data?.payments?.length > 0 
+          ? ((completed.length / data.data.payments.length) * 100).toFixed(1) 
+          : 0
+        
+        setStats({
+          totalRevenue,
+          pendingAmount,
+          successRate: parseFloat(successRate as string),
+          monthlyGrowth: data.data?.stats?.monthlyGrowth || 0
+        })
+      } else {
+        console.error('Failed to fetch payments')
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error)
     } finally {
       setLoading(false)
     }

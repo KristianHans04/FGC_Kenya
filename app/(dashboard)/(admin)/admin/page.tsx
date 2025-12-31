@@ -1,18 +1,3 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Admin Dashboard',
-  description: 'Administrative dashboard for FIRST Global Team Kenya',
-  noIndex: true,
-})
-/
-
 'use client'
 
 import { useState, useEffect } from 'react'

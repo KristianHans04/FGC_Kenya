@@ -1,17 +1,8 @@
+'use client'
+
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Media Management',
-  description: 'Manage media content and articles',
-  noIndex: true,
-})
- } from 'react'
-import { motion } from 'framer-motion'
+import Link from 'next/link'
 import {
   FileText,
   Search,
@@ -36,7 +27,6 @@ import {
   Brain,
   X
 } from 'lucide-react'
-import Link from 'next/link'
 // Simple debounce implementation
 function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -159,10 +149,16 @@ export default function MediaManagement() {
 
   const handleApprove = async (mediaId: string) => {
     try {
-      await fetch(`/api/admin/media/${mediaId}/approve`, {
-        method: 'PUT'
+      const response = await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ mediaId, action: 'approve' })
       })
-      fetchMedia()
+      if (response.ok) {
+        fetchMedia()
+      }
     } catch (error) {
       console.error('Failed to approve media:', error)
     }
@@ -170,12 +166,14 @@ export default function MediaManagement() {
 
   const handleReject = async (mediaId: string, feedback?: string) => {
     try {
-      await fetch(`/api/admin/media/${mediaId}/reject`, {
+      const response = await fetch('/api/admin/media', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback })
+        body: JSON.stringify({ mediaId, action: 'reject', feedback })
       })
-      fetchMedia()
+      if (response.ok) {
+        fetchMedia()
+      }
     } catch (error) {
       console.error('Failed to reject media:', error)
     }
@@ -183,10 +181,16 @@ export default function MediaManagement() {
 
   const handlePublish = async (mediaId: string) => {
     try {
-      await fetch(`/api/admin/media/${mediaId}/publish`, {
-        method: 'PUT'
+      const response = await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ mediaId, action: 'publish' })
       })
-      fetchMedia()
+      if (response.ok) {
+        fetchMedia()
+      }
     } catch (error) {
       console.error('Failed to publish media:', error)
     }
@@ -469,7 +473,7 @@ export default function MediaManagement() {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <User className="h-4 w-4" />
-                    {selectedMedia.author.firstName || selectedMedia.author.email}
+                    {selectedMedia.author?.firstName || selectedMedia.author?.email || 'Unknown'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />

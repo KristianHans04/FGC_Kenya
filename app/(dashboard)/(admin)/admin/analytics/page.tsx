@@ -1,15 +1,6 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Analytics Dashboard',
-  description: 'View analytics and insights',
-  noIndex: true,
-})
-act'
 import {
   BarChart3,
   TrendingUp,
@@ -43,32 +34,29 @@ export default function AnalyticsPage() {
 
   const fetchAnalytics = async () => {
     try {
-      // Mock data for now
-      setAnalytics({
-        userGrowth: [
-          { month: 'Jan', users: 120 },
-          { month: 'Feb', users: 145 },
-          { month: 'Mar', users: 180 },
-          { month: 'Apr', users: 220 }
-        ],
-        applicationStats: {
-          total: 523,
-          approved: 312,
-          pending: 145,
-          rejected: 66
-        },
-        revenueData: [
-          { month: 'Jan', amount: 250000 },
-          { month: 'Feb', amount: 320000 },
-          { month: 'Mar', amount: 285000 },
-          { month: 'Apr', amount: 410000 }
-        ],
-        activityMetrics: {
-          daily: 156,
-          weekly: 892,
-          monthly: 3421
-        }
-      })
+      const response = await fetch(`/api/admin/analytics?timeRange=${timeRange}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAnalytics({
+          userGrowth: data.data?.userGrowth || [],
+          applicationStats: data.data?.applicationStats || {
+            total: 0,
+            approved: 0,
+            pending: 0,
+            rejected: 0
+          },
+          revenueData: data.data?.revenueData || [],
+          activityMetrics: data.data?.activityMetrics || {
+            daily: 0,
+            weekly: 0,
+            monthly: 0
+          }
+        })
+      } else {
+        console.error('Failed to fetch analytics')
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error)
     } finally {
       setLoading(false)
     }

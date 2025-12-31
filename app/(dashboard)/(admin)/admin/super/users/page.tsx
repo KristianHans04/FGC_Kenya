@@ -1,16 +1,7 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Super Admin - Users',
-  description: 'Advanced user management',
-  noIndex: true,
-})
-on'
 import { 
   Users, 
   Search, 

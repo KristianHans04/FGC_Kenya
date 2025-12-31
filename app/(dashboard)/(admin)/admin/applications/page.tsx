@@ -1,16 +1,6 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Application Management',
-  description: 'Review and manage student applications',
-  noIndex: true,
-})
-t } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText,
@@ -32,7 +22,6 @@ import {
   ThumbsDown,
   Send
 } from 'lucide-react'
-import Link from 'next/link'
 
 interface Application {
   id: string

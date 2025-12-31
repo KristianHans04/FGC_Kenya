@@ -1,19 +1,9 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'User Management',
-  description: 'Manage users and roles',
-  noIndex: true,
-})
-ffect } from 'react'
-import { motion } from 'framer-motion'
-import { useAuth } from '@/app/lib/contexts/AuthContext'
+import Link from 'next/link'
 import {
   Users,
   UserPlus,
@@ -28,7 +18,6 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
-import Link from 'next/link'
 
 interface User {
   id: string

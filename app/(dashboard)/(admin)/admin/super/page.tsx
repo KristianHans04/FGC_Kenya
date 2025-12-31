@@ -1,16 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Super Admin',
-  description: 'Super administrator controls',
-  noIndex: true,
-})
-se client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -506,9 +494,9 @@ export default function SuperAdminDashboard() {
                             ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
                             : user.email.split('@')[0]}
                         </p>
-                        {user.userRoles?.length > 0 && (
+                        {user.cohortMemberships?.length > 0 && (
                           <p className="text-xs text-muted-foreground">
-                            {user.userRoles.map((c: any) => c.cohort).filter(Boolean).join(', ')}
+                            {user.cohortMemberships.map((c: any) => c.cohort).filter(Boolean).join(', ')}
                           </p>
                         )}
                       </div>
