@@ -231,6 +231,9 @@ export const NO_LAYOUT_ROUTES = [
   '/signup',
   '/dashboard',
   '/admin',
+  '/mentor',
+  '/student',
+  '/alumni',
 ] as const
 
 // Export all constants as a single object for convenience

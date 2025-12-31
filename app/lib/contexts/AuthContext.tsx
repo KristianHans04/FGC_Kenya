@@ -82,7 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   /**
    * Verify OTP and complete login
    */
-  const verifyOTP = async (email: string, code: string): Promise<void> => {
+  const verifyOTP = async (email: string, code: string): Promise<string | undefined> => {
     const response = await fetch('/api/auth/verify-otp', {
       method: 'POST',
       headers: {
@@ -99,6 +99,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const data = await response.json()
     setUser(data.data.user)
+    return data.data.redirectUrl
   }
 
   /**

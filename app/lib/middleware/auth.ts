@@ -42,20 +42,30 @@ export interface AuthResult {
  */
 export async function authenticateRequest(request: NextRequest): Promise<AuthResult> {
   try {
-    // Get Authorization header
+    // Get token from Authorization header or cookie
+    let token: string | undefined
+    
     const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7) // Remove 'Bearer '
+    } else {
+      // Try to get token from cookie
+      const cookieToken = request.cookies.get('access_token')
+      if (cookieToken) {
+        token = cookieToken.value
+      }
+    }
+    
+    if (!token) {
       return {
         success: false,
         error: {
           code: 'MISSING_TOKEN',
-          message: 'Authorization header with Bearer token required',
+          message: 'Authorization token required',
           status: 401,
         },
       }
     }
-
-    const token = authHeader.substring(7) // Remove 'Bearer '
 
     // Verify JWT token
     const payload = verifyAccessToken(token)
@@ -89,10 +99,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
       select: { 
         id: true, 
         email: true,
-        userRoles: {
-          where: { isActive: true },
-          select: { role: true, cohort: true },
-        },
+        role: true,
         isActive: true 
       },
     })
@@ -124,7 +131,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
       user: {
         id: user.id,
         email: user.email,
-        role: user.userRoles[0]?.role as UserRole,
+        role: (user.role || 'USER') as UserRole,
       },
       sessionId: payload.sessionId,
     }
