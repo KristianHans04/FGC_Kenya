@@ -1,16 +1,21 @@
-/**
- * @file app/(auth)/login/page.tsx
- * @description Login page with robust split layout, constrained form, and 60/30/10 color rule
- * @author Team Kenya Dev
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { Mail, Shield, ArrowLeft, AlertCircle, CheckCircle, Loader2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { useAuth } from '@/app/lib/contexts/AuthContext'
+import { VALIDATION, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Login',
+  description: 'Login to your FIRST Global Team Kenya account',
+  noIndex: true,
+})
+t/link'
 import Image from 'next/image'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
 import { VALIDATION, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'

@@ -1,10 +1,17 @@
-/**
- * @file app/(auth)/signup/page.tsx
- * @description Signup page with modern UI and OTP verification
- * @author Team Kenya Dev
- */
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { 
 
-'use client'
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Sign Up',
+  description: 'Create your FIRST Global Team Kenya account',
+  noIndex: true,
+})
+ent'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
