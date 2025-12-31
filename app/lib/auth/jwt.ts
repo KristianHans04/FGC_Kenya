@@ -5,7 +5,6 @@
  */
 
 import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
 import prisma from '@/app/lib/db'
 import type { JWTPayload, UserRole } from '@/app/types/auth'
 
@@ -38,11 +37,27 @@ function getJWTSecret(): string {
 }
 
 /**
+ * Hash a token using Web Crypto API
+ * @param token - Token to hash
+ * @returns Hashed token as hex string
+ */
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(token)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+/**
  * Generate a random refresh token
  * @returns Secure random token string
  */
 function generateRefreshToken(): string {
-  return crypto.randomBytes(64).toString('hex')
+  // Generate random token using Web Crypto API (Edge-compatible)
+  const array = new Uint8Array(64)
+  crypto.getRandomValues(array)
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
 /**
@@ -153,7 +168,7 @@ export async function createSession(
     where: { id: session.id },
     data: {
       token: accessToken,
-      refreshToken: crypto.createHash('sha256').update(refreshToken).digest('hex'),
+      refreshToken: await hashToken(refreshToken),
     },
   })
 
@@ -213,10 +228,7 @@ export async function refreshTokens(
 } | null> {
   try {
     // Hash the refresh token to compare with stored value
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(refreshToken)
-      .digest('hex')
+    const hashedToken = await hashToken(refreshToken)
 
     // Find session with this refresh token
     const session = await prisma.session.findFirst({
@@ -249,10 +261,7 @@ export async function refreshTokens(
       where: { id: session.id },
       data: {
         token: tokens.accessToken,
-        refreshToken: crypto
-          .createHash('sha256')
-          .update(tokens.refreshToken)
-          .digest('hex'),
+        refreshToken: await hashToken(tokens.refreshToken),
         updatedAt: new Date(),
       },
     })
