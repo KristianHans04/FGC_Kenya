@@ -153,15 +153,6 @@ export enum EmailTemplate {
   ADMIN_NEW_APPLICATION = 'admin-new-application',
 }
 
-/**
- * Auth response after successful verification
- */
-export interface AuthResponse {
-  user: import('./auth').SafeUser
-  token: string
-  refreshToken: string
-  expiresAt: string
-}
 
 /**
  * Request context with auth info
