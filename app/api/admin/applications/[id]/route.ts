@@ -215,7 +215,7 @@ export async function PUT(
           reviewedAt: new Date(),
           interviewDate: reviewData.interviewDate ? new Date(reviewData.interviewDate) : application.interviewDate,
           interviewNotes: reviewData.interviewNotes || application.interviewNotes,
-          finalScore: reviewData.finalScore || application.finalScore,
+          interviewScore: reviewData.finalScore || application.interviewScore,
         },
         include: {
           statusHistory: {
