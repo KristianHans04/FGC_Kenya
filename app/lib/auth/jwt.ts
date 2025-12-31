@@ -79,7 +79,7 @@ export function generateTokens(
   const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
     userId,
     email,
-    role,
+    roles: [{ role: role as any, cohort: null }],
     sessionId,
   }
 
@@ -239,7 +239,14 @@ export async function refreshTokens(
       },
       include: {
         user: {
-          select: { id: true, email: true, role: true },
+          select: { 
+            id: true, 
+            email: true,
+            userRoles: {
+              where: { isActive: true },
+              select: { role: true, cohort: true },
+            },
+          },
         },
       },
     })
@@ -252,7 +259,7 @@ export async function refreshTokens(
     const tokens = generateTokens(
       session.userId,
       session.user.email,
-      session.user.role as UserRole,
+      (session.user.userRoles[0]?.role || 'USER') as UserRole,
       session.id
     )
 
