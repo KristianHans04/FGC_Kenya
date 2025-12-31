@@ -219,3 +219,4 @@ Avoid these common pitfalls that can compromise security, usability, and maintai
 ### 15. UI Design Rules
 
 - **Always follow the golden UI rule (60/30/10)**: Allocate 60% of the design to the dominant color (usually the background or primary elements), 30% to secondary colors (supporting elements), and 10% to accent colors (highlights, calls-to-action, or emphasis). This creates visual harmony and prevents color overload while maintaining a professional appearance.
+- **Avoid stereotypical AI-generated stat cards**: Do not use the common pattern of 4 cards per view displaying stats with generic SVG icons. Stats should be subtle if necessary, often omitted entirely, and when present, integrated discreetly without prominent card layouts.
