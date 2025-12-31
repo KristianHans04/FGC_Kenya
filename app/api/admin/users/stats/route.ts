@@ -43,7 +43,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const [total, active, admins, recentSignups] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { isActive: true } }),
-      prisma.user.count({ where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } } }),
+      prisma.user.count({ 
+        where: { 
+          userRoles: {
+            some: {
+              role: { in: ['ADMIN', 'SUPER_ADMIN'] },
+              isActive: true,
+            },
+          },
+        },
+      }),
       prisma.user.count({
         where: {
           createdAt: {
