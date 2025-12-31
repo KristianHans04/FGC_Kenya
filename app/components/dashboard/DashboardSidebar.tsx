@@ -190,7 +190,7 @@ export default function DashboardSidebar() {
             <div>
               <h2 className="font-semibold text-lg">FGC Kenya</h2>
               <p className="text-sm text-muted-foreground capitalize">
-                {user.currentRole.toLowerCase()} Dashboard
+                {user.currentRole?.toLowerCase() || 'user'} Dashboard
               </p>
             </div>
           )}
