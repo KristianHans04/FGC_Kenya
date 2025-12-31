@@ -7,10 +7,31 @@
 /**
  * User roles for authorization
  */
+export enum Role {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  MENTOR = 'MENTOR',
+  STUDENT = 'STUDENT',
+  ALUMNI = 'ALUMNI',
+  USER = 'USER',
+}
+
+/**
+ * Legacy role enum for backwards compatibility
+ * @deprecated Use Role enum instead
+ */
 export enum UserRole {
   USER = 'USER',
   ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER_ADMIN',
+}
+
+/**
+ * Cohort roles
+ */
+export enum CohortRole {
+  MENTOR = 'MENTOR',
+  STUDENT = 'STUDENT',
 }
 
 /**
@@ -23,7 +44,21 @@ export enum OTPType {
 }
 
 /**
- * User data structure
+ * User role assignment with history
+ */
+export interface UserRoleAssignment {
+  id: string
+  role: Role
+  cohort: string | null
+  startDate: Date
+  endDate: Date | null
+  isActive: boolean
+  assignedBy: string | null
+  notes: string | null
+}
+
+/**
+ * User data structure with role history
  */
 export interface User {
   id: string
@@ -31,12 +66,15 @@ export interface User {
   firstName: string | null
   lastName: string | null
   phone: string | null
-  role: UserRole
+  school: string | null
   isActive: boolean
   emailVerified: boolean
   lastLoginAt: Date | null
   createdAt: Date
   updatedAt: Date
+  userRoles: UserRoleAssignment[]
+  currentRole?: Role // Helper to get active role
+  currentCohort?: string // Helper to get active cohort
 }
 
 /**
@@ -47,8 +85,28 @@ export interface SafeUser {
   email: string
   firstName: string | null
   lastName: string | null
-  role: UserRole
+  school: string | null
   emailVerified: boolean
+  roles: {
+    role: Role
+    cohort: string | null
+    isActive: boolean
+  }[]
+  currentRole: Role
+  currentCohort: string | null
+}
+
+/**
+ * Cohort member data
+ */
+export interface CohortMember {
+  id: string
+  cohort: string
+  role: CohortRole
+  joinedAt: Date
+  leftAt: Date | null
+  isActive: boolean
+  user: User
 }
 
 /**
@@ -87,7 +145,10 @@ export interface OTPCode {
 export interface JWTPayload {
   userId: string
   email: string
-  role: UserRole
+  roles: {
+    role: Role
+    cohort: string | null
+  }[]
   sessionId: string
   iat: number
   exp: number
@@ -100,6 +161,13 @@ export interface AuthContextType {
   user: SafeUser | null
   isLoading: boolean
   isAuthenticated: boolean
+  hasRole: (role: Role, cohort?: string) => boolean
+  hasAnyRole: (roles: Role[]) => boolean
+  isSuperAdmin: () => boolean
+  isAdmin: () => boolean
+  isMentor: (cohort?: string) => boolean
+  isStudent: (cohort?: string) => boolean
+  isAlumni: () => boolean
   login: (email: string) => Promise<void>
   verifyOTP: (email: string, code: string) => Promise<void>
   logout: () => Promise<void>
@@ -137,4 +205,110 @@ export interface AuthResponse {
  */
 export interface RefreshTokenInput {
   refreshToken: string
+}
+
+/**
+ * Role permission check helpers
+ */
+export const rolePermissions = {
+  // Super Admin has access to everything
+  [Role.SUPER_ADMIN]: {
+    canViewAllUsers: true,
+    canManageUsers: true,
+    canAssignRoles: true,
+    canViewPayments: true,
+    canManageApplications: true,
+    canManageMedia: true,
+    canSendEmails: true,
+    canViewAnalytics: true,
+    canExportData: true,
+  },
+  // Admin has most privileges except payment tracking
+  [Role.ADMIN]: {
+    canViewAllUsers: false, // Must search by email
+    canManageUsers: true,
+    canAssignRoles: true,
+    canViewPayments: false,
+    canManageApplications: true,
+    canManageMedia: true,
+    canSendEmails: true,
+    canViewAnalytics: true,
+    canExportData: true,
+  },
+  // Mentor can manage their cohort
+  [Role.MENTOR]: {
+    canViewAllUsers: false,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewPayments: false,
+    canManageApplications: false,
+    canManageMedia: true, // Own articles
+    canSendEmails: false,
+    canViewAnalytics: false,
+    canExportData: false,
+    canViewCohortStudents: true,
+    canApproveStudentContent: true,
+  },
+  // Student can create content
+  [Role.STUDENT]: {
+    canViewAllUsers: false,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewPayments: false,
+    canManageApplications: false,
+    canManageMedia: true, // Own articles, needs approval
+    canSendEmails: false,
+    canViewAnalytics: false,
+    canExportData: false,
+    canViewCohortMembers: true,
+  },
+  // Alumni have limited access
+  [Role.ALUMNI]: {
+    canViewAllUsers: false,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewPayments: false,
+    canManageApplications: false,
+    canManageMedia: false,
+    canSendEmails: false,
+    canViewAnalytics: false,
+    canExportData: false,
+    canAccessAlumniNetwork: true,
+  },
+  // Regular user has minimal access
+  [Role.USER]: {
+    canViewAllUsers: false,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewPayments: false,
+    canManageApplications: false,
+    canManageMedia: false,
+    canSendEmails: false,
+    canViewAnalytics: false,
+    canExportData: false,
+    canApplyToProgram: true,
+  },
+};
+
+/**
+ * Check if a user has permission for an action
+ */
+export function hasPermission(role: Role, permission: string): boolean {
+  return rolePermissions[role]?.[permission] === true;
+}
+
+/**
+ * Get highest priority role from user's roles
+ */
+export function getHighestRole(roles: UserRoleAssignment[]): Role {
+  const activeRoles = roles.filter(r => r.isActive);
+  const rolePriority = [Role.SUPER_ADMIN, Role.ADMIN, Role.MENTOR, Role.STUDENT, Role.ALUMNI, Role.USER];
+  
+  for (const priority of rolePriority) {
+    if (activeRoles.some(r => r.role === priority)) {
+      return priority;
+    }
+  }
+  
+  return Role.USER;
 }
