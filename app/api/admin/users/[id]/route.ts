@@ -70,7 +70,13 @@ export async function DELETE(
     // Get user data for audit log before deletion
     const userToDelete = await prisma.user.findUnique({
       where: { id },
-      select: { email: true, role: true },
+      select: { 
+        email: true,
+        userRoles: {
+          where: { isActive: true },
+          select: { role: true },
+        },
+      },
     })
 
     if (!userToDelete) {
@@ -100,7 +106,7 @@ export async function DELETE(
       id,
       {
         email: userToDelete.email,
-        role: userToDelete.role,
+        role: userToDelete.userRoles[0]?.role || 'USER',
       },
       authenticatedRequest
     )
