@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useState, useEffect } from 'react'
 
 const footerLinks = {
   about: [
@@ -44,8 +45,13 @@ const socialLinks = [
  * @returns {JSX.Element} The footer component
  */
 export default function Footer() {
+  const [mounted, setMounted] = useState(false)
   const { theme, systemTheme } = useTheme()
   const currentTheme = theme === 'system' ? systemTheme : theme
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   return (
     <footer className="bg-background border-t border-border">
@@ -60,7 +66,7 @@ export default function Footer() {
                   alt="FIRST Global Team Kenya Logo"
                   width={40}
                   height={40}
-                  className={`transition-all duration-300 ${currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                  className={`transition-all duration-300 ${mounted && currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
                 />
               </div>
               <div>

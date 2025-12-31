@@ -28,10 +28,15 @@ const navigation = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { theme, systemTheme } = useTheme()
   const currentTheme = theme === 'system' ? systemTheme : theme
   const { user, isAuthenticated, logout } = useAuth()
   const userMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -66,7 +71,7 @@ export default function Header() {
                   alt="FIRST Global Team Kenya Logo"
                   width={48}
                   height={48}
-                  className={`transition-all duration-300 ${currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                  className={`transition-all duration-300 ${mounted && currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
                   priority
                 />
               </div>
@@ -184,7 +189,7 @@ export default function Header() {
                 alt="FIRST Global Team Kenya Logo"
                 width={48}
                 height={48}
-                className={`transition-all duration-300 ${currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                className={`transition-all duration-300 ${mounted && currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
                 priority
               />
             </div>
