@@ -94,8 +94,8 @@ export async function GET(
     const response = addSecurityHeaders(
       NextResponse.json({
         success: true,
-        data: application,
-      } as ApiResponse<Application & { user: any; statusHistory: any[] }>)
+        data: application as any,
+      })
     )
 
     return response
