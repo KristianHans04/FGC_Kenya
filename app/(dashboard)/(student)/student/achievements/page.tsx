@@ -1,6 +1,15 @@
-'use client'
-
 import { useState, useEffect } from 'react'
+import { 
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'My Achievements',
+  description: 'View your achievements and progress',
+  noIndex: true,
+})
+ct'
 import { 
   Award,
   Trophy,
@@ -385,7 +394,7 @@ export default function StudentAchievementsPage() {
 
             <div className="mt-3 pt-3 border-t">
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${getRarityColor(achievement.rarity)}`}>
-                {achievement.rarity.charAt(0).toUpperCase() + achievement.rarity.slice(1)}
+                {achievement?.rarity ? achievement.rarity.charAt(0).toUpperCase() + achievement.rarity.slice(1) : ''}
               </span>
             </div>
           </div>

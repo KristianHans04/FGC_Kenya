@@ -1,7 +1,3 @@
-/**
- * Student Dashboard - Cohort-specific with media creation
- */
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -87,6 +83,22 @@ export default function StudentDashboard() {
     fetchStudentData()
   }, [])
 
+  // Calculate stats when data changes
+  useEffect(() => {
+    const completedModules = modules.filter(m => m.status === 'completed').length
+    const totalModules = modules.length
+    const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0
+
+    setStats({
+      completedModules,
+      totalModules,
+      teamSize: team.length,
+      achievements: achievements.filter(a => a.unlockedAt).length,
+      publishedMedia: mediaDrafts.filter(m => m.status === 'published').length,
+      overallProgress
+    })
+  }, [modules, team, achievements, mediaDrafts])
+
   const fetchStudentData = async () => {
     setLoading(true)
     try {
@@ -101,7 +113,7 @@ export default function StudentDashboard() {
       const teamResponse = await fetch('/api/student/team')
       if (teamResponse.ok) {
         const teamData = await teamResponse.json()
-        setTeam(teamData.data?.team || [])
+        setTeam(teamData.data?.members || [])
       }
 
       // Fetch training modules
@@ -125,19 +137,7 @@ export default function StudentDashboard() {
         setMediaDrafts(mediaData.data?.media || [])
       }
 
-      // Calculate stats
-      const completedModules = modules.filter(m => m.status === 'completed').length
-      const totalModules = modules.length
-      const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0
-
-      setStats({
-        completedModules,
-        totalModules,
-        teamSize: team.length,
-        achievements: achievements.filter(a => a.unlockedAt).length,
-        publishedMedia: mediaDrafts.filter(m => m.status === 'published').length,
-        overallProgress
-      })
+      // Stats will be calculated in a separate useEffect
     } catch (error) {
       console.error('Failed to fetch student data:', error)
     } finally {

@@ -1,7 +1,16 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { 
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'My Team',
+  description: 'View your team members and information',
+  noIndex: true,
+})
+nk'
 import { 
   Users,
   User,
@@ -167,32 +176,32 @@ export default function StudentTeamPage() {
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
         <div className="bg-card rounded-lg border p-4 text-center">
           <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-          <div className="text-2xl font-bold">{displayTeam.stats.totalMembers}</div>
+          <div className="text-2xl font-bold">{displayTeam?.stats?.totalMembers || 0}</div>
           <div className="text-xs text-muted-foreground">Members</div>
         </div>
         <div className="bg-card rounded-lg border p-4 text-center">
           <Star className="h-6 w-6 text-yellow-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold">#{displayTeam.stats.ranking}</div>
+          <div className="text-2xl font-bold">#{displayTeam?.stats?.ranking || 0}</div>
           <div className="text-xs text-muted-foreground">Ranking</div>
         </div>
         <div className="bg-card rounded-lg border p-4 text-center">
           <Target className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold">{displayTeam.stats.teamScore}</div>
+          <div className="text-2xl font-bold">{displayTeam?.stats?.teamScore || 0}</div>
           <div className="text-xs text-muted-foreground">Points</div>
         </div>
         <div className="bg-card rounded-lg border p-4 text-center">
           <Award className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold">{displayTeam.stats.achievements}</div>
+          <div className="text-2xl font-bold">{displayTeam?.stats?.achievements || 0}</div>
           <div className="text-xs text-muted-foreground">Achievements</div>
         </div>
         <div className="bg-card rounded-lg border p-4 text-center">
           <Zap className="h-6 w-6 text-green-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold">{displayTeam.stats.completedTasks}</div>
+          <div className="text-2xl font-bold">{displayTeam?.stats?.completedTasks || 0}</div>
           <div className="text-xs text-muted-foreground">Completed</div>
         </div>
         <div className="bg-card rounded-lg border p-4 text-center">
           <Calendar className="h-6 w-6 text-orange-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold">{displayTeam.stats.pendingTasks}</div>
+          <div className="text-2xl font-bold">{displayTeam?.stats?.pendingTasks || 0}</div>
           <div className="text-xs text-muted-foreground">Pending</div>
         </div>
       </div>
