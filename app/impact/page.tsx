@@ -1,47 +1,9 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { motion } from 'framer-motion'
 import { Quote, GraduationCap, Briefcase, Rocket, Heart, Star, Users } from 'lucide-react'
 import CountUp from '@/app/components/CountUp'
 
-export const metadata: Metadata = {
-  title: 'Our Impact - FIRST Global Team Kenya',
-  description: 'Discover how FIRST Global Team Kenya is transforming lives through STEM education. Read inspiring stories of alumni success and our community outreach impact.',
-  keywords: 'FIRST Global, Team Kenya, Impact, STEM Education, Alumni, Success Stories, Outreach, Kenya',
-  authors: [{ name: 'FIRST Global Team Kenya' }],
-  openGraph: {
-    title: 'Our Impact - FIRST Global Team Kenya',
-    description: 'Transforming lives through STEM education and robotics',
-    url: 'https://fgckenya.com/impact',
-    siteName: 'FIRST Global Team Kenya',
-    images: [
-      {
-        url: '/images/og-impact.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'FIRST Global Team Kenya Impact Stories',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Impact of FIRST Global Team Kenya',
-    description: 'Inspiring stories of STEM education and innovation',
-    images: ['/images/twitter-impact.jpg'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-}
 
 /**
  * ImpactPage component
