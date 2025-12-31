@@ -1,10 +1,16 @@
-/**
- * Alumni Dashboard - Network and Mentorship
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Alumni Dashboard',
+  description: 'Alumni portal for FIRST Global Team Kenya',
+  noIndex: true,
+})
+fect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,
