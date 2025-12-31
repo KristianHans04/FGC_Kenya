@@ -10,8 +10,8 @@ import { verifyOTP, createSession } from '@/app/lib/auth'
 import { sendWelcomeEmail } from '@/app/lib/email'
 import prisma from '@/app/lib/db'
 import { rateLimit, addSecurityHeaders } from '@/app/lib/middleware/security'
-import type { ApiResponse, ErrorCode, AuthResponse } from '@/app/types/api'
-import type { SafeUser } from '@/app/types/auth'
+import type { ApiResponse, ErrorCode } from '@/app/types/api'
+import type { SafeUser, AuthResponse } from '@/app/types/auth'
 
 /**
  * POST /api/auth/verify-otp

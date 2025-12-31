@@ -8,8 +8,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { refreshTokenSchema } from '@/app/lib/validations/auth'
 import { refreshTokens } from '@/app/lib/auth/jwt'
 import { addSecurityHeaders } from '@/app/lib/middleware/security'
-import type { ApiResponse, ErrorCode, AuthResponse } from '@/app/types/api'
-import type { SafeUser } from '@/app/types/auth'
+import type { ApiResponse, ErrorCode } from '@/app/types/api'
+import type { SafeUser, AuthResponse } from '@/app/types/auth'
 
 /**
  * POST /api/auth/refresh
