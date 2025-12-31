@@ -86,7 +86,15 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
     // Verify user still exists and is active
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, email: true, role: true, isActive: true },
+      select: { 
+        id: true, 
+        email: true,
+        userRoles: {
+          where: { isActive: true },
+          select: { role: true, cohort: true },
+        },
+        isActive: true 
+      },
     })
 
     if (!user) {
@@ -116,7 +124,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
       user: {
         id: user.id,
         email: user.email,
-        role: user.role as UserRole,
+        role: user.userRoles[0]?.role as UserRole,
       },
       sessionId: payload.sessionId,
     }
@@ -156,7 +164,7 @@ export function requireAuth(allowedRoles?: UserRole[]) {
     const { user } = authResult
 
     // Check role authorization if roles specified
-    if (allowedRoles && user && !allowedRoles.includes(user.role as any)) {
+    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
       return NextResponse.json(
         {
           success: false,

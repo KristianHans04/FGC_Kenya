@@ -127,7 +127,7 @@ export function requirePermission(permission: string) {
     const roleRequest = request as RoleAuthenticatedRequest
     const { currentRole } = roleRequest
 
-    if (!currentRole || !hasPermission(currentRole, permission)) {
+    if (!currentRole || !hasPermission(currentRole, permission as any)) {
       return NextResponse.json(
         {
           success: false,
