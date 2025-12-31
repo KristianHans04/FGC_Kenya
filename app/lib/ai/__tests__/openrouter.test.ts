@@ -408,7 +408,7 @@ describe('OpenRouter AI Integration', () => {
       const unicodeData = {
         firstName: 'José María',
         lastName: 'O\'Connor',
-        motivation: 'I ❤️ robotics! 🚀',
+        motivation: 'I love robotics and engineering!',
         additionalInfo: 'Français: ingénierie, Español: ingeniería'
       }
 

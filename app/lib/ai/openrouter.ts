@@ -77,7 +77,7 @@ export async function generateApplicationQuestions(request: AIRequest): Promise<
     }
 
     // Parse and validate questions
-    const questions = parseQuestions(response.content)
+    const questions = parseQuestions(response.content || '')
 
     return {
       success: true,
