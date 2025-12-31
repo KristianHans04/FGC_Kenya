@@ -73,6 +73,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       email: dbUser.email,
       firstName: dbUser.firstName,
       lastName: dbUser.lastName,
+      school: null,
       role: dbUser.role as any,
       emailVerified: dbUser.emailVerified,
     }
