@@ -1,12 +1,15 @@
 /**
  * @file app/(dashboard)/(user)/layout.tsx
- * @description User dashboard layout with sidebar navigation
+ * @description User dashboard layout with sidebar navigation and authentication
  * @author Team Kenya Dev
  */
 
-import Sidebar from '@/app/components/Sidebar'
+'use client'
 
-export default function UserDashboardLayout({
+import Sidebar from '@/app/components/Sidebar'
+import { withUserAuth } from '@/app/lib/auth/withAuth'
+
+function UserDashboardLayout({
   children,
 }: {
   children: React.ReactNode
@@ -20,3 +23,5 @@ export default function UserDashboardLayout({
     </div>
   )
 }
+
+export default withUserAuth(UserDashboardLayout)
