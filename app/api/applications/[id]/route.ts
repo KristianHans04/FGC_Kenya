@@ -332,7 +332,7 @@ export async function POST(
     }
 
     // Submit application in transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Update application status
       const updatedApplication = await tx.application.update({
         where: { id },
