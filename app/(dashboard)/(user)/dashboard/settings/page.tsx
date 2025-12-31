@@ -1,7 +1,17 @@
-/**
- * @file app/(dashboard)/(user)/dashboard/settings/page.tsx
- * @description User settings page for editing profile information
- * @author Team Kenya Dev
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { useAuth } from '@/app/lib/contexts/AuthContext'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Settings',
+  description: 'Manage your account settings and preferences',
+  noIndex: true,
+})
+nya Dev
  */
 
 'use client'
