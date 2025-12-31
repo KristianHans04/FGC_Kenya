@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 'use client'
 
 import { useState } from 'react'
