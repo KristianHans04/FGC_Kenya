@@ -226,7 +226,7 @@ export function PermissionGuard({
         // Check if user has permission
         const { hasPermission } = await import('@/app/types/auth')
         const hasRequiredPermission = user.currentRole && 
-          hasPermission(user.currentRole, permission)
+          hasPermission(user.currentRole, permission as any)
         
         if (!hasRequiredPermission) {
           router.push('/unauthorized')

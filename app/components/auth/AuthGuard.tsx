@@ -47,9 +47,9 @@ export default function AuthGuard({
 
     // Check role-based access
     if (isAuthenticated && allowedRoles.length > 0 && user) {
-      if (!allowedRoles.includes(user.role)) {
+      if (!allowedRoles.includes(user.currentRole as any)) {
         // Redirect based on user role
-        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        if (user.currentRole === 'ADMIN' || user.currentRole === 'SUPER_ADMIN') {
           router.push('/admin')
         } else {
           router.push('/dashboard')
@@ -76,7 +76,7 @@ export default function AuthGuard({
   }
 
   // If role check fails, don't render
-  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
+  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.currentRole as any)) {
     return null
   }
 
