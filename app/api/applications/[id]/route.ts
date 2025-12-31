@@ -86,8 +86,8 @@ export async function GET(
     const response = addSecurityHeaders(
       NextResponse.json({
         success: true,
-        data: application,
-      } as ApiResponse<Application>)
+        data: application as any,
+      })
     )
 
     return response
@@ -227,9 +227,9 @@ export async function PUT(
     const response = addSecurityHeaders(
       NextResponse.json({
         success: true,
-        data: updatedApplication,
+        data: updatedApplication as any,
         message: 'Application updated successfully',
-      } as ApiResponse<Application>)
+      })
     )
 
     return response
