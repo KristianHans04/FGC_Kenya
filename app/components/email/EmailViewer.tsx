@@ -6,9 +6,9 @@
 
 'use client'
 
-import { Card, CardContent, CardHeader } from '@/app/components/ui/card'
-import { Button } from '@/app/components/ui/button'
-import { Badge } from '@/app/components/ui/badge'
+import { Card, CardContent, CardHeader } from '@/app/components/ui/Card'
+import { Button } from '@/app/components/ui/Button'
+import { Badge } from '@/app/components/ui/Badge'
 import { ScrollArea } from '@/app/components/ui/scroll-area'
 import { Separator } from '@/app/components/ui/separator'
 import {
@@ -117,15 +117,15 @@ export default function EmailViewer({
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="sm">
             <Star className={`h-4 w-4 ${email.isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
           </Button>
-          <Button variant="ghost" size="icon" onClick={handlePrint}>
+          <Button variant="ghost" size="sm" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="sm">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -138,7 +138,7 @@ export default function EmailViewer({
               <DropdownMenuItem className="text-red-600">Block sender</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>

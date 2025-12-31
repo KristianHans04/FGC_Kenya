@@ -7,11 +7,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
-import { Button } from '@/app/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card'
+import { Button } from '@/app/components/ui/Button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
-import { Badge } from '@/app/components/ui/badge'
+import { Badge } from '@/app/components/ui/Badge'
 import {
   X,
   Send,
@@ -203,7 +203,7 @@ export default function EmailComposer({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -336,7 +336,7 @@ export default function EmailComposer({
             <div className="border rounded-t-md p-2 flex items-center gap-1 flex-wrap bg-muted/30">
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('bold')}
                 className="h-8 w-8"
               >
@@ -344,7 +344,7 @@ export default function EmailComposer({
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('italic')}
                 className="h-8 w-8"
               >
@@ -352,7 +352,7 @@ export default function EmailComposer({
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('underline')}
                 className="h-8 w-8"
               >
@@ -361,7 +361,7 @@ export default function EmailComposer({
               <div className="w-px h-6 bg-border mx-1" />
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('insertUnorderedList')}
                 className="h-8 w-8"
               >
@@ -369,7 +369,7 @@ export default function EmailComposer({
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('insertOrderedList')}
                 className="h-8 w-8"
               >
@@ -378,7 +378,7 @@ export default function EmailComposer({
               <div className="w-px h-6 bg-border mx-1" />
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('justifyLeft')}
                 className="h-8 w-8"
               >
@@ -386,7 +386,7 @@ export default function EmailComposer({
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('justifyCenter')}
                 className="h-8 w-8"
               >
@@ -394,7 +394,7 @@ export default function EmailComposer({
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => execCommand('justifyRight')}
                 className="h-8 w-8"
               >
@@ -403,7 +403,7 @@ export default function EmailComposer({
               <div className="w-px h-6 bg-border mx-1" />
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => {
                   const url = prompt('Enter URL:')
                   if (url) execCommand('createLink', url)
@@ -414,7 +414,7 @@ export default function EmailComposer({
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 className="h-8 w-8"
               >
@@ -429,7 +429,6 @@ export default function EmailComposer({
               className="border border-t-0 rounded-b-md p-4 min-h-[300px] focus:outline-none"
               dangerouslySetInnerHTML={{ __html: body }}
               onInput={(e) => setBody(e.currentTarget.innerHTML)}
-              placeholder="Compose your email..."
             />
 
             {/* Attachments */}
