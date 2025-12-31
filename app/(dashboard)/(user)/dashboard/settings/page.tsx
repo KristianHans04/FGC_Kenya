@@ -1,27 +1,11 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { useAuth } from '@/app/lib/contexts/AuthContext'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Settings',
-  description: 'Manage your account settings and preferences',
-  noIndex: true,
-})
-nya Dev
- */
-
 'use client'
-
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
 import {
-  User,
+
   MapPin,
+  User,
   GraduationCap,
   Phone,
   Mail,
@@ -75,22 +59,24 @@ export default function SettingsPage() {
       const response = await fetch('/api/user/profile')
       if (response.ok) {
         const data = await response.json()
-        setProfile(data.profile)
+        if (data.data) {
+          setProfile({
+            firstName: data.data.firstName || '',
+            lastName: data.data.lastName || '',
+            email: data.data.email || user?.email || '',
+            phone: data.data.phone || '',
+            school: data.data.school || '',
+            grade: data.data.grade || '',
+            county: data.data.county || '',
+            homeAddress: data.data.homeAddress || '',
+            parentName: data.data.parentName || '',
+            parentPhone: data.data.parentPhone || '',
+            parentEmail: data.data.parentEmail || ''
+          })
+        }
       } else {
-        // Mock data for development
-        setProfile({
-          firstName: 'John',
-          lastName: 'Doe',
-          email: user?.email || '',
-          phone: '+254712345678',
-          school: 'Example High School',
-          grade: '12',
-          county: 'Nairobi',
-          homeAddress: '123 Example Street, Nairobi',
-          parentName: 'Jane Doe',
-          parentPhone: '+254798765432',
-          parentEmail: 'parent@example.com'
-        })
+        // If API fails, keep the initial empty state
+        console.error('Failed to fetch profile')
       }
     } catch (error) {
       console.error('Failed to fetch profile:', error)

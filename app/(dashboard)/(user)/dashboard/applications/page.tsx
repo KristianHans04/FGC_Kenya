@@ -1,25 +1,8 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'My Applications',
-  description: 'View and manage your FIRST Global Team Kenya applications',
-  noIndex: true,
-})
-ifferentiation
- * @author Team Kenya Dev
- */
-
 'use client'
-
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+
 import {
   FileText,
   Calendar,
