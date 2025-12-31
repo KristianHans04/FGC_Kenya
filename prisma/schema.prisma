@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,10 +14,8 @@ datasource db {
 // USER AND AUTHENTICATION MODELS
 // =============================================================================
 
-/**
- * User model for authentication
- * Uses email-based OTP authentication (no passwords)
- */
+/// User model for authentication
+/// Uses email-based OTP authentication (no passwords)
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
@@ -42,18 +40,14 @@ model User {
   @@index([role])
 }
 
-/**
- * User roles for authorization
- */
+/// User roles for authorization
 enum UserRole {
   USER
   ADMIN
   SUPER_ADMIN
 }
 
-/**
- * OTP codes for email-based authentication
- */
+/// OTP codes for email-based authentication
 model OTPCode {
   id        String      @id @default(uuid())
   code      String
@@ -72,18 +66,14 @@ model OTPCode {
   @@index([expiresAt])
 }
 
-/**
- * OTP types for different purposes
- */
+/// OTP types for different purposes
 enum OTPType {
   LOGIN
   VERIFY_EMAIL
   ACCOUNT_RECOVERY
 }
 
-/**
- * User sessions for JWT management
- */
+/// User sessions for JWT management
 model Session {
   id           String    @id @default(uuid())
   token        String    @unique
@@ -108,9 +98,7 @@ model Session {
 // APPLICATION MODELS FOR 2026 SEASON
 // =============================================================================
 
-/**
- * Student applications for FIRST Global Team Kenya 2026
- */
+/// Student applications for FIRST Global Team Kenya 2026
 model Application {
   id              String            @id @default(uuid())
   season          String            @default("2026")
@@ -174,9 +162,7 @@ model Application {
   @@index([submittedAt])
 }
 
-/**
- * Application status values
- */
+/// Application status values
 enum ApplicationStatus {
   DRAFT
   SUBMITTED
@@ -190,9 +176,7 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
-/**
- * Experience levels for applicants
- */
+/// Experience levels for applicants
 enum ExperienceLevel {
   NONE
   BEGINNER
@@ -200,9 +184,7 @@ enum ExperienceLevel {
   ADVANCED
 }
 
-/**
- * Track application status changes
- */
+/// Track application status changes
 model ApplicationStatusHistory {
   id            String            @id @default(uuid())
   previousStatus ApplicationStatus?
@@ -222,9 +204,7 @@ model ApplicationStatusHistory {
 // AUDIT AND LOGGING
 // =============================================================================
 
-/**
- * Audit log for tracking all important actions
- */
+/// Audit log for tracking all important actions
 model AuditLog {
   id          String      @id @default(uuid())
   action      AuditAction
@@ -247,9 +227,7 @@ model AuditLog {
   @@index([createdAt])
 }
 
-/**
- * Types of audit actions
- */
+/// Types of audit actions
 enum AuditAction {
   // Authentication
   OTP_REQUESTED
@@ -288,9 +266,7 @@ enum AuditAction {
 // EMAIL AND NOTIFICATION MODELS
 // =============================================================================
 
-/**
- * Email queue for async email sending
- */
+/// Email queue for async email sending
 model EmailQueue {
   id          String      @id @default(uuid())
   to          String
@@ -320,9 +296,7 @@ enum EmailStatus {
 // SYSTEM SETTINGS
 // =============================================================================
 
-/**
- * Application season settings
- */
+/// Application season settings
 model SeasonSettings {
   id                    String    @id @default(uuid())
   season                String    @unique
