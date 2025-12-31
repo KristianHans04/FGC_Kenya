@@ -75,6 +75,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       lastName: dbUser.lastName,
       school: null,
       role: dbUser.role as any,
+      currentRole: dbUser.role as any,  // Ensure currentRole is set
       emailVerified: dbUser.emailVerified,
     }
 

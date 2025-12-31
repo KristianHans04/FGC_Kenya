@@ -12,6 +12,7 @@ import prisma from '@/app/lib/db'
 import { rateLimit, addSecurityHeaders } from '@/app/lib/middleware/security'
 import type { ApiResponse, ErrorCode } from '@/app/types/api'
 import type { SafeUser, AuthResponse } from '@/app/types/auth'
+import { getDashboardRoute } from '@/app/lib/constants/navigation'
 
 /**
  * POST /api/auth/verify-otp
@@ -166,14 +167,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       lastName: user.lastName,
       school: null,
       role: user.role as any,
+      currentRole: user.role as any,  // Ensure currentRole is set
       emailVerified: true,
     }
 
+    // Determine redirect URL based on role using centralized navigation helper
     const authResponse: AuthResponse = {
       user: safeUser,
       token: accessToken,
       refreshToken,
       expiresAt: session.expiresAt.toISOString(),
+      redirectUrl: getDashboardRoute(user.role || 'USER'),
     }
 
     const response = addSecurityHeaders(
