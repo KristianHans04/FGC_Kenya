@@ -218,8 +218,8 @@ export default function EmailComposer({
                 <Label className="w-16">To:</Label>
                 <div className="flex-1">
                   <div className="flex flex-wrap gap-1 mb-1">
-                    {to.map(email => (
-                      <Badge key={email} variant="secondary">
+                    {to.map((email, index) => (
+                      <Badge key={`to-${index}-${email}`} variant="secondary">
                         {email}
                         <button
                           onClick={() => removeRecipient(email, 'to')}
@@ -264,8 +264,8 @@ export default function EmailComposer({
                   <Label className="w-16">Cc:</Label>
                   <div className="flex-1">
                     <div className="flex flex-wrap gap-1 mb-1">
-                      {cc.map(email => (
-                        <Badge key={email} variant="secondary">
+                      {cc.map((email, index) => (
+                        <Badge key={`cc-${index}-${email}`} variant="secondary">
                           {email}
                           <button
                             onClick={() => removeRecipient(email, 'cc')}
@@ -295,8 +295,8 @@ export default function EmailComposer({
                   <Label className="w-16">Bcc:</Label>
                   <div className="flex-1">
                     <div className="flex flex-wrap gap-1 mb-1">
-                      {bcc.map(email => (
-                        <Badge key={email} variant="secondary">
+                      {bcc.map((email, index) => (
+                        <Badge key={`bcc-${index}-${email}`} variant="secondary">
                           {email}
                           <button
                             onClick={() => removeRecipient(email, 'bcc')}
