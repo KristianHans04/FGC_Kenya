@@ -54,7 +54,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     })
 
     // Format activity for dashboard
-    const formattedActivity = recentActivity.map(log => {
+    const formattedActivity = recentActivity.map((log: any) => {
       let description = ''
       let type: 'application' | 'user' | 'review' = 'application'
 
