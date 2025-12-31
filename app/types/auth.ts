@@ -170,7 +170,7 @@ export interface AuthContextType {
   isStudent: (cohort?: string) => boolean
   isAlumni: () => boolean
   login: (email: string) => Promise<void>
-  verifyOTP: (email: string, code: string) => Promise<void>
+  verifyOTP: (email: string, code: string) => Promise<string | undefined>
   logout: () => Promise<void>
   refreshSession: () => Promise<void>
 }
