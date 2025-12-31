@@ -81,10 +81,10 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const redirectUrl = await verifyOTP(email, otp)
+      await verifyOTP(email, otp)
       setSuccess(SUCCESS_MESSAGES.AUTHENTICATION.LOGIN_SUCCESS)
       setTimeout(() => {
-        router.push(redirectUrl || '/dashboard')
+        router.push('/dashboard')
       }, 1500)
     } catch (err) {
       setError(err instanceof Error ? err.message : ERROR_MESSAGES.AUTHENTICATION.INVALID_CREDENTIALS)
