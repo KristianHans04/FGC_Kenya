@@ -9,9 +9,21 @@ const nextConfig = {
     // Images will use standard <img> tags instead of optimized versions
     unoptimized: true,
 
-    // Domains for external images (only applies in server mode, not static)
-    // For static export, external images may need different handling
-    domains: ['localhost', 'res.cloudinary.com'],
+    // Use remotePatterns instead of deprecated domains
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 
 
