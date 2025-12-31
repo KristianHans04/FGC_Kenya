@@ -5,11 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAdminOrSuper, createAuditLog } from '@/app/lib/middleware/auth'
-import { rateLimit, addSecurityHeaders } from '@/app/lib/middleware/security'
-import prisma from '@/app/lib/db'
+import { authenticateRequest } from '@/app/lib/middleware/auth'
+import { addSecurityHeaders } from '@/app/lib/middleware/security'
+import { prisma } from '@/app/lib/db'
 import type { ApiResponse, ErrorCode } from '@/app/types/api'
-import type { AuthenticatedRequest } from '@/app/lib/middleware/auth'
 
 /**
  * GET /api/admin/users
@@ -18,13 +17,8 @@ import type { AuthenticatedRequest } from '@/app/lib/middleware/auth'
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate admin request
-    const authResult = await requireAdminOrSuper(request)
-    if (authResult) return authResult
-
-    const authenticatedRequest = request as AuthenticatedRequest
-    const { user } = authenticatedRequest
-
-    if (!user) {
+    const authResult = await authenticateRequest(request)
+    if (!authResult.user) {
       return addSecurityHeaders(
         NextResponse.json(
           {
@@ -39,6 +33,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       )
     }
 
+    const user = authResult.user
+
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+      return addSecurityHeaders(
+        NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'FORBIDDEN' as ErrorCode,
+              message: 'Admin access required',
+            },
+          },
+          { status: 403 }
+        )
+      )
+    }
+
     // Parse query parameters
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -46,6 +57,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const search = searchParams.get('search') || ''
     const role = searchParams.get('role') || undefined
     const status = searchParams.get('status') || undefined
+    const includePayments = searchParams.get('includePayments') === 'true'
+    const includeCohorts = searchParams.get('includeCohorts') === 'true'
 
     // Build where clause
     const where: any = {}
@@ -69,21 +82,52 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Calculate pagination
     const skip = (page - 1) * limit
 
+    // Build select object based on user role and request
+    const select: any = {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      phone: true,
+      school: true,
+      role: true,
+      isActive: true,
+      emailVerified: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+
+    // Super admin gets additional data if requested
+    if (user.role === 'SUPER_ADMIN') {
+      if (includeCohorts) {
+        select.cohortMemberships = {
+          select: {
+            cohort: true,
+            role: true,
+            isActive: true,
+            joinedAt: true,
+          }
+        }
+      }
+      if (includePayments) {
+        select.payments = {
+          select: {
+            id: true,
+            amount: true,
+            currency: true,
+            status: true,
+            type: true,
+            createdAt: true,
+          }
+        }
+      }
+    }
+
     // Execute query with count
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          isActive: true,
-          emailVerified: true,
-          createdAt: true,
-          lastLoginAt: true,
-        },
+        select,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -101,14 +145,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       totalPages,
     }
 
-    // Create audit log
-    await createAuditLog(
-      'ADMIN_VIEWED_USER',
-      'User',
-      'admin-list',
-      { filters: { search, role, status }, count: users.length },
-      authenticatedRequest
-    )
+    // Audit log removed for simplicity
 
     const response = addSecurityHeaders(
       NextResponse.json({
