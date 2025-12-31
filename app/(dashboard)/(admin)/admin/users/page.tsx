@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useAuth } from '@/app/lib/contexts/AuthContext'
 import {
   Users,
   UserPlus,
@@ -46,19 +47,65 @@ interface UserStats {
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [stats, setStats] = useState<UserStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [searchError, setSearchError] = useState<string>('')
+  const { user } = useAuth()
+  
+  // Regular admins need to search first
+  const requiresSearch = user?.role === 'ADMIN'
+  const canViewAllUsers = user?.role === 'SUPER_ADMIN'
 
   useEffect(() => {
-    fetchUsers()
+    // Only fetch all users for super admin
+    if (canViewAllUsers) {
+      fetchUsers()
+    }
     fetchStats()
   }, [])
 
-  const fetchUsers = async () => {
+  const validateSearch = () => {
+    setSearchError('')
+    
+    if (!requiresSearch) return true
+    
+    // Check if it's an exact email
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(searchTerm)
+    if (isEmail) return true
+    
+    // Check if search has at least 2 names (words)
+    const words = searchTerm.trim().split(/\s+/)
+    if (words.length >= 2 && words.every(w => w.length >= 2)) {
+      return true
+    }
+    
+    setSearchError('Please enter an exact email address or at least two names')
+    return false
+  }
+
+  const fetchUsers = async (searchOverride?: string) => {
+    const search = searchOverride !== undefined ? searchOverride : searchTerm
+    
+    // For regular admins, validate search before fetching
+    if (requiresSearch && !search) {
+      setUsers([])
+      return
+    }
+    
+    if (requiresSearch && !validateSearch()) {
+      return
+    }
+    
+    setLoading(true)
     try {
-      const response = await fetch('/api/admin/users')
+      const params = new URLSearchParams()
+      if (search) params.append('search', search)
+      if (roleFilter !== 'all') params.append('role', roleFilter)
+      if (statusFilter !== 'all') params.append('status', statusFilter)
+      
+      const response = await fetch(`/api/admin/users?${params.toString()}`)
       if (response.ok) {
         const data = await response.json()
         setUsers(data.data?.users || [])
@@ -68,6 +115,13 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSearch = () => {
+    if (requiresSearch && !validateSearch()) {
+      return
+    }
+    fetchUsers()
   }
 
   const fetchStats = async () => {
@@ -246,24 +300,62 @@ export default function AdminUsersPage() {
 
         {/* Filters */}
         <div className="card mb-6">
+          {requiresSearch && (
+            <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div>
+                  <p className="font-medium text-amber-900 dark:text-amber-100">Search Required</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                    To view user profiles, search using an exact email address or at least two names.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search users..."
+                  placeholder={requiresSearch ? "Enter exact email or at least 2 names..." : "Search users..."}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setSearchError('')
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch()
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
                 />
               </div>
+              {searchError && (
+                <p className="text-sm text-destructive mt-2">{searchError}</p>
+              )}
             </div>
 
             <div className="flex gap-2">
+              {requiresSearch && (
+                <button
+                  onClick={handleSearch}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
+                >
+                  <Search className="h-4 w-4" />
+                  Search
+                </button>
+              )}
+              
               <select
                 value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
+                onChange={(e) => {
+                  setRoleFilter(e.target.value)
+                  if (!requiresSearch) fetchUsers()
+                }}
                 className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
               >
                 <option value="all">All Roles</option>
@@ -274,7 +366,10 @@ export default function AdminUsersPage() {
 
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value)
+                  if (!requiresSearch) fetchUsers()
+                }}
                 className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
               >
                 <option value="all">All Status</option>
@@ -311,7 +406,12 @@ export default function AdminUsersPage() {
                   <tr>
                     <td colSpan={6} className="text-center py-8">
                       <Users className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-muted-foreground">No users found</p>
+                      <p className="text-muted-foreground">
+                        {requiresSearch && !searchTerm 
+                          ? "Search for users to view their profiles"
+                          : "No users found"
+                        }
+                      </p>
                     </td>
                   </tr>
                 ) : (
