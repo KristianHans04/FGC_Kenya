@@ -1,41 +1,31 @@
 /**
  * @file page.tsx
- * @description Join/Apply page for <i>FIRST</i> Global Team Kenya with comprehensive form validation
+ * @description Join/Apply page for <i>FIRST</i> Global Team Kenya with modular form components
  * @author Team Kenya Dev
  */
 
 'use client'
 
-import type { Metadata } from 'next'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-
-
+import Link from 'next/link'
+import Image from 'next/image'
 import { 
-  Users, 
-  GraduationCap, 
-  Calendar, 
-  Mail, 
-  Phone, 
-  School, 
-  User, 
-  FileText,
   CheckCircle,
   AlertCircle,
   Loader2,
-  Heart,
-  Target,
+  Calendar,
   Rocket,
-  BookOpen
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react'
-import Link from 'next/link'
 
-/**
- * Zod schema for form validation with comprehensive security checks
- */
+// Import validation schema and types
+import { z } from 'zod'
+
+// Simplified schema for the original join page structure
 const applicationSchema = z.object({
   // Personal Information
   firstName: z.string()
@@ -78,7 +68,7 @@ const applicationSchema = z.object({
     .max(50, 'County name is too long'),
   
   // Experience & Interest
-  experience: z.enum(['none', 'beginner', 'intermediate', 'advanced'])
+  experience: z.enum(['NONE', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'])
     .describe('Please select your experience level'),
   
   interests: z.array(z.string()).min(1, 'Please select at least one area of interest'),
@@ -97,37 +87,25 @@ const applicationSchema = z.object({
 
 type ApplicationFormData = z.infer<typeof applicationSchema>
 
-// Kenyan counties list
-const counties = [
-  'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Kiambu', 'Machakos',
-  'Meru', 'Nyeri', 'Kakamega', 'Kisii', 'Kitui', 'Migori', 'Uasin Gishu',
-  'Trans Nzoia', 'Nandi', 'Kericho', 'Laikipia', 'Narok', 'Kajiado', 'Other'
-]
+// Import constants
+import { 
+  APPLICATION_TIMELINE,
+  ELIGIBILITY_REQUIREMENTS,
+  FORM_STEPS
+} from '@/app/lib/constants/application'
 
-// Interest areas
-const interestAreas = [
-  { id: 'programming', label: 'Programming & Software', icon: FileText },
-  { id: 'mechanical', label: 'Mechanical Engineering', icon: Target },
-  { id: 'electrical', label: 'Electrical Engineering', icon: Rocket },
-  { id: 'design', label: 'Design & CAD', icon: BookOpen },
-  { id: 'strategy', label: 'Strategy & Planning', icon: Target },
-  { id: 'outreach', label: 'Community Outreach', icon: Heart },
-]
-
-// Timeline data - Updated for Panama 2025 completion
-const timeline = [
-  { date: '1 Jan - 28 Feb', title: 'Applications Open', status: 'completed' },
-  { date: '1-15 March', title: 'Initial Screening', status: 'completed' },
-  { date: '20-30 March', title: 'Interviews', status: 'completed' },
-  { date: '5 April', title: 'Team Announcement', status: 'completed' },
-  { date: 'April - October', title: 'Training & Preparation', status: 'completed' },
-  { date: 'October 29, 2025', title: 'Panama Competition - Silver Medal 🥈', status: 'completed' },
-]
+// Import modular form components
+import {
+  PersonalInfoSection,
+  EducationalInfoSection,
+  ExperienceSection,
+  ConsentSection
+} from '@/app/components/forms/application'
 
 /**
  * JoinPage component
  * Displays the application form for new students to join the team
- * Includes eligibility requirements and timeline
+ * Uses modular form components for better maintainability
  * 
  * @returns {JSX.Element} The join page component
  */
@@ -223,655 +201,397 @@ export default function JoinPage() {
      }
    }
 
-  const selectedInterests = watch('interests') || []
-
   return (
-    <>
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 african-pattern opacity-5" aria-hidden="true"></div>
-        <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <div className="flex items-center justify-center space-x-2 mb-6" aria-hidden="true">
-              <div className="h-1 w-8 bg-kenya-black"></div>
-              <div className="h-1 w-8 bg-kenya-red"></div>
-              <div className="h-1 w-8 bg-kenya-green"></div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background"></div>
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-secondary/10 rounded-full blur-3xl opacity-50 animate-pulse delay-1000"></div>
+        <div className="absolute inset-0 african-pattern opacity-[0.03]"></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* Navigation Bar */}
+        <nav className="border-b border-border/40 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/images/FGC_Logo.svg"
+                alt="FIRST Global Team Kenya"
+                width={120}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
+            </Link>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-muted-foreground hidden sm:inline-block">Already a member?</span>
+              <Link href="/login" className="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
+                Sign In
+              </Link>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
-              Join Team <span className="text-primary">Kenya</span>
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Be part of Kenya's journey in the <i>FIRST</i> Global Challenge. 
-              Apply now to represent your country on the world stage!
-            </p>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </nav>
 
-      {/* Eligibility Section */}
-      <section className="py-16 bg-muted/30 overflow-hidden">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-5xl mx-auto"
-          >
-            <h2 className="text-3xl font-bold font-heading text-center mb-12">
-              Eligibility <span className="text-primary">Requirements</span>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { icon: GraduationCap, title: 'Age', desc: '14-18 years old' },
-                { icon: School, title: 'Education', desc: 'Currently in high school (Form 1-4)' },
-                { icon: Users, title: 'Nationality', desc: 'Kenyan citizen or resident' },
-                { icon: Calendar, title: 'Commitment', desc: 'Available April-October' },
-                { icon: Target, title: 'Passion', desc: 'Interest in STEM and robotics' },
-                { icon: Heart, title: 'Team Spirit', desc: 'Collaborative and dedicated' },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="card text-center transition-all duration-300 hover:shadow-lg hover:scale-105"
-                >
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
-                    <item.icon className="h-6 w-6 text-primary" aria-hidden="true" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
+        {/* Hero Section */}
+        <section className="relative py-20 overflow-hidden">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-3xl mx-auto text-center"
+            >
+              <h1 className="text-4xl md:text-6xl font-bold font-heading mb-6 tracking-tight">
+                Join Team <span className="text-transparent bg-clip-text bg-gradient-to-r from-kenya-black via-kenya-red to-kenya-green">Kenya</span>
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                Be part of Kenya's journey in the <i>FIRST</i> Global Challenge. 
+                Apply now to represent your country on the world stage!
+              </p>
+            </motion.div>
+          </div>
+        </section>
 
-      {/* Application Timeline */}
-      <section className="py-16 overflow-hidden">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
-            <h2 className="text-3xl font-bold font-heading text-center mb-12">
-              Application <span className="text-primary">Timeline</span>
-            </h2>
-            
-            <div className="space-y-4">
-              {timeline.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className={`flex items-center space-x-4 p-4 rounded-lg ${
-                    item.status === 'active' 
-                      ? 'bg-primary/10 border-2 border-primary' 
-                      : 'bg-card border border-border'
-                  }`}
-                >
-                  <div className={`w-4 h-4 rounded-full flex-shrink-0 ${
-                    item.status === 'active' ? 'bg-primary' : 'bg-muted'
-                  }`} aria-hidden="true"></div>
-                  <div className="flex-grow">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <h3 className="font-semibold">{item.title}</h3>
-                      <span className="text-sm text-muted-foreground">{item.date}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Application Form */}
-      <section className="py-16 bg-muted/30 overflow-hidden" id="application-form">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl font-bold font-heading text-center mb-8">
-              Application <span className="text-primary">Form</span>
-            </h2>
-
-            <div className="relative">
-              {applicationsClosed && (
-                <div className="absolute inset-0 bg-background/90 flex items-center justify-center z-10 rounded-lg">
-                  <div className="text-center p-8">
-                    <Calendar className="h-16 w-16 text-primary mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold mb-4">Applications Closed</h3>
-                    <p className="text-lg text-muted-foreground mb-6 max-w-md mx-auto">
-                      The application period for the 2025 <i>FIRST</i> Global Challenge team has ended.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      The next recruitment cycle will open in January 2026.
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className={applicationsClosed ? 'max-h-[50vh] overflow-hidden blur-sm' : ''}>
-                {/* Status Messages */}
-                <div id="form-status" tabIndex={-1} aria-live="polite" aria-atomic="true">
-                  {submitStatus === 'success' && (
+        {/* Eligibility Section */}
+        <section className="py-16 bg-muted/30 relative">
+          <div className="container px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="max-w-5xl mx-auto"
+            >
+              <h2 className="text-3xl font-bold font-heading text-center mb-12">
+                Eligibility <span className="text-primary">Requirements</span>
+              </h2>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {ELIGIBILITY_REQUIREMENTS.map((item, index) => {
+                  const IconComponent = item.icon
+                  return (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start space-x-3"
-                      role="alert"
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                      className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-card"
                     >
-                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" aria-hidden="true" />
-                      <div>
-                        <h3 className="font-semibold text-green-800 dark:text-green-200">Application Submitted Successfully!</h3>
-                        <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                          We've received your application. We'll contact you within 2 weeks.
-                        </p>
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4 ring-4 ring-primary/5">
+                        <IconComponent className="h-6 w-6 text-primary" aria-hidden="true" />
                       </div>
+                      <h3 className="font-semibold mb-2 text-lg">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
                     </motion.div>
-                  )}
+                  )
+                })}
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
-                  {submitStatus === 'error' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start space-x-3"
-                      role="alert"
-                    >
-                      <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" aria-hidden="true" />
-                      <div>
-                        <h3 className="font-semibold text-red-800 dark:text-red-200">Submission Error</h3>
-                        <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                          There was an error submitting your application. Please try again or contact us.
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Step Indicator */}
-                {currentStep !== 'complete' && (
-                  <div className="mb-6">
-                    <div className="flex items-center justify-center space-x-4">
-                      <div className={`flex items-center ${currentStep === 'form' ? 'text-primary' : 'text-muted-foreground'}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                          currentStep === 'form' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                        }`}>
-                          1
-                        </div>
-                        <span className="ml-2 text-sm font-medium">Application Form</span>
-                      </div>
-                      <div className="w-8 h-px bg-border"></div>
-                      <div className={`flex items-center ${currentStep === 'ai-questions' ? 'text-primary' : 'text-muted-foreground'}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                          currentStep === 'ai-questions' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                        }`}>
-                          2
-                        </div>
-                        <span className="ml-2 text-sm font-medium">AI Questions</span>
+        {/* Application Timeline */}
+        <section className="py-16">
+          <div className="container px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="max-w-4xl mx-auto"
+            >
+              <h2 className="text-3xl font-bold font-heading text-center mb-12">
+                Application <span className="text-primary">Timeline</span>
+              </h2>
+              
+              <div className="space-y-4">
+                {APPLICATION_TIMELINE.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="flex items-center space-x-4 p-4 rounded-xl bg-card/50 border border-border/50 hover:bg-card transition-colors"
+                  >
+                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-primary/20 ring-2 ring-primary" aria-hidden="true"></div>
+                    <div className="flex-grow">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <h3 className="font-semibold text-foreground">{item.title}</h3>
+                        <span className="text-sm text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md">{item.date}</span>
                       </div>
                     </div>
-                  </div>
-                )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
-                {currentStep === 'form' && (
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 card" noValidate>
-                  <fieldset disabled={applicationsClosed}>
-                    {/* Personal Information */}
-                    <fieldset>
-                      <legend className="text-xl font-semibold mb-4">Personal Information</legend>
+        {/* Application Form */}
+        <section className="py-16 bg-muted/30 relative" id="application-form">
+          <div className="container px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="max-w-3xl mx-auto"
+            >
+              <h2 className="text-3xl font-bold font-heading text-center mb-8">
+                Application <span className="text-primary">Form</span>
+              </h2>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="firstName" className="block text-sm font-medium mb-2">
-                            First Name <span className="text-red-500" aria-label="required">*</span>
-                          </label>
-                          <input
-                            {...register('firstName')}
-                            type="text"
-                            id="firstName"
-                            aria-required="true"
-                            aria-invalid={!!errors.firstName}
-                            aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          />
-                          {errors.firstName && (
-                            <p id="firstName-error" className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.firstName.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label htmlFor="lastName" className="block text-sm font-medium mb-2">
-                            Last Name <span className="text-red-500" aria-label="required">*</span>
-                          </label>
-                          <input
-                            {...register('lastName')}
-                            type="text"
-                            id="lastName"
-                            aria-required="true"
-                            aria-invalid={!!errors.lastName}
-                            aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          />
-                          {errors.lastName && (
-                            <p id="lastName-error" className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.lastName.message}
-                            </p>
-                          )}
-                        </div>
+              <div className="relative">
+                {applicationsClosed && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-20 rounded-2xl border border-border/50">
+                    <div className="text-center p-8 max-w-md">
+                      <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Calendar className="h-10 w-10 text-muted-foreground" />
                       </div>
-
-                      <div className="grid sm:grid-cols-2 gap-4 mt-4">
-                        <div>
-                          <label htmlFor="email" className="block text-sm font-medium mb-2">
-                            Email Address <span className="text-red-500" aria-label="required">*</span>
-                          </label>
-                          <input
-                            {...register('email')}
-                            type="email"
-                            id="email"
-                            aria-required="true"
-                            aria-invalid={!!errors.email}
-                            aria-describedby={errors.email ? 'email-error' : undefined}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          />
-                          {errors.email && (
-                            <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.email.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                            Phone Number <span className="text-red-500" aria-label="required">*</span>
-                          </label>
-                          <input
-                            {...register('phone')}
-                            type="tel"
-                            id="phone"
-                            placeholder="+254712345678"
-                            aria-required="true"
-                            aria-invalid={!!errors.phone}
-                            aria-describedby={errors.phone ? 'phone-error' : 'phone-help'}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          />
-                          <p id="phone-help" className="mt-1 text-xs text-muted-foreground">
-                            Format: +254XXXXXXXXX or 07XXXXXXXX
-                          </p>
-                          {errors.phone && (
-                            <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.phone.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-2">
-                          Date of Birth <span className="text-red-500" aria-label="required">*</span>
-                        </label>
-                        <input
-                          {...register('dateOfBirth')}
-                          type="date"
-                          id="dateOfBirth"
-                          aria-required="true"
-                          aria-invalid={!!errors.dateOfBirth}
-                          aria-describedby={errors.dateOfBirth ? 'dob-error' : 'dob-help'}
-                          className="w-full sm:w-auto px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                        />
-                        <p id="dob-help" className="mt-1 text-xs text-muted-foreground">
-                          You must be between 14 and 18 years old
-                        </p>
-                        {errors.dateOfBirth && (
-                          <p id="dob-error" className="mt-1 text-sm text-red-500" role="alert">
-                            {errors.dateOfBirth.message}
-                          </p>
-                        )}
-                      </div>
-                    </fieldset>
-
-                    {/* Educational Information */}
-                    <fieldset>
-                      <legend className="text-xl font-semibold mb-4">Educational Information</legend>
-
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="school" className="block text-sm font-medium mb-2">
-                            School Name <span className="text-red-500" aria-label="required">*</span>
-                          </label>
-                          <input
-                            {...register('school')}
-                            type="text"
-                            id="school"
-                            aria-required="true"
-                            aria-invalid={!!errors.school}
-                            aria-describedby={errors.school ? 'school-error' : undefined}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          />
-                          {errors.school && (
-                            <p id="school-error" className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.school.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label htmlFor="grade" className="block text-sm font-medium mb-2">
-                            Current Grade/Form <span className="text-red-500" aria-label="required">*</span>
-                          </label>
-                          <select
-                            {...register('grade')}
-                            id="grade"
-                            aria-required="true"
-                            aria-invalid={!!errors.grade}
-                            aria-describedby={errors.grade ? 'grade-error' : undefined}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          >
-                            <option value="">Select grade</option>
-                            <option value="9">Form 1 (Grade 9)</option>
-                            <option value="10">Form 2 (Grade 10)</option>
-                            <option value="11">Form 3 (Grade 11)</option>
-                            <option value="12">Form 4 (Grade 12)</option>
-                          </select>
-                          {errors.grade && (
-                            <p id="grade-error" className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.grade.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <label htmlFor="county" className="block text-sm font-medium mb-2">
-                          County <span className="text-red-500" aria-label="required">*</span>
-                        </label>
-                        <select
-                          {...register('county')}
-                          id="county"
-                          aria-required="true"
-                          aria-invalid={!!errors.county}
-                          aria-describedby={errors.county ? 'county-error' : undefined}
-                          className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                        >
-                          <option value="">Select county</option>
-                          {counties.map(county => (
-                            <option key={county} value={county}>{county}</option>
-                          ))}
-                        </select>
-                        {errors.county && (
-                          <p id="county-error" className="mt-1 text-sm text-red-500" role="alert">
-                            {errors.county.message}
-                          </p>
-                        )}
-                      </div>
-                    </fieldset>
-
-                    {/* Experience & Interest */}
-                    <fieldset>
-                      <legend className="text-xl font-semibold mb-4">Experience & Interest</legend>
-
-                      <div>
-                        <label htmlFor="experience" className="block text-sm font-medium mb-2">
-                          Robotics/Programming Experience <span className="text-red-500" aria-label="required">*</span>
-                        </label>
-                        <select
-                          {...register('experience')}
-                          id="experience"
-                          aria-required="true"
-                          aria-invalid={!!errors.experience}
-                          aria-describedby={errors.experience ? 'experience-error' : undefined}
-                          className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                        >
-                          <option value="">Select experience level</option>
-                          <option value="none">No prior experience</option>
-                          <option value="beginner">Beginner (less than 1 year)</option>
-                          <option value="intermediate">Intermediate (1-2 years)</option>
-                          <option value="advanced">Advanced (more than 2 years)</option>
-                        </select>
-                        {errors.experience && (
-                          <p id="experience-error" className="mt-1 text-sm text-red-500" role="alert">
-                            {errors.experience.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="mt-4">
-                        <fieldset>
-                          <legend className="block text-sm font-medium mb-2">
-                            Areas of Interest <span className="text-red-500" aria-label="required">*</span>
-                            <span className="text-xs text-muted-foreground ml-2">(Select at least one)</span>
-                          </legend>
-                          <div className="grid sm:grid-cols-2 gap-3 mt-2">
-                            {interestAreas.map(area => (
-                              <label
-                                key={area.id}
-                                className="flex items-center space-x-3 p-3 border border-border rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-                              >
-                                <input
-                                  {...register('interests')}
-                                  type="checkbox"
-                                  value={area.id}
-                                  className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
-                                  aria-describedby={`${area.id}-label`}
-                                />
-                                <span id={`${area.id}-label`} className="flex items-center space-x-2">
-                                  <area.icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                                  <span className="text-sm">{area.label}</span>
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                          {errors.interests && (
-                            <p className="mt-1 text-sm text-red-500" role="alert">
-                              {errors.interests.message}
-                            </p>
-                          )}
-                        </fieldset>
-                      </div>
-
-                      <div className="mt-4">
-                        <label htmlFor="motivation" className="block text-sm font-medium mb-2">
-                          Why do you want to join Team Kenya? <span className="text-red-500" aria-label="required">*</span>
-                        </label>
-                        <textarea
-                          {...register('motivation')}
-                          id="motivation"
-                          rows={4}
-                          aria-required="true"
-                          aria-invalid={!!errors.motivation}
-                          aria-describedby={errors.motivation ? 'motivation-error' : 'motivation-help'}
-                          className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
-                          placeholder="Tell us about your passion for STEM, robotics, and representing Kenya..."
-                        />
-                        <p id="motivation-help" className="mt-1 text-xs text-muted-foreground">
-                          100-500 characters
-                        </p>
-                        {errors.motivation && (
-                          <p id="motivation-error" className="mt-1 text-sm text-red-500" role="alert">
-                            {errors.motivation.message}
-                          </p>
-                        )}
-                      </div>
-                    </fieldset>
-
-                    {/* Consent & Terms */}
-                    <fieldset>
-                      <legend className="text-xl font-semibold mb-4">Consent & Terms</legend>
-
-                      <div className="space-y-3">
-                        <label className="flex items-start space-x-3">
-                          <input
-                            {...register('parentConsent')}
-                            type="checkbox"
-                            className="w-4 h-4 mt-1 text-primary border-border rounded focus:ring-primary"
-                            aria-describedby="consent-text"
-                          />
-                          <span id="consent-text" className="text-sm">
-                            I confirm that I have my parent/guardian's consent to apply for Team Kenya
-                            <span className="text-red-500" aria-label="required"> *</span>
-                          </span>
-                        </label>
-                        {errors.parentConsent && (
-                          <p className="ml-7 text-sm text-red-500" role="alert">
-                            {errors.parentConsent.message}
-                          </p>
-                        )}
-
-                        <label className="flex items-start space-x-3">
-                          <input
-                            {...register('termsAccepted')}
-                            type="checkbox"
-                            className="w-4 h-4 mt-1 text-primary border-border rounded focus:ring-primary"
-                            aria-describedby="terms-text"
-                          />
-                          <span id="terms-text" className="text-sm">
-                            I accept the{' '}
-                            <Link href="/terms" className="text-primary hover:text-primary-light underline">
-                              terms and conditions
-                            </Link>
-                            {' '}and understand the commitment required
-                            <span className="text-red-500" aria-label="required"> *</span>
-                          </span>
-                        </label>
-                        {errors.termsAccepted && (
-                          <p className="ml-7 text-sm text-red-500" role="alert">
-                            {errors.termsAccepted.message}
-                          </p>
-                        )}
-                      </div>
-                    </fieldset>
-
-                    {/* Submit Button */}
-                    <div className="flex justify-center pt-6">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting || applicationsClosed}
-                        className="btn-primary min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-busy={isSubmitting}
-                      >
-                        {isGeneratingQuestions ? (
-                          <>
-                            <Loader2 className="animate-spin h-4 w-4 mr-2" aria-hidden="true" />
-                            Generating Questions...
-                          </>
-                        ) : (
-                          <>
-                            Continue to Questions
-                            <Rocket className="ml-2 h-5 w-5" aria-hidden="true" />
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </fieldset>
-                </form>
-                )}
-
-                {currentStep === 'ai-questions' && (
-                  <div className="card space-y-6">
-                    <div className="text-center mb-6">
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
-                        <Rocket className="h-6 w-6 text-primary" />
-                      </div>
-                      <h2 className="text-xl font-semibold">Personalized Questions</h2>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Based on your application, here are some questions to help us understand you better
+                      <h3 className="text-2xl font-bold mb-4">Applications Closed</h3>
+                      <p className="text-lg text-muted-foreground mb-6">
+                        The application period for the 2025 <i>FIRST</i> Global Challenge team has ended.
+                      </p>
+                      <p className="text-sm font-medium text-primary bg-primary/10 py-2 px-4 rounded-full inline-block">
+                        Next cycle opens: January 2026
                       </p>
                     </div>
-
-                    <div className="space-y-4">
-                      {aiQuestions.map((question, index) => (
-                        <div key={index} className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            Question {index + 1}: {question}
-                          </label>
-                          <textarea
-                            value={questionAnswers[`question_${index}`] || ''}
-                            onChange={(e) => setQuestionAnswers(prev => ({
-                              ...prev,
-                              [`question_${index}`]: e.target.value
-                            }))}
-                            rows={4}
-                            className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background resize-none"
-                            placeholder="Provide a thoughtful answer..."
-                            required
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-between pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep('form')}
-                        className="btn-secondary"
-                      >
-                        ← Back to Form
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSubmit(onSubmit)()}
-                        disabled={isSubmitting || Object.keys(questionAnswers).length < aiQuestions.length}
-                        className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            Submit Application
-                            <CheckCircle className="ml-2 h-4 w-4" />
-                          </>
-                        )}
-                      </button>
-                    </div>
                   </div>
                 )}
+                
+                <div className={applicationsClosed ? 'opacity-50 pointer-events-none filter blur-[1px]' : ''}>
+                  {/* Status Messages */}
+                  <div id="form-status" tabIndex={-1} aria-live="polite" aria-atomic="true">
+                    <AnimatePresence>
+                      {submitStatus === 'success' && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="mb-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-start space-x-3"
+                          role="alert"
+                        >
+                          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" aria-hidden="true" />
+                          <div>
+                            <h3 className="font-semibold text-green-800 dark:text-green-200">Application Submitted Successfully!</h3>
+                            <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                              We've received your application. We'll contact you within 2 weeks.
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
 
-                {currentStep === 'complete' && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="card text-center"
-                  >
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full mb-4">
-                      <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                      {submitStatus === 'error' && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start space-x-3"
+                          role="alert"
+                        >
+                          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" aria-hidden="true" />
+                          <div>
+                            <h3 className="font-semibold text-red-800 dark:text-red-200">Submission Error</h3>
+                            <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                              There was an error submitting your application. Please try again or contact us.
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Step Indicator */}
+                  {currentStep !== 'complete' && (
+                    <div className="mb-8">
+                      <div className="flex items-center justify-center space-x-4">
+                        {FORM_STEPS.map((step, index) => {
+                          const isActive = currentStep === step.key
+                          const currentStepNumber = FORM_STEPS.find(s => s.key === currentStep)?.number || 1
+                          const isCompleted = step.number < currentStepNumber
+                          return (
+                            <React.Fragment key={step.key}>
+                              <div className={`flex items-center ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                                  isActive 
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-110' 
+                                    : isCompleted
+                                      ? 'bg-primary/20 text-primary'
+                                      : 'bg-muted text-muted-foreground'
+                                }`}>
+                                  {isCompleted ? <CheckCircle className="h-5 w-5" /> : step.number}
+                                </div>
+                                <span className={`ml-3 text-sm font-medium hidden sm:inline-block transition-colors ${isActive ? 'text-foreground' : ''}`}>
+                                  {step.label}
+                                </span>
+                              </div>
+                              {index < FORM_STEPS.length - 1 && (
+                                <div className={`w-12 h-0.5 rounded-full transition-colors ${isCompleted ? 'bg-primary/50' : 'bg-border'}`}></div>
+                              )}
+                            </React.Fragment>
+                          )
+                        })}
+                      </div>
                     </div>
-                    <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
-                    <p className="text-muted-foreground mb-4">
-                      Thank you for applying to join FIRST Global Team Kenya. We'll review your application and get back to you within 2 weeks.
-                    </p>
-                    <Link href="/dashboard" className="btn-primary">
-                      View Dashboard
-                    </Link>
-                  </motion.div>
-                )}
+                  )}
+
+                  {currentStep === 'form' && (
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 bg-card border border-border/50 shadow-xl rounded-2xl p-8" noValidate>
+                      <fieldset disabled={applicationsClosed} className="space-y-8">
+                        <PersonalInfoSection 
+                          register={register}
+                          errors={errors}
+                          disabled={applicationsClosed}
+                        />
+
+                        <div className="h-px bg-border/50"></div>
+
+                        <EducationalInfoSection 
+                          register={register}
+                          errors={errors}
+                          disabled={applicationsClosed}
+                        />
+
+                        <div className="h-px bg-border/50"></div>
+
+                        <ExperienceSection 
+                          register={register}
+                          watch={watch}
+                          errors={errors}
+                          disabled={applicationsClosed}
+                        />
+
+                        <div className="h-px bg-border/50"></div>
+
+                        <ConsentSection 
+                          register={register}
+                          errors={errors}
+                          disabled={applicationsClosed}
+                        />
+
+                      {/* Submit Button */}
+                      <div className="flex justify-center pt-6">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting || applicationsClosed}
+                          className="btn-primary min-w-[240px] py-4 text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          aria-busy={isSubmitting}
+                        >
+                          {isGeneratingQuestions ? (
+                            <>
+                              <Loader2 className="animate-spin h-5 w-5 mr-2" aria-hidden="true" />
+                              Generating Questions...
+                            </>
+                          ) : (
+                            <>
+                              Continue to Questions
+                              <Rocket className="ml-2 h-5 w-5" aria-hidden="true" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </fieldset>
+                  </form>
+                  )}
+
+                  {currentStep === 'ai-questions' && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="bg-card border border-border/50 shadow-xl rounded-2xl p-8 space-y-8"
+                    >
+                      <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 ring-4 ring-primary/5">
+                          <Rocket className="h-8 w-8 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-bold font-heading">Personalized Questions</h2>
+                        <p className="text-muted-foreground mt-2 max-w-lg mx-auto">
+                          Based on your application, we've generated a few questions to help us understand your unique perspective better.
+                        </p>
+                      </div>
+
+                      <div className="space-y-6">
+                        {aiQuestions.map((question, index) => (
+                          <div key={index} className="space-y-3">
+                            <label className="block text-base font-medium text-foreground">
+                              <span className="text-primary font-bold mr-2">{index + 1}.</span>
+                              {question}
+                            </label>
+                            <textarea
+                              value={questionAnswers[`question_${index}`] || ''}
+                              onChange={(e) => setQuestionAnswers(prev => ({
+                                ...prev,
+                                [`question_${index}`]: e.target.value
+                              }))}
+                              rows={4}
+                              className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary bg-background/50 resize-none transition-all duration-200"
+                              placeholder="Type your answer here..."
+                              required
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-between pt-6 border-t border-border/50">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep('form')}
+                          className="px-6 py-3 border border-border rounded-xl hover:bg-muted transition-colors font-medium flex items-center"
+                        >
+                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          Back to Form
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSubmit(onSubmit)()}
+                          disabled={isSubmitting || Object.keys(questionAnswers).length < aiQuestions.length}
+                          className="btn-primary py-3 px-8 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                              Submitting...
+                            </>
+                          ) : (
+                            <>
+                              Submit Application
+                              <CheckCircle className="ml-2 h-5 w-5" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentStep === 'complete' && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-card border border-border/50 shadow-xl rounded-2xl p-12 text-center max-w-2xl mx-auto"
+                    >
+                      <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 dark:bg-green-900/20 rounded-full mb-6 ring-8 ring-green-50 dark:ring-green-900/10">
+                        <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
+                      </div>
+                      <h2 className="text-3xl font-bold font-heading mb-4">Application Submitted!</h2>
+                      <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
+                        Thank you for applying to join FIRST Global Team Kenya. We've sent a confirmation email to your inbox. We'll review your application and get back to you within 2 weeks.
+                      </p>
+                      <Link href="/dashboard" className="btn-primary inline-flex items-center py-3 px-8 text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300">
+                        View Dashboard
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Link>
+                    </motion.div>
+                  )}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>    </>
+            </motion.div>
+          </div>
+        </section>    
+      </div>
+    </div>
   )
 }
