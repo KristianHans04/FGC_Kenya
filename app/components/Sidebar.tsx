@@ -95,6 +95,7 @@ const adminSidebarItems: SidebarItem[] = [
 
 export default function Sidebar({ variant, className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const pathname = usePathname()
@@ -102,6 +103,7 @@ export default function Sidebar({ variant, className }: SidebarProps) {
   const { logout, user } = useAuth()
 
   const sidebarItems = variant === 'admin' ? adminSidebarItems : userSidebarItems
+  const shouldExpand = !isCollapsed || isHovered
 
   // Auto-collapse on mobile
   useEffect(() => {
@@ -145,8 +147,8 @@ export default function Sidebar({ variant, className }: SidebarProps) {
     <div className="flex flex-col h-full">
       {/* Logo/Brand */}
       <div className={cn(
-        "flex items-center px-4 py-6 border-b border-border",
-        isCollapsed && "justify-center"
+        "flex items-center px-4 py-6 border-b border-border transition-all duration-200",
+        isCollapsed && !isHovered && "justify-center px-2"
       )}>
         <div className="flex items-center space-x-3">
           <div className="relative w-8 h-8 flex-shrink-0">
@@ -158,12 +160,13 @@ export default function Sidebar({ variant, className }: SidebarProps) {
             />
           </div>
           <AnimatePresence>
-            {!isCollapsed && (
+            {shouldExpand && (
               <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                className="overflow-hidden"
+                transition={{ duration: 0.15 }}
+                className="overflow-hidden whitespace-nowrap"
               >
                 <h1 className="text-lg font-bold font-heading text-primary">
                   {BRAND.SHORT_NAME}
@@ -176,22 +179,23 @@ export default function Sidebar({ variant, className }: SidebarProps) {
 
       {/* User Info */}
       <div className={cn(
-        "px-4 py-4 border-b border-border",
-        isCollapsed && "px-2"
+        "px-4 py-4 border-b border-border transition-all duration-200",
+        isCollapsed && !isHovered && "px-2"
       )}>
         <div className={cn(
           "flex items-center space-x-3",
-          isCollapsed && "justify-center"
+          isCollapsed && !isHovered && "justify-center"
         )}>
           <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
             <User className="h-4 w-4 text-primary" />
           </div>
           <AnimatePresence>
-            {!isCollapsed && (
+            {shouldExpand && (
               <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.15 }}
                 className="overflow-hidden min-w-0 flex-1"
               >
                 <p className="text-sm font-medium truncate">
@@ -219,30 +223,31 @@ export default function Sidebar({ variant, className }: SidebarProps) {
                 }
               }}
               className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group",
-                isCollapsed && "justify-center px-2",
+                "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group",
+                isCollapsed && !isHovered && "justify-center px-2",
                 isActive(item.href)
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <item.icon className={cn(
-                "flex-shrink-0",
-                isCollapsed ? "h-5 w-5" : "h-4 w-4 mr-3"
+                "flex-shrink-0 transition-all duration-200",
+                isCollapsed && !isHovered ? "h-5 w-5" : "h-4 w-4 mr-3"
               )} />
               <AnimatePresence>
-                {!isCollapsed && (
+                {shouldExpand && (
                   <motion.span
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="truncate"
+                    transition={{ duration: 0.15 }}
+                    className="truncate whitespace-nowrap"
                   >
                     {item.label}
                   </motion.span>
                 )}
               </AnimatePresence>
-              {item.children && !isCollapsed && (
+              {item.children && shouldExpand && (
                 <ChevronRight
                   className={cn(
                     "ml-auto h-4 w-4 transition-transform",
@@ -254,11 +259,12 @@ export default function Sidebar({ variant, className }: SidebarProps) {
 
             {/* Submenu */}
             <AnimatePresence>
-              {item.children && expandedItems.has(item.label) && !isCollapsed && (
+              {item.children && expandedItems.has(item.label) && shouldExpand && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.15 }}
                   className="ml-7 mt-1 space-y-1 overflow-hidden"
                 >
                   {item.children.map((child) => (
@@ -288,21 +294,22 @@ export default function Sidebar({ variant, className }: SidebarProps) {
         <button
           onClick={handleLogout}
           className={cn(
-            "flex items-center w-full px-3 py-2 text-sm font-medium text-muted-foreground rounded-lg hover:bg-muted hover:text-foreground transition-colors",
-            isCollapsed && "justify-center px-2"
+            "flex items-center w-full px-3 py-2 text-sm font-medium text-muted-foreground rounded-lg hover:bg-muted hover:text-foreground transition-all duration-200",
+            isCollapsed && !isHovered && "justify-center px-2"
           )}
         >
           <LogOut className={cn(
-            "flex-shrink-0",
-            isCollapsed ? "h-5 w-5" : "h-4 w-4 mr-3"
+            "flex-shrink-0 transition-all duration-200",
+            isCollapsed && !isHovered ? "h-5 w-5" : "h-4 w-4 mr-3"
           )} />
           <AnimatePresence>
-            {!isCollapsed && (
+            {shouldExpand && (
               <motion.span
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                className="truncate"
+                transition={{ duration: 0.15 }}
+                className="truncate whitespace-nowrap"
               >
                 Logout
               </motion.span>
@@ -326,11 +333,15 @@ export default function Sidebar({ variant, className }: SidebarProps) {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className={cn(
-        "hidden md:flex flex-col bg-card border-r border-border transition-all duration-300",
-        isCollapsed ? "w-16" : "w-64",
-        className
-      )}>
+      <div 
+        className={cn(
+          "hidden md:flex flex-col bg-card border-r border-border transition-all duration-300 relative",
+          isCollapsed && !isHovered ? "w-16" : "w-64",
+          className
+        )}
+        onMouseEnter={() => isCollapsed && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <SidebarContent />
 
         {/* Collapse Toggle */}
