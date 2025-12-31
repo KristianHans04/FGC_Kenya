@@ -143,10 +143,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const hasRole = (role: any): boolean => !!user?.role && user.role === role
+  const hasAnyRole = (roles: any[]): boolean => !!user?.role && roles.includes(user.role)
+  const isSuperAdmin = (): boolean => user?.role === 'SUPER_ADMIN'
+  const isAdmin = (): boolean => user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+  const isMentor = (): boolean => user?.role === 'MENTOR'
+  const isStudent = (): boolean => user?.role === 'STUDENT'
+  const isAlumni = (): boolean => user?.role === 'ALUMNI'
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
+    hasRole,
+    hasAnyRole,
+    isSuperAdmin,
+    isAdmin,
+    isMentor,
+    isStudent,
+    isAlumni,
     login,
     verifyOTP,
     logout,
