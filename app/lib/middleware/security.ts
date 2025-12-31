@@ -132,17 +132,28 @@ export function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
 
   // Content Security Policy (strict)
+  // Generate nonce for inline scripts/styles
+  const nonce = crypto.getRandomValues(new Uint8Array(16))
+    .reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), '')
+  
   response.headers.set(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
+    `script-src 'self' 'nonce-${nonce}'; ` +
+    `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com; ` +
     "img-src 'self' data: https:; " +
     "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; " +
     "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; " +
     "frame-src 'none'; " +
-    "object-src 'none';"
+    "object-src 'none'; " +
+    "base-uri 'self'; " +
+    "form-action 'self'; " +
+    "frame-ancestors 'none'; " +
+    "upgrade-insecure-requests;"
   )
+  
+  // Store nonce for use in app
+  response.headers.set('X-Nonce', nonce)
 
   // HSTS (HTTP Strict Transport Security)
   if (process.env.NODE_ENV === 'production') {
