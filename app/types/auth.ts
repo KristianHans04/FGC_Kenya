@@ -87,13 +87,14 @@ export interface SafeUser {
   lastName: string | null
   school: string | null
   emailVerified: boolean
-  roles: {
+  role?: Role  // Direct role field for streamlined schema
+  roles?: {
     role: Role
     cohort: string | null
     isActive: boolean
-  }[]
-  currentRole: Role
-  currentCohort: string | null
+  }[]  // Optional for backwards compatibility
+  currentRole?: Role
+  currentCohort?: string | null
 }
 
 /**
@@ -198,6 +199,7 @@ export interface AuthResponse {
   token: string
   refreshToken: string
   expiresAt: string
+  redirectUrl?: string
 }
 
 /**
@@ -293,8 +295,10 @@ export const rolePermissions = {
 /**
  * Check if a user has permission for an action
  */
-export function hasPermission(role: Role, permission: string): boolean {
-  return rolePermissions[role]?.[permission] === true;
+export function hasPermission(role: Role, permission: keyof typeof rolePermissions[Role]): boolean {
+  const permissions = rolePermissions[role];
+  if (!permissions) return false;
+  return (permissions as any)[permission] === true;
 }
 
 /**
