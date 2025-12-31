@@ -1,11 +1,16 @@
-/**
- * Gmail-like Email Inbox
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Email Inbox',
+  description: 'View and manage email inbox',
+  noIndex: true,
+})
+ AnimatePresence } from 'framer-motion'
 import {
   Mail,
   Inbox,

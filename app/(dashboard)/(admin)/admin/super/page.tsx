@@ -1,9 +1,16 @@
-/**
- * Super Admin Dashboard - BOSS Level Access
- * Full user list with real-time sorting and payment tracking
- */
+import { useState, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
 
-'use client'
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Super Admin',
+  description: 'Super administrator controls',
+  noIndex: true,
+})
+se client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -499,9 +506,9 @@ export default function SuperAdminDashboard() {
                             ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
                             : user.email.split('@')[0]}
                         </p>
-                        {user.cohortMemberships.length > 0 && (
+                        {user.userRoles?.length > 0 && (
                           <p className="text-xs text-muted-foreground">
-                            {user.cohortMemberships.map((c: any) => c.cohort).join(', ')}
+                            {user.userRoles.map((c: any) => c.cohort).filter(Boolean).join(', ')}
                           </p>
                         )}
                       </div>

@@ -1,10 +1,16 @@
-/**
- * Email Campaigns Management
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Email Campaigns',
+  description: 'Create and manage email campaigns',
+  noIndex: true,
+})
+act'
 import { motion } from 'framer-motion'
 import {
   Send,
@@ -283,12 +289,12 @@ export default function EmailCampaigns() {
                     <>
                       <div>
                         <p className="text-xs text-muted-foreground">Sent</p>
-                        <p className="font-medium">{campaign.sentCount.toLocaleString()}</p>
+                        <p className="font-medium">{campaign?.sentCount?.toLocaleString() || '0'}</p>
                       </div>
                       
                       <div>
                         <p className="text-xs text-muted-foreground">Open Rate</p>
-                        <p className="font-medium">{campaign.openRate}%</p>
+                        <p className="font-medium">{campaign?.openRate || 0}%</p>
                       </div>
                       
                       <div>

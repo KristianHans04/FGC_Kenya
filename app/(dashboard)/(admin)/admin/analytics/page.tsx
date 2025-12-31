@@ -1,6 +1,15 @@
-'use client'
-
 import { useState, useEffect } from 'react'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Analytics Dashboard',
+  description: 'View analytics and insights',
+  noIndex: true,
+})
+act'
 import {
   BarChart3,
   TrendingUp,

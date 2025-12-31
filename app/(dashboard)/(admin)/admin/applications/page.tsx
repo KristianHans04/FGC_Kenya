@@ -1,10 +1,16 @@
-/**
- * Admin Applications Management Page with Review Workflow
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Application Management',
+  description: 'Review and manage student applications',
+  noIndex: true,
+})
+t } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText,
@@ -65,7 +71,10 @@ export default function AdminApplicationsPage() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch(`/api/admin/applications?status=${filter}`)
+      const url = filter === 'all' 
+        ? '/api/admin/applications' 
+        : `/api/admin/applications?status=${filter}`
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         setApplications(data.data?.applications || [])

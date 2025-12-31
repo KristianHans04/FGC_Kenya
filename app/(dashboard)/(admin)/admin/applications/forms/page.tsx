@@ -1,10 +1,16 @@
-/**
- * Application Form Builder and Management
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Application Forms',
+  description: 'Create and manage application forms',
+  noIndex: true,
+})
+
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText,
@@ -110,7 +116,7 @@ export default function ApplicationFormsManagement() {
 
     try {
       await fetch(`/api/admin/applications/forms/${formId}/activate`, {
-        method: 'PUT'
+        method: 'POST'
       })
       fetchForms()
       fetchActiveForm()

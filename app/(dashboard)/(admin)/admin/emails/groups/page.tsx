@@ -1,10 +1,16 @@
-/**
- * Email Groups Management - Fine-grained email targeting
- */
-
-'use client'
-
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Email Groups',
+  description: 'Manage email distribution groups',
+  noIndex: true,
+})
+eState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,

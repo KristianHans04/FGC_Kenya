@@ -1,10 +1,16 @@
-/**
- * Admin Events Management Page
- */
-
-'use client'
-
 import { useState } from 'react'
+import { motion } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Event Management',
+  description: 'Manage team events and activities',
+  noIndex: true,
+})
+react'
 import { motion } from 'framer-motion'
 import {
   Calendar,

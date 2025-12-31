@@ -1,10 +1,16 @@
-/**
- * Media Management with Semantic Search
- */
-
-'use client'
-
 import { useState, useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import {
+
+import type { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/utils/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Media Management',
+  description: 'Manage media content and articles',
+  noIndex: true,
+})
+ } from 'react'
 import { motion } from 'framer-motion'
 import {
   FileText,
@@ -380,7 +386,7 @@ export default function MediaManagement() {
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                     <User className="h-3 w-3" />
-                    <span>{item.author.firstName || item.author.email.split('@')[0]}</span>
+                    <span>{item?.author?.firstName || item?.author?.email?.split('@')[0] || 'Unknown'}</span>
                     {item.cohort && (
                       <>
                         <span>•</span>
