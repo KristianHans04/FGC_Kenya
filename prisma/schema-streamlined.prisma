@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Streamlined Schema - Removing unnecessary JOIN tables
+// This is a proposed schema to reduce complexity
 
 generator client {
   provider = "prisma-client-js"
@@ -11,18 +11,28 @@ datasource db {
 }
 
 // =============================================================================
-// USER AND AUTHENTICATION MODELS
+// STREAMLINED USER MODEL - No separate UserRole table
 // =============================================================================
 
-/// User model for authentication with role history
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
   firstName     String?
   lastName      String?
   phone         String?
-  school        String?   // Current or last school
-  role          Role      @default(USER)  // Direct role field
+  school        String?
+  
+  // Role fields (no separate table needed)
+  role          Role      @default(USER)
+  cohort        String?   // e.g., "FGC2025", null for admins
+  roleAssignedAt DateTime @default(now())
+  roleAssignedBy String?  // User ID who assigned the role
+  roleNotes     String?   // Admin notes about role assignment
+  
+  // Previous roles tracking (as JSON)
+  roleHistory   Json?     // Array of {role, cohort, assignedAt, assignedBy, endedAt}
+  
+  // Status fields
   isActive      Boolean   @default(true)
   emailVerified Boolean   @default(false)
   lastLoginAt   DateTime?
@@ -36,8 +46,7 @@ model User {
   auditLogs     AuditLog[]    @relation("UserAuditLogs")
   adminActions  AuditLog[]    @relation("AdminAuditLogs")
   
-  // Role-based relationships
-  userRoles     UserRole[]    // Multiple roles across years
+  // Email relationships
   sentEmails    Email[]       @relation("SentEmails")
   receivedEmails Email[]      @relation("ReceivedEmails")
   emailDrafts   EmailDraft[]
@@ -47,90 +56,43 @@ model User {
   articles      MediaArticle[] @relation("AuthorArticles")
   reviewedArticles MediaArticle[] @relation("ReviewedArticles")
   
-  // Cohort relationships
-  cohortMemberships CohortMember[] @relation("CohortMembers")
-  
-  // Payment tracking (for super admin view)
+  // Payment tracking
   payments      Payment[]
   
   // Application forms created (for admins)
   createdForms  ApplicationForm[]
 
   @@index([email])
-}
-
-/// User role assignments with history
-model UserRole {
-  id        String      @id @default(uuid())
-  role      Role
-  cohort    String?     // e.g., "FGC2025", "FGC2026"
-  startDate DateTime    @default(now())
-  endDate   DateTime?   // null means currently active
-  isActive  Boolean     @default(true)
-  
-  // Relations
-  userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Who assigned this role
-  assignedBy String?
-  notes      String?    // Admin notes about role assignment
-  
-  @@unique([userId, role, cohort, startDate])
-  @@index([userId])
   @@index([role])
   @@index([cohort])
-  @@index([isActive])
 }
 
-/// Available roles in the system
 enum Role {
-  SUPER_ADMIN  // Full access to everything
-  ADMIN        // Manage users, applications, content
-  MENTOR       // Guide students, approve content
-  STUDENT      // Create content, participate
-  ALUMNI       // Former students
-  USER         // Regular users, applicants
-}
-
-/// Cohort membership tracking
-model CohortMember {
-  id        String      @id @default(uuid())
-  cohort    String      // e.g., "FGC2025"
-  role      CohortRole
-  joinedAt  DateTime    @default(now())
-  leftAt    DateTime?
-  isActive  Boolean     @default(true)
-  
-  // Relations
-  userId    String
-  user      User        @relation("CohortMembers", fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, cohort, role])
-  @@index([cohort])
-  @@index([isActive])
-}
-
-enum CohortRole {
+  SUPER_ADMIN
+  ADMIN
   MENTOR
   STUDENT
+  ALUMNI
+  USER
 }
 
 // =============================================================================
-// EMAIL SYSTEM (GMAIL-LIKE)
+// STREAMLINED EMAIL SYSTEM - No separate EmailLabel table
 // =============================================================================
 
-/// Email messages
 model Email {
   id          String      @id @default(uuid())
   subject     String
   body        String      // Rich text HTML
-  plainText   String?     // Plain text version
+  plainText   String?
   
   // Recipients
-  toEmails    String[]    // Array of email addresses
-  ccEmails    String[]    // CC recipients
-  bccEmails   String[]    // BCC recipients
+  toEmails    String[]
+  ccEmails    String[]
+  bccEmails   String[]
+  
+  // Labels as array instead of separate table
+  labels      String[]    @default(["INBOX"])
   
   // Metadata
   isRead      Boolean     @default(false)
@@ -144,7 +106,7 @@ model Email {
   replyToId   String?
   
   // Attachments
-  attachments Json?       // JSON array of attachment info
+  attachments Json?
   
   sentAt      DateTime?
   createdAt   DateTime    @default(now())
@@ -157,10 +119,6 @@ model Email {
   recipientId String?
   recipient   User?       @relation("ReceivedEmails", fields: [recipientId], references: [id])
   
-  // Labels/folders
-  labels      EmailLabel[]
-  
-  // Campaign association
   campaignId  String?
   campaign    EmailCampaign? @relation(fields: [campaignId], references: [id])
   
@@ -170,11 +128,10 @@ model Email {
   @@index([sentAt])
 }
 
-/// Email drafts
 model EmailDraft {
   id          String      @id @default(uuid())
   subject     String?
-  body        String?     // Rich text HTML
+  body        String?
   toEmails    String[]
   ccEmails    String[]
   bccEmails   String[]
@@ -183,45 +140,25 @@ model EmailDraft {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   
-  // Relations
   userId      String
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
 }
 
-/// Email labels/folders
-model EmailLabel {
-  id          String      @id @default(uuid())
-  name        String
-  color       String?
-  isSystem    Boolean     @default(false) // Inbox, Sent, etc.
-  
-  // Relations
-  emails      Email[]
-  
-  @@unique([name])
-}
-
-/// Email campaigns
 model EmailCampaign {
   id          String      @id @default(uuid())
   name        String
   description String?
   status      CampaignStatus @default(DRAFT)
   
-  // Target groups
-  targetGroup Json        // Detailed targeting criteria
-  
-  // Content
+  targetGroup Json        // Targeting criteria
   subject     String
-  body        String      // Rich text HTML
+  body        String
   
-  // Schedule
   scheduledAt DateTime?
   sentAt      DateTime?
   
-  // Stats
   sentCount   Int         @default(0)
   openCount   Int         @default(0)
   clickCount  Int         @default(0)
@@ -229,7 +166,6 @@ model EmailCampaign {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   
-  // Relations
   createdById String
   createdBy   User        @relation("CreatedCampaigns", fields: [createdById], references: [id])
   
@@ -248,52 +184,43 @@ enum CampaignStatus {
 }
 
 // =============================================================================
-// MEDIA SYSTEM (BEEHIIV-LIKE)
+// MEDIA SYSTEM
 // =============================================================================
 
-/// Media articles
 model MediaArticle {
   id          String      @id @default(uuid())
   slug        String      @unique
   title       String
   excerpt     String?
-  content     String      // Rich text content
+  content     String
   coverImage  String?
   
-  // Status
   status      ArticleStatus @default(DRAFT)
   
-  // SEO
   metaTitle   String?
   metaDescription String?
   tags        String[]
   
-  // Analytics
   viewCount   Int         @default(0)
   likes       Int         @default(0)
   shares      Int         @default(0)
   
-  // Publishing
   publishedAt DateTime?
   featuredAt  DateTime?
   
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   
-  // Relations
   authorId    String
   author      User        @relation("AuthorArticles", fields: [authorId], references: [id])
   
-  // Approval workflow
   reviewedById String?
   reviewedBy  User?       @relation("ReviewedArticles", fields: [reviewedById], references: [id])
   reviewedAt  DateTime?
   reviewNotes String?
   
-  // Cohort restriction
-  cohortRestriction String? // If set, only visible to this cohort
+  cohortRestriction String?
   
-  // Article revisions
   revisions   MediaRevision[]
   
   @@index([slug])
@@ -312,14 +239,12 @@ enum ArticleStatus {
   ARCHIVED
 }
 
-/// Media article revisions
 model MediaRevision {
   id          String      @id @default(uuid())
   content     String
-  changes     Json?       // Track what changed
+  changes     Json?
   createdAt   DateTime    @default(now())
   
-  // Relations
   articleId   String
   article     MediaArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
   
@@ -327,32 +252,27 @@ model MediaRevision {
 }
 
 // =============================================================================
-// APPLICATION MANAGEMENT SYSTEM
+// STREAMLINED APPLICATION SYSTEM - Status history as JSON
 // =============================================================================
 
-/// Application forms (created by admins)
 model ApplicationForm {
   id          String      @id @default(uuid())
-  season      String      @unique // e.g., "FGC2026"
+  season      String      @unique
   title       String
   description String?
   
-  // Form structure
-  fields      Json        // JSON schema for form fields
+  fields      Json
   
-  // Status
   isActive    Boolean     @default(false)
-  isDuplicate Boolean     @default(false) // If duplicated from another form
-  duplicatedFrom String?  // ID of original form
+  isDuplicate Boolean     @default(false)
+  duplicatedFrom String?
   
-  // Dates
   openDate    DateTime
   closeDate   DateTime
   
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   
-  // Relations
   createdById String
   createdBy   User        @relation(fields: [createdById], references: [id])
   
@@ -362,16 +282,17 @@ model ApplicationForm {
   @@index([isActive])
 }
 
-/// Student applications
 model Application {
   id              String            @id @default(uuid())
   season          String            
   status          ApplicationStatus @default(DRAFT)
   
-  // Form responses
-  responses       Json              // Dynamic based on form fields
+  // Status history as JSON instead of separate table
+  statusHistory   Json?             // Array of {status, changedAt, changedBy, notes}
   
-  // Personal Information (standard fields)
+  responses       Json
+  
+  // Personal Information
   firstName       String
   lastName        String
   email           String
@@ -411,12 +332,12 @@ model Application {
   interviewNotes  String?
   
   // Final selection
-  finalRank       Int?              // Top 10 get selected
+  finalRank       Int?
   selectionNotes  String?
   
   // Rejection
   rejectionReason String?
-  rejectionFeedback String?         // Optional personalized feedback
+  rejectionFeedback String?
   
   // Timestamps
   submittedAt     DateTime?
@@ -430,8 +351,6 @@ model Application {
   formId          String
   form            ApplicationForm   @relation(fields: [formId], references: [id])
   
-  statusHistory   ApplicationStatusHistory[]
-  
   @@unique([userId, season])
   @@index([status])
   @@index([season])
@@ -440,7 +359,6 @@ model Application {
   @@index([finalRank])
 }
 
-/// Application status values
 enum ApplicationStatus {
   DRAFT
   SUBMITTED
@@ -454,50 +372,27 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
-/// Track application status changes
-model ApplicationStatusHistory {
-  id            String            @id @default(uuid())
-  previousStatus ApplicationStatus?
-  newStatus     ApplicationStatus
-  notes         String?
-  emailSent     Boolean           @default(false)
-  changedBy     String?           // Admin user ID
-  createdAt     DateTime          @default(now())
-  
-  // Relations
-  applicationId String
-  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  
-  @@index([applicationId])
-}
-
 // =============================================================================
 // PAYMENT TRACKING
 // =============================================================================
 
-/// Payment records (visible to super admin)
 model Payment {
   id          String      @id @default(uuid())
   amount      Float
   currency    String      @default("KES")
-  purpose     String      // e.g., "Application Fee", "Donation", "Sponsorship"
+  purpose     String
   
-  // Payment details
-  method      String?     // e.g., "M-Pesa", "Bank Transfer", "PayPal"
+  method      String?
   reference   String?     @unique
   
-  // Status
   status      PaymentStatus @default(PENDING)
   
-  // Metadata
-  metadata    Json?       // Additional payment info
+  metadata    Json?
   
-  // Timestamps
   paidAt      DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   
-  // Relations
   userId      String?
   user        User?       @relation(fields: [userId], references: [id])
   
@@ -519,7 +414,6 @@ enum PaymentStatus {
 // AUTHENTICATION SUPPORT MODELS
 // =============================================================================
 
-/// OTP codes for email-based authentication
 model OTPCode {
   id        String      @id @default(uuid())
   code      String
@@ -530,7 +424,6 @@ model OTPCode {
   attempts  Int         @default(0)
   createdAt DateTime    @default(now())
   
-  // Relations
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   
@@ -538,14 +431,12 @@ model OTPCode {
   @@index([expiresAt])
 }
 
-/// OTP types for different purposes
 enum OTPType {
   LOGIN
   VERIFY_EMAIL
   ACCOUNT_RECOVERY
 }
 
-/// User sessions for JWT management
 model Session {
   id           String    @id @default(uuid())
   token        String    @unique
@@ -557,7 +448,6 @@ model Session {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   
-  // Relations
   userId       String
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
@@ -570,18 +460,16 @@ model Session {
 // AUDIT AND LOGGING
 // =============================================================================
 
-/// Audit log for tracking all important actions
 model AuditLog {
   id          String      @id @default(uuid())
   action      AuditAction
-  entityType  String      // 'User', 'Application', 'Email', 'Article', etc.
+  entityType  String
   entityId    String
-  details     Json?       // Additional context
+  details     Json?
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime    @default(now())
   
-  // Relations
   userId      String?
   user        User?       @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
   adminId     String?
@@ -593,7 +481,6 @@ model AuditLog {
   @@index([createdAt])
 }
 
-/// Types of audit actions
 enum AuditAction {
   // Authentication
   OTP_REQUESTED
@@ -650,10 +537,9 @@ enum AuditAction {
 }
 
 // =============================================================================
-// EMAIL QUEUE AND NOTIFICATIONS
+// EMAIL QUEUE
 // =============================================================================
 
-/// Email queue for async email sending
 model EmailQueue {
   id          String      @id @default(uuid())
   to          String
@@ -680,16 +566,15 @@ enum EmailQueueStatus {
 }
 
 // =============================================================================
-// EXISTING CONTENT MODELS (Preserved from original schema)
+// EXISTING CONTENT MODELS
 // =============================================================================
 
-// Team Members
 model TeamMember {
   id        String   @id @default(uuid())
   name      String
   role      String
-  category  String   // 'Current Team', 'Mentors', 'Alumni'
-  year      String?  // Year of participation
+  category  String
+  year      String?
   bio       String?
   image     String?
   linkedIn  String?
@@ -698,48 +583,45 @@ model TeamMember {
   updatedAt DateTime @updatedAt
 }
 
-// News Articles (separate from MediaArticle for public news)
 model NewsArticle {
   id          String   @id @default(uuid())
   title       String
   excerpt     String
   content     String?
-  category    String   // 'Competition', 'Outreach', 'Alumni', 'Partnership', 'Workshop'
+  category    String
   date        DateTime
   readTime    String
   author      String
   image       String?
-  tags        Json     // JSON array of tags
+  tags        Json
   featured    Boolean  @default(false)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// Competition Timeline
 model Competition {
   id           String   @id @default(uuid())
   year         String
   location     String
   theme        String
   achievement  String
-  highlights   Json     // JSON array of highlights
+  highlights   Json
   ranking      Int?
   teamSize     Int?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
-// Resources/Learning Materials
 model Resource {
   id          String   @id @default(uuid())
-  category    String   // 'robotics', 'programming', 'mechanical', 'electrical', 'competition', 'stem'
-  type        String   // 'guide', 'video', 'tutorial', 'course'
+  category    String
+  type        String
   title       String
   description String
-  difficulty  String   // 'beginner', 'intermediate', 'advanced', 'all'
+  difficulty  String
   duration    String
-  format      String   // 'PDF', 'Video', 'Interactive', etc.
+  format      String
   link        String
   featured    Boolean  @default(false)
   published   Boolean  @default(true)
@@ -747,94 +629,87 @@ model Resource {
   updatedAt   DateTime @updatedAt
 }
 
-// Impact Stories/Testimonials
 model ImpactStory {
   id        String   @id @default(uuid())
   name      String
   role      String
-  year      String   // Year as team member
+  year      String
   story     String
-  impact    String   // Short impact description
+  impact    String
   image     String?
   featured  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// Milestones/Achievements
 model Milestone {
   id          String   @id @default(uuid())
-  number      String   // e.g., "500+", "85%"
-  label       String   // e.g., "Students Trained"
+  number      String
+  label       String
   description String?
-  category    String?  // Optional category for grouping
-  order       Int      @default(0) // For ordering display
+  category    String?
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// Partners/Sponsors
 model Partner {
   id          String   @id @default(uuid())
   name        String
   description String?
   logo        String?
   website     String?
-  type        String   // 'sponsor', 'partner', 'collaborator'
-  level       String?  // 'gold', 'silver', 'bronze', etc.
+  type        String
+  level       String?
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// Outreach Programs
 model OutreachProgram {
   id            String   @id @default(uuid())
   title         String
   description   String
-  beneficiaries String   // e.g., "50+ schools", "200+ students monthly"
-  icon          String?  // Icon identifier
+  beneficiaries String
+  icon          String?
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
-// Quick Start Guides
 model QuickStartGuide {
   id          String   @id @default(uuid())
   title       String
   description String
-  icon        String   // Icon identifier
-  color       String   // Color class
-  items       Json     // JSON array of guide items
+  icon        String
+  color       String
+  items       Json
   order       Int      @default(0)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// External Links
 model ExternalLink {
   id          String   @id @default(uuid())
   title       String
   description String
   url         String
-  icon        String   // Icon identifier
-  category    String?  // Optional category
+  icon        String
+  category    String?
   order       Int      @default(0)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// Site Statistics
 model SiteStat {
   id        String   @id @default(uuid())
-  key       String   @unique // e.g., 'years_active', 'students_impacted'
+  key       String   @unique
   value     Int
-  suffix    String?  // e.g., '+', '%'
+  suffix    String?
   label     String
-  icon      String?  // Icon identifier
+  icon      String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

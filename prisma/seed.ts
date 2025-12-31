@@ -3,7 +3,109 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Clear existing data
+  console.log('🌱 Starting database seed...')
+  
+  // Create test users for each role
+  const testUsers = [
+    {
+      email: 'sadmin@example.com',
+      firstName: 'Super',
+      lastName: 'Admin',
+      school: 'FGC Kenya HQ',
+      role: 'SUPER_ADMIN',
+      cohort: null
+    },
+    {
+      email: 'admin@example.com',
+      firstName: 'Regular', 
+      lastName: 'Admin',
+      school: 'FGC Kenya HQ',
+      role: 'ADMIN',
+      cohort: null
+    },
+    {
+      email: 'mentor@example.com',
+      firstName: 'John',
+      lastName: 'Mentor',
+      school: 'Nairobi School',
+      role: 'MENTOR',
+      cohort: 'FGC2026'
+    },
+    {
+      email: 'student@example.com',
+      firstName: 'Jane',
+      lastName: 'Student',
+      school: 'Mombasa High School',
+      role: 'STUDENT',
+      cohort: 'FGC2026'
+    },
+    {
+      email: 'alumni@example.com',
+      firstName: 'Alice',
+      lastName: 'Alumni',
+      school: 'Kisumu Girls',
+      role: 'ALUMNI',
+      cohort: 'FGC2024'
+    },
+    {
+      email: 'user@example.com',
+      firstName: 'Bob',
+      lastName: 'User',
+      school: 'Eldoret School',
+      role: 'USER',
+      cohort: null
+    }
+  ]
+
+  for (const userData of testUsers) {
+    // Create or update user
+    const user = await prisma.user.upsert({
+      where: { email: userData.email },
+      update: {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        school: userData.school,
+        emailVerified: true,
+        isActive: true
+      },
+      create: {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        school: userData.school,
+        emailVerified: true,
+        isActive: true
+      }
+    })
+
+    console.log(`✅ Created/Updated user: ${user.email}`)
+
+    // Create user role assignment
+    await prisma.userRole.upsert({
+      where: {
+        userId_role_cohort_startDate: {
+          userId: user.id,
+          role: userData.role as any,
+          cohort: userData.cohort || '',
+          startDate: new Date()
+        }
+      },
+      update: {
+        isActive: true,
+        endDate: null
+      },
+      create: {
+        userId: user.id,
+        role: userData.role as any,
+        cohort: userData.cohort,
+        isActive: true,
+        assignedBy: 'SYSTEM',
+        notes: 'Test user created by seeder'
+      }
+    })
+  }
+
+  // Clear existing data  
   await prisma.$transaction([
     prisma.externalLink.deleteMany(),
     prisma.quickStartGuide.deleteMany(),
