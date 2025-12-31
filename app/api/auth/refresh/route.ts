@@ -84,7 +84,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         email: true,
         firstName: true,
         lastName: true,
-        role: true,
+        school: true,
+        userRoles: {
+          where: { isActive: true },
+          select: { role: true, cohort: true },
+        },
         emailVerified: true,
       },
     })
@@ -104,12 +108,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
+    const primaryRole = user.userRoles[0]
     const safeUser: SafeUser = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.role as any,
+      school: user.school,
+      roles: user.userRoles.map(ur => ({ 
+        role: ur.role as any, 
+        cohort: ur.cohort,
+        isActive: true 
+      })),
+      currentRole: (primaryRole?.role || 'USER') as any,
+      currentCohort: primaryRole?.cohort || null,
       emailVerified: user.emailVerified,
     }
 
