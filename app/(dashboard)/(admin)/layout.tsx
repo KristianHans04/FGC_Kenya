@@ -1,12 +1,15 @@
 /**
  * @file app/(dashboard)/(admin)/layout.tsx
- * @description Admin dashboard layout with sidebar navigation
+ * @description Admin dashboard layout with sidebar navigation and authentication
  * @author Team Kenya Dev
  */
 
-import Sidebar from '@/app/components/Sidebar'
+'use client'
 
-export default function AdminDashboardLayout({
+import Sidebar from '@/app/components/Sidebar'
+import { withAdminAuth } from '@/app/lib/auth/withAuth'
+
+function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode
@@ -20,3 +23,5 @@ export default function AdminDashboardLayout({
     </div>
   )
 }
+
+export default withAdminAuth(AdminDashboardLayout)
