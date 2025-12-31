@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -7,18 +9,6 @@ import Image from 'next/image'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
 import { VALIDATION, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'
 
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Login',
-  description: 'Login to your FIRST Global Team Kenya account',
-  noIndex: true,
-})
-t/link'
-import Image from 'next/image'
-import { useAuth } from '@/app/lib/contexts/AuthContext'
-import { VALIDATION, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
