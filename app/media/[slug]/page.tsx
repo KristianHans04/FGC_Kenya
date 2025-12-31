@@ -67,8 +67,8 @@ function renderContentBlock(block: ContentBlock, index: number) {
  * Story detail page displaying full content with reading time and similar stories
  */
 export default async function StoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = await params
-  const story = getStoryByIdentifier(resolvedParams.slug)
+  const { slug } = await params
+  const story = getStoryByIdentifier(slug)
 
   if (!story) {
     notFound()
