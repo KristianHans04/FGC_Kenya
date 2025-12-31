@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, firstName, lastName, phone } = validationResult.data
+  const school = '' // Default school value for new signups
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -126,9 +127,20 @@ export async function POST(request: NextRequest) {
         firstName,
         lastName,
         phone,
-        role: 'USER',
+        school,
         isActive: true,
         emailVerified: false,
+      },
+    })
+    
+    // Assign default USER role
+    await prisma.userRole.create({
+      data: {
+        userId: newUser.id,
+        role: 'USER',
+        isActive: true,
+        assignedBy: 'SYSTEM',
+        notes: 'Default role for new signup',
       },
     })
 
