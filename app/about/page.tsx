@@ -1,47 +1,10 @@
+'use client'
+
 import type { Metadata } from 'next'
 import { motion } from 'framer-motion'
 import { Trophy, Award, Users, Target, Globe, Calendar, MapPin, Star } from 'lucide-react'
 import Image from 'next/image'
 
-export const metadata: Metadata = {
-  title: 'About Us - FIRST Global Team Kenya',
-  description: 'Learn about FIRST Global Team Kenya\'s journey since 2017, our mission to inspire STEM education, and our achievements in international robotics competitions.',
-  keywords: 'FIRST Global, Team Kenya, Robotics, STEM, Education, Kenya, History, Achievements, Mission',
-  authors: [{ name: 'FIRST Global Team Kenya' }],
-  openGraph: {
-    title: 'About FIRST Global Team Kenya',
-    description: 'Discover our 9-year journey inspiring Kenyan youth through robotics and STEM education',
-    url: 'https://fgckenya.com/about',
-    siteName: 'FIRST Global Team Kenya',
-    images: [
-      {
-        url: '/images/og-about.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'FIRST Global Team Kenya - About Us',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'About FIRST Global Team Kenya',
-    description: 'Our mission, vision, and 9-year journey in robotics education',
-    images: ['/images/twitter-about.jpg'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-}
 
 const timeline = [
   {
