@@ -1,16 +1,7 @@
+'use client'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Session Schedule',
-  description: 'View and manage session schedule',
-  noIndex: true,
-})
-on'
 import { 
   ArrowLeft,
   Calendar,

@@ -1,17 +1,9 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Mentor Dashboard',
-  description: 'Mentor portal for FIRST Global Team Kenya',
-  noIndex: true,
-})
-fect } from 'react'
-import { motion } from 'framer-motion'
+import { useAuth } from '@/app/lib/contexts/AuthContext'
+import Link from 'next/link'
 import {
   Users,
   GraduationCap,
@@ -29,8 +21,6 @@ import {
   Target,
   Activity
 } from 'lucide-react'
-import { useAuth } from '@/app/lib/contexts/AuthContext'
-import Link from 'next/link'
 
 interface Student {
   id: string

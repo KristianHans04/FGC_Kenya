@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   ArrowLeft,
@@ -50,18 +50,19 @@ interface StudentDetail {
   }>
 }
 
-export default function StudentDetailPage({ params }: { params: { id: string } }) {
+export default function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const { id } = use(params)
   const [student, setStudent] = useState<StudentDetail | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchStudentDetail()
-  }, [params.id])
+  }, [id])
 
   const fetchStudentDetail = async () => {
     try {
-      const response = await fetch(`/api/mentor/students/${params.id}`)
+      const response = await fetch(`/api/mentor/students/${id}`)
       if (response.ok) {
         const data = await response.json()
         setStudent(data.data || null)
@@ -73,9 +74,9 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
     }
   }
 
-  // Mock data for display
+  // Fallback data for display when API returns null
   const mockStudent: StudentDetail = {
-    id: params.id,
+    id: id,
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@school.ac.ke',

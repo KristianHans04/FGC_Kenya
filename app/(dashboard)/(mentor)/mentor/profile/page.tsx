@@ -1,15 +1,6 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Mentor Profile',
-  description: 'Manage your mentor profile',
-  noIndex: true,
-})
-ct'
 import { 
   User,
   Mail,

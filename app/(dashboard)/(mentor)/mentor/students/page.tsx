@@ -1,16 +1,7 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'My Students',
-  description: 'View and manage your students',
-  noIndex: true,
-})
-nk'
 import { 
   Users, 
   Search, 

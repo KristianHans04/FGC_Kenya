@@ -1,16 +1,7 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Mentoring Sessions',
-  description: 'Manage your mentoring sessions',
-  noIndex: true,
-})
-nk'
 import { 
   Calendar,
   Clock,
