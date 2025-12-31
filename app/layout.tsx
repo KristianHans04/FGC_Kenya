@@ -18,6 +18,7 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://fgckenya.com'),
   title: 'FIRST Global Team Kenya - Inspiring the Future of STEM',
   description: 'Official website of FIRST Global Challenge Team Kenya. Join us in inspiring young Kenyans through robotics and STEM education.',
   keywords: 'FIRST Global, Team Kenya, Robotics, STEM, Education, Kenya, Technology, Innovation',
