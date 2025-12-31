@@ -14,6 +14,9 @@ import {
   applicationSubmittedTemplate,
   applicationStatusTemplate,
   adminNewApplicationTemplate,
+  type ApplicationSubmissionData,
+  type ApplicationStatusData,
+  type AdminNewApplicationData,
 } from './templates'
 
 /**
@@ -59,13 +62,24 @@ interface SendEmailOptions {
  * @returns Promise resolving to success boolean
  */
 export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
-  // In development, log email instead of sending
-  if (process.env.NODE_ENV === 'development' && !EMAIL_CONFIG.user) {
-    console.log('\n📧 Email Preview (Development Mode)')
+  // In development or when EMAIL_PROVIDER is 'console', log email instead of sending
+  if (process.env.NODE_ENV === 'development' || process.env.EMAIL_PROVIDER === 'console' || !EMAIL_CONFIG.user) {
+    console.log('\n' + '='.repeat(60))
+    console.log('[EMAIL PREVIEW] Development Mode')
+    console.log('='.repeat(60))
     console.log('To:', options.to)
     console.log('Subject:', options.subject)
-    console.log('Text:', options.text?.slice(0, 200) + '...')
-    console.log('---\n')
+    console.log('-'.repeat(60))
+    if (options.text) {
+      // Extract OTP code if present
+      const otpMatch = options.text.match(/OTP Code: (\d+)/);
+      if (otpMatch) {
+        console.log('[OTP CODE]:', otpMatch[1])
+        console.log('-'.repeat(60))
+      }
+      console.log('Content:', options.text.slice(0, 500))
+    }
+    console.log('='.repeat(60) + '\n')
     return true
   }
 
@@ -178,21 +192,15 @@ function generateEmailContent(
 ): { subject: string; html: string; text: string } {
   switch (template) {
     case 'otp-login':
-      return otpLoginTemplate(data as { code: string; expiryMinutes: number })
+      return otpLoginTemplate(data as unknown as { code: string; expiryMinutes: number })
     case 'welcome':
-      return welcomeTemplate(data as { firstName: string })
+      return welcomeTemplate(data as unknown as { firstName: string; email: string })
     case 'application-submitted':
-      return applicationSubmittedTemplate(
-        data as { firstName: string; applicationId: string; season: string }
-      )
+      return applicationSubmittedTemplate(data as unknown as ApplicationSubmissionData)
     case 'application-status':
-      return applicationStatusTemplate(
-        data as { firstName: string; status: ApplicationStatus; notes?: string; interviewDate?: Date }
-      )
+      return applicationStatusTemplate(data as unknown as ApplicationStatusData)
     case 'admin-new-application':
-      return adminNewApplicationTemplate(
-        data as { applicantName: string; applicantEmail: string; applicationId: string; season: string }
-      )
+      return adminNewApplicationTemplate(data as unknown as AdminNewApplicationData)
     default:
       throw new Error(`Unknown email template: ${template}`)
   }
@@ -219,7 +227,7 @@ export async function sendWelcomeEmail(
   email: string,
   firstName: string
 ): Promise<boolean> {
-  const { subject, html, text } = welcomeTemplate({ firstName })
+  const { subject, html, text } = welcomeTemplate({ firstName, email })
   return sendEmail({ to: email, subject, html, text })
 }
 
@@ -233,12 +241,14 @@ export async function sendWelcomeEmail(
 export async function sendApplicationStatusEmail(
   email: string,
   firstName: string,
+  applicationId: string,
   status: ApplicationStatus,
   notes?: string,
   interviewDate?: Date
 ): Promise<boolean> {
   const { subject, html, text } = applicationStatusTemplate({
     firstName,
+    applicationId,
     status,
     notes,
     interviewDate,
