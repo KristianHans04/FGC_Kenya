@@ -100,27 +100,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Super admin gets additional data if requested
     if (user.role === 'SUPER_ADMIN') {
       if (includeCohorts) {
-        select.cohortMemberships = {
-          select: {
-            cohort: true,
-            role: true,
-            isActive: true,
-            joinedAt: true,
-          }
-        }
-      }
-      if (includePayments) {
-        select.payments = {
+        select.userRoles = {
           select: {
             id: true,
-            amount: true,
-            currency: true,
-            status: true,
-            type: true,
-            createdAt: true,
+            role: true,
+            cohort: true,
+            startDate: true,
+            endDate: true,
+            isActive: true,
           }
         }
       }
+      // Payments feature not yet implemented
+      // if (includePayments) {
+      //   select.payments = true
+      // }
     }
 
     // Execute query with count
