@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useAuth } from '@/app/lib/contexts/AuthContext'
+import Link from 'next/link'
 import {
   BookOpen,
   FileText,
@@ -22,8 +24,6 @@ import {
   Image,
   PlusCircle
 } from 'lucide-react'
-import { useAuth } from '@/app/lib/contexts/AuthContext'
-import Link from 'next/link'
 
 interface TeamMember {
   id: string

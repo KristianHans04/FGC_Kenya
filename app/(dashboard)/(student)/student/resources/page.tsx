@@ -1,15 +1,8 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { BookOpen, FileText, Video, Download, Search } from 'lucide-react'
 
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Learning Resources',
-  description: 'Access learning materials and resources',
-  noIndex: true,
-})
-lucide-react'
 
 export default function StudentResourcesPage() {
   const [resources, setResources] = useState([])

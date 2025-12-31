@@ -1,15 +1,6 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { 
-
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'Training Modules',
-  description: 'Complete your training modules',
-  noIndex: true,
-})
-ct'
 import { 
   BookOpen, 
   PlayCircle, 

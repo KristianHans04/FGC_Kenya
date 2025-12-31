@@ -1,15 +1,8 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { User, Mail, Phone, School, Edit, Save } from 'lucide-react'
 
-import type { Metadata } from 'next'
-import { generateMetadata } from '@/app/lib/utils/metadata'
-
-export const metadata: Metadata = generateMetadata({
-  title: 'My Profile',
-  description: 'Manage your student profile',
-  noIndex: true,
-})
-lucide-react'
 
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState(null)
