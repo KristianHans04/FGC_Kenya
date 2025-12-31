@@ -14,15 +14,14 @@ datasource db {
 // USER AND AUTHENTICATION MODELS
 // =============================================================================
 
-/// User model for authentication
-/// Uses email-based OTP authentication (no passwords)
+/// User model for authentication with role history
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
   firstName     String?
   lastName      String?
   phone         String?
-  role          UserRole  @default(USER)
+  school        String?   // Current or last school
   isActive      Boolean   @default(true)
   emailVerified Boolean   @default(false)
   lastLoginAt   DateTime?
@@ -35,17 +34,489 @@ model User {
   applications  Application[]
   auditLogs     AuditLog[]    @relation("UserAuditLogs")
   adminActions  AuditLog[]    @relation("AdminAuditLogs")
+  
+  // Role-based relationships
+  userRoles     UserRole[]    // Multiple roles across years
+  sentEmails    Email[]       @relation("SentEmails")
+  receivedEmails Email[]      @relation("ReceivedEmails")
+  emailDrafts   EmailDraft[]
+  emailCampaigns EmailCampaign[] @relation("CreatedCampaigns")
+  
+  // Media relationships
+  articles      MediaArticle[] @relation("AuthorArticles")
+  reviewedArticles MediaArticle[] @relation("ReviewedArticles")
+  
+  // Cohort relationships
+  cohortMemberships CohortMember[] @relation("CohortMembers")
+  
+  // Payment tracking (for super admin view)
+  payments      Payment[]
+  
+  // Application forms created (for admins)
+  createdForms  ApplicationForm[]
 
   @@index([email])
-  @@index([role])
 }
 
-/// User roles for authorization
-enum UserRole {
-  USER
-  ADMIN
-  SUPER_ADMIN
+/// User role assignments with history
+model UserRole {
+  id        String      @id @default(uuid())
+  role      Role
+  cohort    String?     // e.g., "FGC2025", "FGC2026"
+  startDate DateTime    @default(now())
+  endDate   DateTime?   // null means currently active
+  isActive  Boolean     @default(true)
+  
+  // Relations
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Who assigned this role
+  assignedBy String?
+  notes      String?    // Admin notes about role assignment
+  
+  @@unique([userId, role, cohort, startDate])
+  @@index([userId])
+  @@index([role])
+  @@index([cohort])
+  @@index([isActive])
 }
+
+/// Available roles in the system
+enum Role {
+  SUPER_ADMIN  // Full access to everything
+  ADMIN        // Manage users, applications, content
+  MENTOR       // Guide students, approve content
+  STUDENT      // Create content, participate
+  ALUMNI       // Former students
+  USER         // Regular users, applicants
+}
+
+/// Cohort membership tracking
+model CohortMember {
+  id        String      @id @default(uuid())
+  cohort    String      // e.g., "FGC2025"
+  role      CohortRole
+  joinedAt  DateTime    @default(now())
+  leftAt    DateTime?
+  isActive  Boolean     @default(true)
+  
+  // Relations
+  userId    String
+  user      User        @relation("CohortMembers", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, cohort, role])
+  @@index([cohort])
+  @@index([isActive])
+}
+
+enum CohortRole {
+  MENTOR
+  STUDENT
+}
+
+// =============================================================================
+// EMAIL SYSTEM (GMAIL-LIKE)
+// =============================================================================
+
+/// Email messages
+model Email {
+  id          String      @id @default(uuid())
+  subject     String
+  body        String      // Rich text HTML
+  plainText   String?     // Plain text version
+  
+  // Recipients
+  toEmails    String[]    // Array of email addresses
+  ccEmails    String[]    // CC recipients
+  bccEmails   String[]    // BCC recipients
+  
+  // Metadata
+  isRead      Boolean     @default(false)
+  isStarred   Boolean     @default(false)
+  isArchived  Boolean     @default(false)
+  isDeleted   Boolean     @default(false)
+  isDraft     Boolean     @default(false)
+  
+  // Threading
+  threadId    String?
+  replyToId   String?
+  
+  // Attachments
+  attachments Json?       // JSON array of attachment info
+  
+  sentAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  senderId    String
+  sender      User        @relation("SentEmails", fields: [senderId], references: [id])
+  
+  recipientId String?
+  recipient   User?       @relation("ReceivedEmails", fields: [recipientId], references: [id])
+  
+  // Labels/folders
+  labels      EmailLabel[]
+  
+  // Campaign association
+  campaignId  String?
+  campaign    EmailCampaign? @relation(fields: [campaignId], references: [id])
+  
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([threadId])
+  @@index([sentAt])
+}
+
+/// Email drafts
+model EmailDraft {
+  id          String      @id @default(uuid())
+  subject     String?
+  body        String?     // Rich text HTML
+  toEmails    String[]
+  ccEmails    String[]
+  bccEmails   String[]
+  attachments Json?
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+/// Email labels/folders
+model EmailLabel {
+  id          String      @id @default(uuid())
+  name        String
+  color       String?
+  isSystem    Boolean     @default(false) // Inbox, Sent, etc.
+  
+  // Relations
+  emails      Email[]
+  
+  @@unique([name])
+}
+
+/// Email campaigns
+model EmailCampaign {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  status      CampaignStatus @default(DRAFT)
+  
+  // Target groups
+  targetGroup Json        // Detailed targeting criteria
+  
+  // Content
+  subject     String
+  body        String      // Rich text HTML
+  
+  // Schedule
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  
+  // Stats
+  sentCount   Int         @default(0)
+  openCount   Int         @default(0)
+  clickCount  Int         @default(0)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  createdById String
+  createdBy   User        @relation("CreatedCampaigns", fields: [createdById], references: [id])
+  
+  emails      Email[]
+  
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  CANCELLED
+}
+
+// =============================================================================
+// MEDIA SYSTEM (BEEHIIV-LIKE)
+// =============================================================================
+
+/// Media articles
+model MediaArticle {
+  id          String      @id @default(uuid())
+  slug        String      @unique
+  title       String
+  excerpt     String?
+  content     String      // Rich text content
+  coverImage  String?
+  
+  // Status
+  status      ArticleStatus @default(DRAFT)
+  
+  // SEO
+  metaTitle   String?
+  metaDescription String?
+  tags        String[]
+  
+  // Analytics
+  viewCount   Int         @default(0)
+  likes       Int         @default(0)
+  shares      Int         @default(0)
+  
+  // Publishing
+  publishedAt DateTime?
+  featuredAt  DateTime?
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  authorId    String
+  author      User        @relation("AuthorArticles", fields: [authorId], references: [id])
+  
+  // Approval workflow
+  reviewedById String?
+  reviewedBy  User?       @relation("ReviewedArticles", fields: [reviewedById], references: [id])
+  reviewedAt  DateTime?
+  reviewNotes String?
+  
+  // Cohort restriction
+  cohortRestriction String? // If set, only visible to this cohort
+  
+  // Article revisions
+  revisions   MediaRevision[]
+  
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@index([cohortRestriction])
+}
+
+enum ArticleStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+/// Media article revisions
+model MediaRevision {
+  id          String      @id @default(uuid())
+  content     String
+  changes     Json?       // Track what changed
+  createdAt   DateTime    @default(now())
+  
+  // Relations
+  articleId   String
+  article     MediaArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  
+  @@index([articleId])
+}
+
+// =============================================================================
+// APPLICATION MANAGEMENT SYSTEM
+// =============================================================================
+
+/// Application forms (created by admins)
+model ApplicationForm {
+  id          String      @id @default(uuid())
+  season      String      @unique // e.g., "FGC2026"
+  title       String
+  description String?
+  
+  // Form structure
+  fields      Json        // JSON schema for form fields
+  
+  // Status
+  isActive    Boolean     @default(false)
+  isDuplicate Boolean     @default(false) // If duplicated from another form
+  duplicatedFrom String?  // ID of original form
+  
+  // Dates
+  openDate    DateTime
+  closeDate   DateTime
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  
+  applications Application[]
+  
+  @@index([season])
+  @@index([isActive])
+}
+
+/// Student applications
+model Application {
+  id              String            @id @default(uuid())
+  season          String            
+  status          ApplicationStatus @default(DRAFT)
+  
+  // Form responses
+  responses       Json              // Dynamic based on form fields
+  
+  // Personal Information (standard fields)
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  dateOfBirth     DateTime
+  gender          String?
+  nationality     String            @default("Kenyan")
+  
+  // Educational Information
+  school          String
+  grade           String
+  county          String
+  
+  // Documents
+  resumeUrl       String?
+  recommendationUrl String?
+  portfolioUrl    String?
+  
+  // Consent
+  parentConsent   Boolean           @default(false)
+  termsAccepted   Boolean           @default(false)
+  parentEmail     String?
+  parentPhone     String?
+  
+  // Review process
+  reviewNotes     String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  
+  // Shortlisting
+  shortlistRank   Int?
+  shortlistNotes  String?
+  
+  // Interview
+  interviewDate   DateTime?
+  interviewScore  Float?
+  interviewNotes  String?
+  
+  // Final selection
+  finalRank       Int?              // Top 10 get selected
+  selectionNotes  String?
+  
+  // Rejection
+  rejectionReason String?
+  rejectionFeedback String?         // Optional personalized feedback
+  
+  // Timestamps
+  submittedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  formId          String
+  form            ApplicationForm   @relation(fields: [formId], references: [id])
+  
+  statusHistory   ApplicationStatusHistory[]
+  
+  @@unique([userId, season])
+  @@index([status])
+  @@index([season])
+  @@index([submittedAt])
+  @@index([shortlistRank])
+  @@index([finalRank])
+}
+
+/// Application status values
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  ACCEPTED
+  REJECTED
+  WAITLISTED
+  WITHDRAWN
+}
+
+/// Track application status changes
+model ApplicationStatusHistory {
+  id            String            @id @default(uuid())
+  previousStatus ApplicationStatus?
+  newStatus     ApplicationStatus
+  notes         String?
+  emailSent     Boolean           @default(false)
+  changedBy     String?           // Admin user ID
+  createdAt     DateTime          @default(now())
+  
+  // Relations
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  @@index([applicationId])
+}
+
+// =============================================================================
+// PAYMENT TRACKING
+// =============================================================================
+
+/// Payment records (visible to super admin)
+model Payment {
+  id          String      @id @default(uuid())
+  amount      Float
+  currency    String      @default("KES")
+  purpose     String      // e.g., "Application Fee", "Donation", "Sponsorship"
+  
+  // Payment details
+  method      String?     // e.g., "M-Pesa", "Bank Transfer", "PayPal"
+  reference   String?     @unique
+  
+  // Status
+  status      PaymentStatus @default(PENDING)
+  
+  // Metadata
+  metadata    Json?       // Additional payment info
+  
+  // Timestamps
+  paidAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+  
+  @@index([status])
+  @@index([purpose])
+  @@index([paidAt])
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+// =============================================================================
+// AUTHENTICATION SUPPORT MODELS
+// =============================================================================
 
 /// OTP codes for email-based authentication
 model OTPCode {
@@ -57,11 +528,11 @@ model OTPCode {
   usedAt    DateTime?
   attempts  Int         @default(0)
   createdAt DateTime    @default(now())
-
+  
   // Relations
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
   @@index([userId, code])
   @@index([expiresAt])
 }
@@ -84,120 +555,14 @@ model Session {
   isValid      Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-
+  
   // Relations
   userId       String
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
-}
-
-// =============================================================================
-// APPLICATION MODELS FOR 2026 SEASON
-// =============================================================================
-
-/// Student applications for FIRST Global Team Kenya 2026
-model Application {
-  id              String            @id @default(uuid())
-  season          String            @default("2026")
-  status          ApplicationStatus @default(DRAFT)
-  
-  // Personal Information
-  firstName       String
-  lastName        String
-  email           String
-  phone           String
-  dateOfBirth     DateTime
-  gender          String?
-  nationality     String            @default("Kenyan")
-  
-  // Educational Information
-  school          String
-  grade           String
-  county          String
-  
-  // Experience & Interest
-  experience      ExperienceLevel
-   interests       Json              // JSON array of interest IDs
-   motivation      String
-  
-  // Additional Information
-  previouslyApplied Boolean         @default(false)
-  hearAboutUs     String?
-   additionalInfo  String?
-  
-  // Documents (URLs to uploaded files)
-  resumeUrl       String?
-  recommendationUrl String?
-  
-  // Consent
-  parentConsent   Boolean           @default(false)
-  termsAccepted   Boolean           @default(false)
-  parentEmail     String?
-  parentPhone     String?
-  
-  // Admin Review
-   reviewNotes     String?
-  reviewedBy      String?
-  reviewedAt      DateTime?
-  interviewDate   DateTime?
-   interviewNotes  String?
-  finalScore      Float?
-  
-  // Timestamps
-  submittedAt     DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-
-  // Relations
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  statusHistory   ApplicationStatusHistory[]
-
-  @@unique([userId, season])
-  @@index([status])
-  @@index([season])
-  @@index([submittedAt])
-}
-
-/// Application status values
-enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  SHORTLISTED
-  INTERVIEW_SCHEDULED
-  INTERVIEWED
-  ACCEPTED
-  REJECTED
-  WAITLISTED
-  WITHDRAWN
-}
-
-/// Experience levels for applicants
-enum ExperienceLevel {
-  NONE
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
-/// Track application status changes
-model ApplicationStatusHistory {
-  id            String            @id @default(uuid())
-  previousStatus ApplicationStatus?
-  newStatus     ApplicationStatus
-   notes         String?
-  changedBy     String?           // Admin user ID
-  createdAt     DateTime          @default(now())
-
-  // Relations
-  applicationId String
-  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  @@index([applicationId])
 }
 
 // =============================================================================
@@ -208,19 +573,19 @@ model ApplicationStatusHistory {
 model AuditLog {
   id          String      @id @default(uuid())
   action      AuditAction
-  entityType  String      // 'User', 'Application', etc.
+  entityType  String      // 'User', 'Application', 'Email', 'Article', etc.
   entityId    String
   details     Json?       // Additional context
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime    @default(now())
-
+  
   // Relations
   userId      String?
   user        User?       @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
   adminId     String?
   admin       User?       @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: SetNull)
-
+  
   @@index([userId])
   @@index([entityType, entityId])
   @@index([action])
@@ -244,6 +609,8 @@ enum AuditAction {
   USER_UPDATED
   USER_DELETED
   USER_ROLE_CHANGED
+  USER_ROLE_ASSIGNED
+  USER_ROLE_REVOKED
   
   // Application Management
   APPLICATION_CREATED
@@ -256,14 +623,33 @@ enum AuditAction {
   APPLICATION_SHORTLISTED
   APPLICATION_WITHDRAWN
   
+  // Email Actions
+  EMAIL_SENT
+  EMAIL_DRAFTED
+  EMAIL_CAMPAIGN_CREATED
+  EMAIL_CAMPAIGN_SENT
+  
+  // Media Actions
+  ARTICLE_CREATED
+  ARTICLE_UPDATED
+  ARTICLE_PUBLISHED
+  ARTICLE_APPROVED
+  ARTICLE_REJECTED
+  
   // Admin Actions
+  ADMIN_VIEWED_USER
   ADMIN_VIEWED_APPLICATION
   ADMIN_EXPORTED_DATA
   ADMIN_BULK_ACTION
+  ADMIN_VIEWED_PAYMENTS
+  
+  // Super Admin Actions
+  SUPER_ADMIN_VIEWED_ALL_USERS
+  SUPER_ADMIN_TRACKED_PAYMENT
 }
 
 // =============================================================================
-// EMAIL AND NOTIFICATION MODELS
+// EMAIL QUEUE AND NOTIFICATIONS
 // =============================================================================
 
 /// Email queue for async email sending
@@ -273,46 +659,23 @@ model EmailQueue {
   subject     String
   template    String
   data        Json
-  status      EmailStatus @default(PENDING)
+  status      EmailQueueStatus @default(PENDING)
   attempts    Int         @default(0)
   maxAttempts Int         @default(3)
   error       String?
   sentAt      DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-
+  
   @@index([status])
   @@index([createdAt])
 }
 
-enum EmailStatus {
+enum EmailQueueStatus {
   PENDING
   SENDING
   SENT
   FAILED
-}
-
-// =============================================================================
-// SYSTEM SETTINGS
-// =============================================================================
-
-/// Application season settings
-model SeasonSettings {
-  id                    String    @id @default(uuid())
-  season                String    @unique
-  applicationOpenDate   DateTime
-  applicationCloseDate  DateTime
-  reviewStartDate       DateTime?
-  interviewStartDate    DateTime?
-  announcementDate      DateTime?
-  isActive              Boolean   @default(false)
-  maxApplications       Int       @default(500)
-  currentApplications   Int       @default(0)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@index([season])
-  @@index([isActive])
 }
 
 // =============================================================================
@@ -334,7 +697,7 @@ model TeamMember {
   updatedAt DateTime @updatedAt
 }
 
-// News Articles
+// News Articles (separate from MediaArticle for public news)
 model NewsArticle {
   id          String   @id @default(uuid())
   title       String
@@ -345,7 +708,7 @@ model NewsArticle {
   readTime    String
   author      String
   image       String?
-   tags        Json     // JSON array of tags
+  tags        Json     // JSON array of tags
   featured    Boolean  @default(false)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -359,7 +722,7 @@ model Competition {
   location     String
   theme        String
   achievement  String
-   highlights   Json     // JSON array of highlights
+  highlights   Json     // JSON array of highlights
   ranking      Int?
   teamSize     Int?
   createdAt    DateTime @default(now())
@@ -442,7 +805,7 @@ model QuickStartGuide {
   description String
   icon        String   // Icon identifier
   color       String   // Color class
-   items       Json     // JSON array of guide items
+  items       Json     // JSON array of guide items
   order       Int      @default(0)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
