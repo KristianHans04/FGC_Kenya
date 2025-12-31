@@ -234,7 +234,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { applicationIds, status, notes } = validationResult.data
 
     // Update applications in transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const updates = []
 
       for (const applicationId of applicationIds) {
@@ -270,6 +270,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         await sendApplicationStatusEmail(
           application.email,
           application.user.firstName || application.firstName,
+          application.id,
           status as any,
           notes,
           undefined // No interview date for bulk updates

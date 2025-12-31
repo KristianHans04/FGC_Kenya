@@ -204,7 +204,7 @@ export async function PUT(
     }
 
     // Update application in transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Update application
       const updatedApplication = await tx.application.update({
         where: { id },
@@ -243,6 +243,7 @@ export async function PUT(
       await sendApplicationStatusEmail(
         application.email,
         application.user.firstName || application.firstName,
+        application.id,
         reviewData.status as ApplicationStatus,
         reviewData.notes,
         reviewData.interviewDate ? new Date(reviewData.interviewDate) : undefined
