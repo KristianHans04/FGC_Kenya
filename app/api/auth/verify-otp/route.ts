@@ -164,6 +164,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      school: null,
       role: user.role as any,
       emailVerified: true,
     }
