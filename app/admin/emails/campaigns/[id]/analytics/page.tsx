@@ -1,10 +1,24 @@
 'use client'
 
+import { use, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 
-export default function CampaignAnalyticsPage({ params }: { params: { id: string } }) {
+export default function CampaignAnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
+  useEffect(() => {
+    document.title = 'Campaign Analytics | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'View analytics for your email campaign')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'View analytics for your email campaign'
+      document.head.appendChild(meta)
+    }
+  }, [])
   const router = useRouter()
+  const { id } = use(params)
 
   return (
     <div className="p-8">
@@ -17,7 +31,7 @@ export default function CampaignAnalyticsPage({ params }: { params: { id: string
       </button>
       
       <h1 className="text-3xl font-bold mb-4">Campaign Analytics</h1>
-      <p className="text-muted-foreground">Campaign ID: {params.id}</p>
+      <p className="text-muted-foreground">Campaign ID: {id}</p>
       
       <div className="mt-8 bg-card rounded-lg border p-6">
         <p className="text-center text-muted-foreground">Analytics data will be displayed here</p>
