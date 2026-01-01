@@ -58,7 +58,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Get user info for response
     const { verifyAccessToken } = await import('@/app/lib/auth/jwt')
-    const payload = verifyAccessToken(newTokens.accessToken)
+    const payload = await verifyAccessToken(newTokens.accessToken)
 
     if (!payload) {
       return addSecurityHeaders(
@@ -85,10 +85,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         firstName: true,
         lastName: true,
         school: true,
-        userRoles: {
-          where: { isActive: true },
-          select: { role: true, cohort: true },
-        },
+        role: true,
         emailVerified: true,
       },
     })
@@ -108,20 +105,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const primaryRole = user.userRoles[0]
     const safeUser: SafeUser = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       school: user.school,
-      roles: user.userRoles.map(ur => ({ 
-        role: ur.role as any, 
-        cohort: ur.cohort,
-        isActive: true 
-      })),
-      currentRole: (primaryRole?.role || 'USER') as any,
-      currentCohort: primaryRole?.cohort || null,
+      role: user.role as any,
       emailVerified: user.emailVerified,
     }
 

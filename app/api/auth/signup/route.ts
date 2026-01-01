@@ -133,17 +133,6 @@ export async function POST(request: NextRequest) {
       },
     })
     
-    // Assign default USER role
-    await prisma.userRole.create({
-      data: {
-        userId: newUser.id,
-        role: 'USER',
-        isActive: true,
-        assignedBy: 'SYSTEM',
-        notes: 'Default role for new signup',
-      },
-    })
-
     // Generate OTP for email verification
     const otp = generateOTPCode()
     const expiresAt = new Date(Date.now() + SECURITY.OTP_EXPIRY_MINUTES * 60 * 1000)

@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requestOTPSchema } from '@/app/lib/validations/auth'
-import { canRequestOTP, createOTP } from '@/app/lib/auth/otp'
+import { canRequestOTP, createOTP, OTP_CONFIG } from '@/app/lib/auth/otp'
 import type { OTPType } from '@/app/types/auth'
 import { sendOTPEmail } from '@/app/lib/email'
 import prisma from '@/app/lib/db'
@@ -93,9 +93,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Generate and store OTP
     const otpCode = await createOTP(user.id, 'LOGIN' as OTPType)
+    
+    // Record timestamp when OTP was sent
+    const otpSentAt = Math.floor(Date.now() / 1000) // Unix timestamp
 
-    // Send OTP email
-    const emailSent = await sendOTPEmail(email, otpCode, 10)
+    // Send OTP email (will use OTP_CONFIG.EXPIRY_MINUTES by default)
+    const emailSent = await sendOTPEmail(email, otpCode)
 
     if (!emailSent) {
       console.error('Failed to send OTP email to:', email)
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         action: 'OTP_REQUESTED',
         entityType: 'User',
         entityId: user.id,
-        details: { emailSent },
+        details: { emailSent, otpSentAt },
         ipAddress: request.headers.get('x-forwarded-for') ||
                   request.headers.get('x-real-ip'),
         userAgent: request.headers.get('user-agent'),
@@ -119,7 +122,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       NextResponse.json({
         success: true,
         message: 'OTP sent to your email',
-      } as ApiResponse<void>)
+        data: { otpSentAt } // Return timestamp to client
+      } as ApiResponse<{ otpSentAt: number }>)
     )
 
     return response
