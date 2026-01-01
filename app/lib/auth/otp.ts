@@ -15,13 +15,17 @@ export const OTP_CONFIG = {
   /** Length of OTP code */
   LENGTH: 6,
   /** OTP expiry time in minutes */
-  EXPIRY_MINUTES: 10,
+  EXPIRY_MINUTES: 5,
+  /** OTP expiry time in seconds (for frontend use) */
+  EXPIRY_SECONDS: 300, // 5 minutes in seconds
   /** Maximum verification attempts before lockout */
   MAX_ATTEMPTS: 5,
   /** Cooldown period between OTP requests in seconds */
-  COOLDOWN_SECONDS: 60,
-  /** Maximum OTPs per email per hour */
-  MAX_OTPS_PER_HOUR: 5,
+  COOLDOWN_SECONDS: 30, // Changed from 60 to 30 seconds
+  /** Maximum OTPs per rate limit period */
+  MAX_OTPS_PER_PERIOD: 5,
+  /** Rate limit period in minutes */
+  RATE_LIMIT_MINUTES: 15,
 } as const
 
 /**
@@ -110,19 +114,19 @@ export async function canRequestOTP(
     }
   }
 
-  // Check hourly limit
-  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
-  const hourlyCount = await prisma.oTPCode.count({
+  // Check rate limit (15 minutes instead of 1 hour)
+  const rateLimitPeriod = new Date(now.getTime() - OTP_CONFIG.RATE_LIMIT_MINUTES * 60 * 1000)
+  const periodCount = await prisma.oTPCode.count({
     where: {
       userId,
-      createdAt: { gte: oneHourAgo },
+      createdAt: { gte: rateLimitPeriod },
     },
   })
 
-  if (hourlyCount >= OTP_CONFIG.MAX_OTPS_PER_HOUR) {
+  if (periodCount >= OTP_CONFIG.MAX_OTPS_PER_PERIOD) {
     return {
       canRequest: false,
-      reason: 'Too many OTP requests. Please try again in an hour.',
+      reason: `Too many OTP requests. Please try again in ${OTP_CONFIG.RATE_LIMIT_MINUTES} minutes for security.`,
     }
   }
 

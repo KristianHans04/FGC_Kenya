@@ -1,10 +1,10 @@
 /**
  * @file lib/auth/jwt.ts
- * @description JWT token generation and verification utilities
+ * @description JWT token generation and verification utilities using jose
  * @author Team Kenya Dev
  */
 
-import jwt from 'jsonwebtoken'
+import { SignJWT, jwtVerify } from 'jose'
 import prisma from '@/app/lib/db'
 import type { JWTPayload, UserRole } from '@/app/types/auth'
 
@@ -25,15 +25,15 @@ export const JWT_CONFIG = {
 } as const
 
 /**
- * Get JWT secret from environment
+ * Get JWT secret as Uint8Array for jose
  * @throws Error if JWT_SECRET is not configured
  */
-function getJWTSecret(): string {
+function getJWTSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET
   if (!secret) {
     throw new Error('JWT_SECRET environment variable is not configured')
   }
-  return secret
+  return new TextEncoder().encode(secret)
 }
 
 /**
@@ -68,25 +68,26 @@ function generateRefreshToken(): string {
  * @param sessionId - Session ID
  * @returns Object containing access token, refresh token, and expiry
  */
-export function generateTokens(
+export async function generateTokens(
   userId: string,
   email: string,
   role: UserRole,
   sessionId: string
-): { accessToken: string; refreshToken: string; expiresAt: Date } {
+): Promise<{ accessToken: string; refreshToken: string; expiresAt: Date }> {
   const secret = getJWTSecret()
 
-  const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
+  const payload = {
     userId,
     email,
     roles: [{ role: role as any, cohort: null }],
     sessionId,
   }
 
-  const accessToken = jwt.sign(payload, secret, {
-    algorithm: JWT_CONFIG.ALGORITHM,
-    expiresIn: JWT_CONFIG.ACCESS_TOKEN_EXPIRY,
-  })
+  const accessToken = await new SignJWT(payload)
+    .setProtectedHeader({ alg: JWT_CONFIG.ALGORITHM })
+    .setIssuedAt()
+    .setExpirationTime('15m')
+    .sign(secret)
 
   const refreshToken = generateRefreshToken()
   
@@ -102,19 +103,22 @@ export function generateTokens(
  * @param token - JWT token string
  * @returns Decoded payload or null if invalid
  */
-export function verifyAccessToken(token: string): JWTPayload | null {
+export async function verifyAccessToken(token: string): Promise<JWTPayload | null> {
   try {
     const secret = getJWTSecret()
-    const decoded = jwt.verify(token, secret, {
+    const { payload } = await jwtVerify(token, secret, {
       algorithms: [JWT_CONFIG.ALGORITHM],
-    }) as JWTPayload
+    })
 
-    return decoded
+    // Cast payload to our JWTPayload type
+    return payload as unknown as JWTPayload
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      console.debug('Token expired')
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      console.debug('Invalid token:', error.message)
+    if (error instanceof Error) {
+      if (error.message.includes('expired')) {
+        console.debug('Token expired')
+      } else {
+        console.debug('Invalid token:', error.message)
+      }
     }
     return null
   }
@@ -156,7 +160,7 @@ export async function createSession(
   })
 
   // Generate tokens with session ID
-  const { accessToken, refreshToken, expiresAt } = generateTokens(
+  const { accessToken, refreshToken, expiresAt } = await generateTokens(
     userId,
     email,
     role,
@@ -242,10 +246,7 @@ export async function refreshTokens(
           select: { 
             id: true, 
             email: true,
-            userRoles: {
-              where: { isActive: true },
-              select: { role: true, cohort: true },
-            },
+            role: true,
           },
         },
       },
@@ -256,10 +257,10 @@ export async function refreshTokens(
     }
 
     // Generate new tokens
-    const tokens = generateTokens(
+    const tokens = await generateTokens(
       session.userId,
       session.user.email,
-      (session.user.userRoles[0]?.role || 'USER') as UserRole,
+      (session.user.role || 'USER') as UserRole,
       session.id
     )
 
