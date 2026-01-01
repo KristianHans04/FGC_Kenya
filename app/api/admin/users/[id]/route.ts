@@ -72,10 +72,7 @@ export async function DELETE(
       where: { id },
       select: { 
         email: true,
-        userRoles: {
-          where: { isActive: true },
-          select: { role: true },
-        },
+        role: true,
       },
     })
 
@@ -106,7 +103,7 @@ export async function DELETE(
       id,
       {
         email: userToDelete.email,
-        role: userToDelete.userRoles[0]?.role || 'USER',
+        role: userToDelete.role || 'USER',
       },
       authenticatedRequest
     )

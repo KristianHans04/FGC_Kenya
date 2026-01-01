@@ -100,10 +100,7 @@ export async function PUT(
         email: true,
         firstName: true,
         lastName: true,
-        userRoles: {
-          where: { isActive: true },
-          select: { role: true, cohort: true },
-        },
+        role: true,
         isActive: true,
         emailVerified: true,
         createdAt: true,

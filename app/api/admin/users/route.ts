@@ -100,13 +100,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Super admin gets additional data if requested
     if (user.role === 'SUPER_ADMIN') {
       if (includeCohorts) {
-        select.userRoles = {
+        select.cohortMemberships = {
           select: {
             id: true,
-            role: true,
             cohort: true,
-            startDate: true,
-            endDate: true,
+            role: true,
+            joinedAt: true,
+            leftAt: true,
             isActive: true,
           }
         }
