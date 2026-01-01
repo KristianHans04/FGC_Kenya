@@ -30,10 +30,14 @@ const createPrismaClient = () => {
  * Singleton Prisma client instance
  * In development, store in global to prevent hot-reload issues
  */
-export const prisma: PrismaClient = global.prisma ?? createPrismaClient()
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma: PrismaClient = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma
+  globalForPrisma.prisma = prisma
 }
 
 /**
