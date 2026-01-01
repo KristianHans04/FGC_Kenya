@@ -139,3 +139,6 @@ redis_data/
 
 # AI Documentations Master
 AI_DOCUMENTATIONS.mdtemp_docs/
+
+#Github Copilot
+.github/*
