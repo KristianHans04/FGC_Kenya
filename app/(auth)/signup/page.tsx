@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { 
@@ -27,6 +27,21 @@ interface SignupFormData {
 }
 
 export default function SignupPage() {
+  
+  useEffect(() => {
+    document.title = 'Sign Up | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Create your FIRST Global Team Kenya account')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Create your FIRST Global Team Kenya account'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [formData, setFormData] = useState<SignupFormData>({
     email: '',
     firstName: '',

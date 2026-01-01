@@ -8,79 +8,172 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
 import { VALIDATION, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'
-
+import OTPVerification from '@/app/components/auth/OTPVerification'
+import { getDashboardRoute } from '@/app/lib/constants/navigation'
+import { OTP_CONFIG } from '@/app/lib/auth/otp'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
-  const [step, setStep] = useState<'email' | 'otp'>('email')
+  
+  useEffect(() => {
+    document.title = 'Login | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Sign in to your FIRST Global Team Kenya account')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Sign in to your FIRST Global Team Kenya account'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+  // Initialize state from sessionStorage to persist across reloads
+  const [email, setEmail] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('otp_email') || ''
+    }
+    return ''
+  })
+  const [step, setStep] = useState<'email' | 'otp'>(() => {
+    if (typeof window !== 'undefined') {
+      return (sessionStorage.getItem('otp_step') as 'email' | 'otp') || 'email'
+    }
+    return 'email'
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [emailError, setEmailError] = useState('')
-  const { login, verifyOTP, isAuthenticated } = useAuth()
+  const [otpSentAt, setOtpSentAt] = useState<number | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('otp_sent_at')
+      return stored ? parseInt(stored, 10) : undefined
+    }
+    return undefined
+  })
+  const { login, verifyOTP, isAuthenticated, user } = useAuth()
   const router = useRouter()
+
+  // Save state to sessionStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (email) {
+        sessionStorage.setItem('otp_email', email)
+      } else {
+        sessionStorage.removeItem('otp_email')
+      }
+      
+      if (step === 'otp') {
+        sessionStorage.setItem('otp_step', step)
+      } else {
+        sessionStorage.removeItem('otp_step')
+      }
+      
+      if (otpSentAt) {
+        sessionStorage.setItem('otp_sent_at', otpSentAt.toString())
+      } else {
+        sessionStorage.removeItem('otp_sent_at')
+      }
+    }
+  }, [email, step, otpSentAt])
+
+  // Check if OTP is still valid on mount
+  useEffect(() => {
+    if (step === 'otp' && otpSentAt) {
+      const now = Math.floor(Date.now() / 1000)
+      const elapsed = now - otpSentAt
+      
+      // If OTP has expired, reset to email step
+      if (elapsed > OTP_CONFIG.EXPIRY_SECONDS) {
+        setStep('email')
+        setOtpSentAt(undefined)
+        // Don't show error on email page - it's confusing
+        sessionStorage.removeItem('otp_step')
+        sessionStorage.removeItem('otp_sent_at')
+      }
+    }
+  }, [])
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard')
+    if (isAuthenticated && user) {
+      const dashboardRoute = getDashboardRoute(user.role || 'USER')
+      router.push(dashboardRoute)
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, user, router])
 
   // Don't render the login form if already authenticated
   if (isAuthenticated) {
     return null
   }
 
-  const validateEmail = (): boolean => {
-    if (!email) {
-      setEmailError(ERROR_MESSAGES.VALIDATION.REQUIRED_FIELD)
-      return false
-    }
-    if (!VALIDATION.EMAIL.test(email)) {
-      setEmailError(ERROR_MESSAGES.VALIDATION.INVALID_EMAIL)
-      return false
-    }
-    setEmailError('')
-    return true
+  const validateEmail = (email: string) => {
+    const emailRegex = VALIDATION.EMAIL
+    return emailRegex.test(email)
   }
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateEmail()) return
-
-    setIsLoading(true)
+  const handleEmailSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault()
     setError('')
     setSuccess('')
+    setEmailError('')
 
-    try {
-      await login(email)
-      setSuccess(SUCCESS_MESSAGES.AUTHENTICATION.OTP_SENT)
-      setStep('otp')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : ERROR_MESSAGES.NETWORK.SERVER_ERROR)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!VALIDATION.OTP.test(otp)) {
-      setError(ERROR_MESSAGES.VALIDATION.INVALID_OTP)
+    if (!email.trim()) {
+      setEmailError('Email is required')
       return
     }
 
+    if (!validateEmail(email)) {
+      setEmailError(ERROR_MESSAGES.VALIDATION.INVALID_EMAIL)
+      return
+    }
+
+    // Check if we already have an active OTP session (even from another tab)
+    const storedOtpSentAt = sessionStorage.getItem('otp_sent_at')
+    const storedEmail = sessionStorage.getItem('otp_email')
+    
+    if (storedOtpSentAt && storedEmail === email) {
+      const now = Math.floor(Date.now() / 1000)
+      const sentAt = parseInt(storedOtpSentAt, 10)
+      const elapsed = now - sentAt
+      
+      // If OTP is still valid, go back to OTP step
+      if (elapsed < OTP_CONFIG.EXPIRY_SECONDS) {
+        setOtpSentAt(sentAt)
+        setStep('otp')
+        setSuccess('Your verification code is still active')
+        return
+      } else {
+        // Clear expired session data
+        sessionStorage.removeItem('otp_sent_at')
+        sessionStorage.removeItem('otp_step')
+      }
+    }
+
     setIsLoading(true)
-    setError('')
 
     try {
-      const redirectUrl = await verifyOTP(email, otp)
-      setSuccess(SUCCESS_MESSAGES.AUTHENTICATION.LOGIN_SUCCESS)
-      setTimeout(() => {
-        router.push(redirectUrl || '/dashboard')
-      }, 1500)
+      const result = await login(email)
+      if (result.success && result.data?.otpSentAt) {
+        setSuccess(SUCCESS_MESSAGES.AUTHENTICATION.OTP_SENT)
+        setOtpSentAt(result.data.otpSentAt)
+        setStep('otp')
+      } else {
+        // Make rate limiting message more user-friendly
+        let errorMessage = result.error?.message || ERROR_MESSAGES.AUTHENTICATION.INVALID_CREDENTIALS
+        
+        // Check if it's a rate limiting error and make it clearer
+        if (errorMessage.includes('Please wait')) {
+          const match = errorMessage.match(/(\d+) seconds/)
+          if (match) {
+            errorMessage = `⏰ Too soon! Please wait ${match[1]} seconds before requesting a new code.`
+          }
+        } else if (errorMessage.includes('Too many OTP requests')) {
+          errorMessage = '🔒 Too many attempts. Please try again in an hour for security reasons.'
+        }
+        
+        setError(errorMessage)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : ERROR_MESSAGES.AUTHENTICATION.INVALID_CREDENTIALS)
     } finally {
@@ -88,19 +181,71 @@ export default function LoginPage() {
     }
   }
 
-  const handleBackToEmail = () => {
-    setStep('email')
-    setOtp('')
+  const handleOTPVerify = async (otp: string) => {
     setError('')
     setSuccess('')
+
+    try {
+      const result = await verifyOTP(email, otp)
+      if (result.success) {
+        setSuccess(SUCCESS_MESSAGES.AUTHENTICATION.LOGIN_SUCCESS)
+        
+        // Clear session storage on successful login
+        sessionStorage.removeItem('otp_email')
+        sessionStorage.removeItem('otp_step')
+        sessionStorage.removeItem('otp_sent_at')
+        
+        // Redirect based on user role
+        if (result.data?.user?.role) {
+          const dashboardRoute = getDashboardRoute(result.data.user.role)
+          setTimeout(() => {
+            router.push(dashboardRoute)
+          }, 500)
+        } else {
+          // Fallback to default dashboard
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 500)
+        }
+      } else {
+        setError(result.error?.message || ERROR_MESSAGES.AUTHENTICATION.OTP_EXPIRED)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : ERROR_MESSAGES.AUTHENTICATION.INVALID_CREDENTIALS)
+    }
+  }
+
+  const handleResendOTP = async () => {
+    setError('')
+    setSuccess('')
+    
+    try {
+      const result = await login(email)
+      if (result.success && result.data?.otpSentAt) {
+        setSuccess('New verification code sent!')
+        setOtpSentAt(result.data.otpSentAt)
+      } else {
+        setError(result.error?.message || 'Failed to resend code')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resend code')
+    }
+  }
+
+  const handleBackToEmail = () => {
+    setStep('email')
+    setError('')
+    setSuccess('')
+    setOtpSentAt(undefined)
+    
+    // Clear OTP-related session storage
+    sessionStorage.removeItem('otp_step')
+    sessionStorage.removeItem('otp_sent_at')
   }
 
   return (
     <div className="min-h-screen w-full flex bg-background overflow-hidden">
-      {/* 
-        Left Panel - Brand Visuals (60% of screen on desktop)
-        Dominant Color: Kenya Black/Dark Theme
-      */}
+      {/* Left Panel - Brand Visuals (60% of screen on desktop) */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative bg-kenya-black flex-col justify-between p-12 text-white overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 z-0">
@@ -146,13 +291,9 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* 
-        Right Panel - Login Form (40% of screen on desktop)
-        Secondary Color: White/Light Gray (Surface)
-        Accent Color: Kenya Green (Buttons)
-      */}
+      {/* Right Panel - Login Form (40% of screen on desktop) */}
       <div className="w-full lg:w-1/2 xl:w-5/12 flex items-center justify-center p-6 sm:p-12 lg:p-16 bg-background relative">
-        {/* Mobile Background (Visible only on small screens) */}
+        {/* Mobile Background */}
         <div className="absolute inset-0 z-0 lg:hidden">
            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background"></div>
         </div>
@@ -186,37 +327,43 @@ export default function LoginPage() {
             {step === 'email' ? (
               <motion.div
                 key="email-step"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
                 <form onSubmit={handleEmailSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-foreground">
+                    <label htmlFor="email" className="block text-sm font-medium text-foreground">
                       Email Address
                     </label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      </div>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <input
                         id="email"
                         name="email"
                         type="email"
+                        autoComplete="email"
                         required
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value)
                           setEmailError('')
                         }}
-                        className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl bg-background focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
-                        placeholder="name@example.com"
+                        className="block w-full pl-11 pr-3 py-3 border border-border rounded-xl bg-background focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
+                        placeholder="Enter your email"
                         disabled={isLoading}
                       />
                     </div>
                     {emailError && (
-                      <p className="text-xs text-red-500 font-medium ml-1">{emailError}</p>
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="text-sm text-red-600 flex items-center mt-1"
+                      >
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {emailError}
+                      </motion.p>
                     )}
                   </div>
 
@@ -228,6 +375,17 @@ export default function LoginPage() {
                     >
                       <AlertCircle className="h-5 w-5 flex-shrink-0" />
                       <span className="font-medium">{error}</span>
+                    </motion.div>
+                  )}
+
+                  {success && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="flex items-center space-x-3 text-sm text-primary bg-primary/10 p-4 rounded-xl border border-primary/20"
+                    >
+                      <CheckCircle className="h-5 w-5 flex-shrink-0" />
+                      <span className="font-medium">{success}</span>
                     </motion.div>
                   )}
 
@@ -251,102 +409,16 @@ export default function LoginPage() {
                 </form>
               </motion.div>
             ) : (
-              <motion.div
-                key="otp-step"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 ring-4 ring-primary/5">
-                    <Shield className="h-8 w-8 text-primary" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-foreground">Verification Code</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Enter the 6-digit code sent to <br />
-                    <span className="font-medium text-foreground">{email}</span>
-                  </p>
-                </div>
-
-                <form onSubmit={handleOTPSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <input
-                      id="otp"
-                      name="otp"
-                      type="text"
-                      required
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      className="block w-full text-center py-4 border border-border rounded-xl bg-background focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none text-3xl font-mono tracking-[0.5em] placeholder:tracking-normal font-bold"
-                      placeholder="000000"
-                      disabled={isLoading}
-                      autoFocus
-                    />
-                  </div>
-
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="flex items-center space-x-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-800"
-                    >
-                      <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                      <span className="font-medium">{error}</span>
-                    </motion.div>
-                  )}
-
-                  {success && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="flex items-center space-x-3 text-sm text-green-600 bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-100 dark:border-green-800"
-                    >
-                      <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                      <span className="font-medium">{success}</span>
-                    </motion.div>
-                  )}
-
-                  <div className="flex space-x-3">
-                    <button
-                      type="button"
-                      onClick={handleBackToEmail}
-                      className="flex-1 py-3.5 px-4 border border-border rounded-xl hover:bg-muted/50 transition-colors text-sm font-medium"
-                      disabled={isLoading}
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isLoading || otp.length !== 6}
-                      className="flex-[2] flex items-center justify-center py-3.5 px-4 rounded-xl text-white bg-kenya-green hover:bg-green-700 shadow-lg shadow-green-900/20 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none font-semibold tracking-wide"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          Verify & Login
-                          <Shield className="ml-2 h-5 w-5" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-
-                <div className="mt-6 text-center">
-                  <button
-                    onClick={handleEmailSubmit}
-                    className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
-                    disabled={isLoading}
-                  >
-                    Resend Code
-                  </button>
-                </div>
-              </motion.div>
+              <OTPVerification
+                email={email}
+                onVerify={handleOTPVerify}
+                onResend={handleResendOTP}
+                onBack={handleBackToEmail}
+                isLoading={isLoading}
+                error={error}
+                success={success}
+                otpSentAt={otpSentAt}
+              />
             )}
           </AnimatePresence>
 
