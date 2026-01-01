@@ -36,6 +36,21 @@ interface Student {
 }
 
 export default function MentorStudentsPage() {
+  
+  useEffect(() => {
+    document.title = 'My Students | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'View and manage your assigned students')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'View and manage your assigned students'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')

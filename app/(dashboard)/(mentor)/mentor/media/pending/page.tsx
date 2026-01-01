@@ -33,6 +33,21 @@ interface PendingMedia {
 }
 
 export default function MentorMediaPendingPage() {
+  
+  useEffect(() => {
+    document.title = 'Media Review | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Review and approve student media submissions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Review and approve student media submissions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [pendingMedia, setPendingMedia] = useState<PendingMedia[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedMedia, setSelectedMedia] = useState<PendingMedia | null>(null)

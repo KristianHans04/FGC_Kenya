@@ -51,6 +51,18 @@ interface StudentDetail {
 }
 
 export default function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  useEffect(() => {
+    document.title = 'Student Details | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'View detailed information about your student')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'View detailed information about your student'
+      document.head.appendChild(meta)
+    }
+  }, [])
   const router = useRouter()
   const { id } = use(params)
   const [student, setStudent] = useState<StudentDetail | null>(null)

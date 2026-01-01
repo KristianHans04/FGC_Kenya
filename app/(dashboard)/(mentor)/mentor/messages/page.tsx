@@ -48,6 +48,21 @@ interface Conversation {
 }
 
 export default function MentorMessagesPage() {
+  
+  useEffect(() => {
+    document.title = 'Mentor Messages | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Communicate with your mentees')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Communicate with your mentees'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [messages, setMessages] = useState<Message[]>([])
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)

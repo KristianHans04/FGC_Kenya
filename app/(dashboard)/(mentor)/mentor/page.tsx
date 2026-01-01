@@ -62,6 +62,21 @@ interface TrainingSession {
 }
 
 export default function MentorDashboard() {
+  
+  useEffect(() => {
+    document.title = 'Mentor Dashboard | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Guide and support FIRST Global students')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Guide and support FIRST Global students'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const { user } = useAuth()
   const [cohort, setCohort] = useState<string>('')
   const [students, setStudents] = useState<Student[]>([])

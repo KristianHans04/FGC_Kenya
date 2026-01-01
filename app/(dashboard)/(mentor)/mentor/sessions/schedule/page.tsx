@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   ArrowLeft,
@@ -30,6 +30,21 @@ interface SessionForm {
 }
 
 export default function ScheduleSessionPage() {
+  
+  useEffect(() => {
+    document.title = 'Session Schedule | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Schedule and manage mentoring sessions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Schedule and manage mentoring sessions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<SessionForm>({

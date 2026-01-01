@@ -34,6 +34,21 @@ interface Resource {
 }
 
 export default function MentorResourcesPage() {
+  
+  useEffect(() => {
+    document.title = 'Mentor Resources | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Access teaching materials and resources')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Access teaching materials and resources'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')

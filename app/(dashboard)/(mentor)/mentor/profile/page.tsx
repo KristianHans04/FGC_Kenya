@@ -44,6 +44,21 @@ interface MentorProfile {
 }
 
 export default function MentorProfilePage() {
+  
+  useEffect(() => {
+    document.title = 'Mentor Profile | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage your mentor profile and availability')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage your mentor profile and availability'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [profile, setProfile] = useState<MentorProfile | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)

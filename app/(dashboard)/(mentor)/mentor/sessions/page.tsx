@@ -38,6 +38,21 @@ interface Session {
 }
 
 export default function MentorSessionsPage() {
+  
+  useEffect(() => {
+    document.title = 'Mentoring Sessions | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage your mentoring sessions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage your mentoring sessions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('all')
