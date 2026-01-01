@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { FileText, Scale, AlertTriangle, UserCheck, Code, Mail } from 'lucide-react'
@@ -11,6 +13,20 @@ import { FileText, Scale, AlertTriangle, UserCheck, Code, Mail } from 'lucide-re
  * @returns {JSX.Element} The terms of service page component
  */
 export default function TermsOfServicePage() {
+  useEffect(() => {
+    document.title = 'Terms of Service | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Terms and conditions for using FIRST Global Team Kenya platform')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Terms and conditions for using FIRST Global Team Kenya platform'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   return (
     <>
       {/* Hero Section */}

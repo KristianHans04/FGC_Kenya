@@ -6,12 +6,26 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { BookOpen, Code, Cpu, Wrench, Users, Globe, Download, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ResourcesPage() {
+  useEffect(() => {
+    document.title = 'Resources | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Educational resources and learning materials for FIRST Global participants')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Educational resources and learning materials for FIRST Global participants'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [selectedCategory, setSelectedCategory] = useState('all')
 
   const resources = [

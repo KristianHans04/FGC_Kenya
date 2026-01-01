@@ -1,256 +1,444 @@
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Clock, User, ArrowLeft, ArrowRight, Tag } from 'lucide-react'
-import { getAllStories, getStoryByIdentifier, getSimilarStories, formatDate, formatRelativeDate, ContentBlock } from '@/app/lib/media'
-import ShareButton from '@/app/components/ShareButton'
+import { motion } from 'framer-motion'
+import {
+  Calendar,
+  Clock,
+  User,
+  Eye,
+  Share2,
+  ArrowLeft,
+  Tag,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Copy,
+  Check,
+  ChevronRight
+} from 'lucide-react'
 
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const stories = getAllStories()
-  return stories.map(story => ({
-    slug: story.slug,
-  }))
+interface Article {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  coverImage?: string
+  author: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
+    role: string
+  }
+  tags: string[]
+  viewCount: number
+  publishedAt: string
+  readTime?: number
+  metaTitle?: string
+  metaDescription?: string
 }
 
-/**
- * Render individual content blocks with appropriate styling
- */
-function renderContentBlock(block: ContentBlock, index: number) {
-  switch (block.type) {
-    case 'paragraph':
-      return (
-        <p key={index} className="text-lg leading-relaxed mb-6 text-foreground">
-          {block.text}
-        </p>
-      )
-    
-    case 'heading':
-      return (
-        <h2 key={index} className="text-2xl md:text-3xl font-bold font-heading mt-8 mb-4 text-foreground">
-          {block.text}
-        </h2>
-      )
-    
-    case 'image':
-      return (
-        <figure key={index} className="my-8">
-          <div className="aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-            <span className="text-muted-foreground">Story Image</span>
+interface RelatedArticle {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  coverImage?: string
+  author: {
+    firstName?: string
+    lastName?: string
+    email: string
+  }
+  publishedAt: string
+  viewCount: number
+  readTime?: number
+}
+
+export default function ArticleDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const slug = params?.slug as string
+
+  const [article, setArticle] = useState<Article | null>(null)
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
+  const [viewTracked, setViewTracked] = useState(false)
+
+  useEffect(() => {
+    if (slug) {
+      fetchArticle()
+    }
+  }, [slug])
+
+  const fetchArticle = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/media/articles/${slug}`)
+      if (response.ok) {
+        const data = await response.json()
+        setArticle(data.article)
+        setRelatedArticles(data.related || [])
+
+        // Update page meta tags
+        if (data.article) {
+          document.title = `${data.article.metaTitle || data.article.title} | FIRST Global Team Kenya`
+          const metaDescription = document.querySelector('meta[name="description"]')
+          if (metaDescription) {
+            metaDescription.setAttribute('content', data.article.metaDescription || data.article.excerpt)
+          } else {
+            const meta = document.createElement('meta')
+            meta.name = 'description'
+            meta.content = data.article.metaDescription || data.article.excerpt
+            document.head.appendChild(meta)
+          }
+        }
+
+        // Track page view
+        if (!viewTracked) {
+          trackPageView()
+        }
+      } else if (response.status === 404) {
+        router.push('/404')
+      }
+    } catch (error) {
+      console.error('Error fetching article:', error)
+      router.push('/404')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const trackPageView = async () => {
+    try {
+      await fetch(`/api/media/articles/${slug}/view`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: getSessionId(),
+          userAgent: navigator.userAgent,
+          referrer: document.referrer
+        })
+      })
+      setViewTracked(true)
+    } catch (error) {
+      console.error('Failed to track view:', error)
+    }
+  }
+
+  const getSessionId = () => {
+    let sessionId = sessionStorage.getItem('session_id')
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      sessionStorage.setItem('session_id', sessionId)
+    }
+    return sessionId
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const shareArticle = (platform: string) => {
+    if (!article) return
+
+    const url = window.location.href
+    const title = article.title
+    const text = article.excerpt
+
+    switch (platform) {
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
+        break
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank')
+        break
+      case 'linkedin':
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
+        break
+      case 'copy':
+        navigator.clipboard.writeText(url).then(() => {
+          setCopied(true)
+          setTimeout(() => setCopied(false), 2000)
+        })
+        break
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-12">
+        <div className="container px-4 mx-auto max-w-4xl">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-8"></div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-full mb-8"></div>
+            <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded mb-8"></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5"></div>
+            </div>
           </div>
-          {block.caption && (
-            <figcaption className="text-sm text-muted-foreground text-center mt-2 italic">
-              {block.caption}
-            </figcaption>
-          )}
-        </figure>
-      )
-    
-    case 'blockquote':
-      return (
-        <blockquote key={index} className="border-l-4 border-primary pl-6 py-4 my-6 bg-muted/30 rounded-r-lg">
-          <p className="text-lg italic text-foreground mb-2">
-            "{block.text}"
+        </div>
+      </div>
+    )
+  }
+
+  if (!article) {
+    return (
+      <div className="min-h-screen py-12 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Article Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            The article you're looking for doesn't exist or has been removed.
           </p>
-          {block.author && (
-            <cite className="text-sm text-muted-foreground not-italic">
-              — {block.author}
-            </cite>
-          )}
-        </blockquote>
-      )
-    
-    default:
-      return null
+          <Link
+            href="/media"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Articles
+          </Link>
+        </div>
+      </div>
+    )
   }
-}
-
-/**
- * Story detail page displaying full content with reading time and similar stories
- */
-export default async function StoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const story = getStoryByIdentifier(slug)
-
-  if (!story) {
-    notFound()
-  }
-
-  const similarStories = getSimilarStories(story, 3)
 
   return (
-    <>
-      {/* Hero Section */}
-      <section className="relative py-12 overflow-hidden">
-        <div className="absolute inset-0 african-pattern opacity-5"></div>
-        <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Back button */}
-            <div className="mb-6">
-              <Link
-                href="/media"
-                className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Media
-              </Link>
-            </div>
+    <div className="min-h-screen py-12">
+      <article className="container px-4 mx-auto">
+        <div className="max-w-4xl mx-auto">
+          {/* Back Button */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mb-8"
+          >
+            <Link
+              href="/media"
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Articles
+            </Link>
+          </motion.div>
 
-            {/* Category and metadata */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <span className="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
-                {story.category}
-              </span>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          {/* Article Header */}
+          <motion.header
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-8"
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{article.title}</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">{article.excerpt}</p>
+
+            {/* Article Meta */}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pb-6 border-b">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>
+                  By <span className="font-medium text-foreground">
+                    {article.author.firstName ? 
+                      `${article.author.firstName} ${article.author.lastName || ''}` : 
+                      article.author.email.split('@')[0]
+                    }
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                <time dateTime={story.publishedDate}>
-                  {formatDate(story.publishedDate)}
-                </time>
-                <span className="mx-2">•</span>
-                <span>{formatRelativeDate(story.publishedDate)}</span>
+                {formatDate(article.publishedAt)}
               </div>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>{story.readTimeMinutes} min read</span>
+              {article.readTime && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {article.readTime} min read
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                {article.viewCount + (viewTracked ? 1 : 0)} views
               </div>
             </div>
+          </motion.header>
 
-            {/* Title */}
-            <h1 className="text-3xl md:text-5xl font-bold font-heading mb-6 text-foreground">
-              {story.title}
-            </h1>
+          {/* Cover Image */}
+          {article.coverImage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8 rounded-xl overflow-hidden"
+            >
+              <img
+                src={article.coverImage}
+                alt={article.title}
+                className="w-full h-auto"
+              />
+            </motion.div>
+          )}
 
-            {/* Excerpt */}
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              {story.excerpt}
-            </p>
+          {/* Article Content */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="prose prose-lg max-w-none dark:prose-invert mb-12"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
 
-            {/* Author info */}
-            <div className="flex items-start gap-4 p-6 bg-muted/30 rounded-lg mb-8">
-              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <User className="h-6 w-6 text-primary" />
+          {/* Tags */}
+          {article.tags.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-wrap items-center gap-2 mb-8"
+            >
+              <Tag className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              {article.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/media?tag=${encodeURIComponent(tag)}`}
+                  className="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm transition-colors"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Share Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="border-t pt-8 mb-12"
+          >
+            <h3 className="text-lg font-semibold mb-4">Share this article</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => shareArticle('facebook')}
+                className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                title="Share on Facebook"
+              >
+                <Facebook className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => shareArticle('twitter')}
+                className="p-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                title="Share on Twitter"
+              >
+                <Twitter className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => shareArticle('linkedin')}
+                className="p-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+                title="Share on LinkedIn"
+              >
+                <Linkedin className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => shareArticle('copy')}
+                className="p-3 bg-gray-200 dark:bg-gray-700 text-foreground rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+                title="Copy link"
+              >
+                {copied ? <Check className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
+                {copied && <span className="text-sm">Copied!</span>}
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Author Bio */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 mb-12"
+          >
+            <h3 className="text-lg font-semibold mb-2">About the Author</h3>
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <User className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <div className="font-semibold text-foreground mb-1">{story.author}</div>
-                <div className="text-sm text-muted-foreground">{story.authorBio}</div>
+                <h4 className="font-semibold">
+                  {article.author.firstName ? 
+                    `${article.author.firstName} ${article.author.lastName || ''}` : 
+                    article.author.email.split('@')[0]
+                  }
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                  {article.author.role.toLowerCase().replace('_', ' ')}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  Contributing writer and member of the FIRST Global Team Kenya community.
+                </p>
               </div>
             </div>
+          </motion.div>
 
-            {/* Tags */}
-            {story.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8">
-                {story.tags.map((tag, idx) => (
-                  <span 
-                    key={idx} 
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-background border border-border text-sm rounded-full"
+          {/* Related Articles */}
+          {relatedArticles.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <h2 className="text-2xl font-bold mb-6">Related Articles</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                {relatedArticles.map((related) => (
+                  <Link
+                    key={related.id}
+                    href={`/media/${related.slug}`}
+                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all group"
                   >
-                    <Tag className="h-3 w-3" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="py-12">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <article className="max-w-4xl mx-auto">
-            {story.content.map((block, index) => renderContentBlock(block, index))}
-          </article>
-
-          {/* Share section */}
-          <div className="max-w-4xl mx-auto mt-12 pt-8 border-t border-border">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Last updated: {formatDate(story.updatedDate)}
-              </div>
-              <ShareButton title={story.title} text={story.excerpt} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Similar Stories Section */}
-      {similarStories.length > 0 && (
-        <section className="py-16 bg-muted/30">
-          <div className="container px-4 sm:px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold font-heading mb-8">
-                Related <span className="text-primary">Stories</span>
-              </h2>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {similarStories.map((relatedStory) => (
-                  <article
-                    key={relatedStory.id}
-                    className="card hover:shadow-xl transition-shadow group"
-                  >
-                    {/* Thumbnail */}
-                    <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">Story Image</span>
-                    </div>
-
-                    {/* Category */}
-                    <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-md mb-3">
-                      {relatedStory.category}
-                    </span>
-
-                    {/* Title */}
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                      <Link href={`/media/${relatedStory.slug}`}>
-                        {relatedStory.title}
-                      </Link>
-                    </h3>
-
-                    {/* Excerpt */}
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {relatedStory.excerpt}
-                    </p>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{relatedStory.readTimeMinutes} min</span>
+                    {related.coverImage ? (
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={related.coverImage}
+                          alt={related.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
-                      <Link
-                        href={`/media/${relatedStory.slug}`}
-                        className="inline-flex items-center text-primary hover:text-primary/80 transition-colors font-medium"
-                      >
-                        Read
-                        <ArrowRight className="ml-1 h-3 w-3" />
-                      </Link>
+                    ) : (
+                      <div className="h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <ChevronRight className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                        {related.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                        {related.excerpt}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span>{formatDate(related.publishedAt)}</span>
+                        {related.readTime && (
+                          <span>{related.readTime} min read</span>
+                        )}
+                        <span>{related.viewCount} views</span>
+                      </div>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center card bg-gradient-to-br from-primary/10 to-secondary/10">
-            <h2 className="text-2xl font-bold mb-4">
-              Want to Learn More About Team Kenya?
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Explore our journey, meet our team, and discover how you can be part of Kenya's STEM revolution
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/about" className="btn-primary">
-                About Us
-              </Link>
-              <Link href="/media" className="btn-secondary">
-                More Stories
-              </Link>
-            </div>
-          </div>
+            </motion.div>
+          )}
         </div>
-      </section>
-    </>
+      </article>
+    </div>
   )
 }

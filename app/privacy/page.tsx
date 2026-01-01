@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Shield, Eye, Lock, Database, UserCheck, Mail } from 'lucide-react'
@@ -11,6 +13,20 @@ import { Shield, Eye, Lock, Database, UserCheck, Mail } from 'lucide-react'
  * @returns {JSX.Element} The privacy policy page component
  */
 export default function PrivacyPolicyPage() {
+  useEffect(() => {
+    document.title = 'Privacy Policy | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'How we protect and handle your data at FIRST Global Team Kenya')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'How we protect and handle your data at FIRST Global Team Kenya'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   return (
     <>
       {/* Hero Section */}

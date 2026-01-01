@@ -44,21 +44,7 @@ export enum OTPType {
 }
 
 /**
- * User role assignment with history
- */
-export interface UserRoleAssignment {
-  id: string
-  role: Role
-  cohort: string | null
-  startDate: Date
-  endDate: Date | null
-  isActive: boolean
-  assignedBy: string | null
-  notes: string | null
-}
-
-/**
- * User data structure with role history
+ * User data structure
  */
 export interface User {
   id: string
@@ -72,7 +58,6 @@ export interface User {
   lastLoginAt: Date | null
   createdAt: Date
   updatedAt: Date
-  userRoles: UserRoleAssignment[]
   currentRole?: Role // Helper to get active role
   currentCohort?: string // Helper to get active cohort
 }
@@ -169,8 +154,8 @@ export interface AuthContextType {
   isMentor: (cohort?: string) => boolean
   isStudent: (cohort?: string) => boolean
   isAlumni: () => boolean
-  login: (email: string) => Promise<void>
-  verifyOTP: (email: string, code: string) => Promise<string | undefined>
+  login: (email: string) => Promise<{ success: boolean; data?: { otpSentAt: number }; error?: { message: string } }>
+  verifyOTP: (email: string, code: string) => Promise<{ success: boolean; data?: any; error?: { message: string } }>
   logout: () => Promise<void>
   refreshSession: () => Promise<void>
 }
@@ -301,18 +286,3 @@ export function hasPermission(role: Role, permission: keyof typeof rolePermissio
   return (permissions as any)[permission] === true;
 }
 
-/**
- * Get highest priority role from user's roles
- */
-export function getHighestRole(roles: UserRoleAssignment[]): Role {
-  const activeRoles = roles.filter(r => r.isActive);
-  const rolePriority = [Role.SUPER_ADMIN, Role.ADMIN, Role.MENTOR, Role.STUDENT, Role.ALUMNI, Role.USER];
-  
-  for (const priority of rolePriority) {
-    if (activeRoles.some(r => r.role === priority)) {
-      return priority;
-    }
-  }
-  
-  return Role.USER;
-}

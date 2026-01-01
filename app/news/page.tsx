@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, ArrowRight, Search, Filter, Tag } from 'lucide-react'
 import Link from 'next/link'
@@ -101,6 +101,20 @@ const categories = ['All', 'Competition', 'Outreach', 'Alumni', 'Partnership', '
  * @returns {JSX.Element} The news page component
  */
 export default function NewsPage() {
+  useEffect(() => {
+    document.title = 'News & Updates | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Latest news and updates from FIRST Global Team Kenya')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Latest news and updates from FIRST Global Team Kenya'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
 

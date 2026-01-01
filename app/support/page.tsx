@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 /**
  * @file page.tsx
  * @description Streamlined support page for donations and sponsorship for <i>FIRST</i> Global Team Kenya
@@ -47,6 +49,21 @@ const currentSponsors = [
  * @returns {JSX.Element} The support page component
  */
 export default function SupportPage() {
+  
+  useEffect(() => {
+    document.title = 'Support | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Get help and support for FIRST Global Kenya')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Get help and support for FIRST Global Kenya'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   return (
     <>
       {/* Hero Section */}
