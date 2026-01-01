@@ -6,6 +6,8 @@
 
 'use client'
 
+import { useEffect } from 'react'
+
 import { motion } from 'framer-motion'
 import ContactInfo from '@/app/components/contact/ContactInfo'
 import ContactForm from '@/app/components/contact/ContactForm'
@@ -19,6 +21,20 @@ import FAQSection from '@/app/components/contact/FAQSection'
  * @returns {JSX.Element} The contact page component
  */
 export default function ContactPage() {
+  useEffect(() => {
+    document.title = 'Contact Us | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Get in touch with FIRST Global Team Kenya')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Get in touch with FIRST Global Team Kenya'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   return (
     <>
       {/* Hero Section */}

@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { motion } from 'framer-motion'
 import { Trophy, Award, Users, Target, Globe, Calendar, MapPin, Star } from 'lucide-react'
 import Image from 'next/image'
@@ -108,6 +110,20 @@ const milestones = [
  * @returns {JSX.Element} The about page component
  */
 export default function AboutPage() {
+  useEffect(() => {
+    document.title = 'About Us | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Learn about FIRST Global Team Kenya and our mission to inspire young innovators')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Learn about FIRST Global Team Kenya and our mission to inspire young innovators'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   return (
     <>
       {/* Hero Section */}

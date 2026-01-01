@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { motion } from 'framer-motion'
 import { Quote, GraduationCap, Briefcase, Rocket, Heart, Star, Users } from 'lucide-react'
 import CountUp from '@/app/components/CountUp'
@@ -13,6 +15,20 @@ import CountUp from '@/app/components/CountUp'
  * @returns {JSX.Element} The impact page component
  */
 export default function ImpactPage() {
+  useEffect(() => {
+    document.title = 'Our Impact | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'See the impact FIRST Global Team Kenya is making in STEM education')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'See the impact FIRST Global Team Kenya is making in STEM education'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const impactMetrics = [
     {
       icon: Users,

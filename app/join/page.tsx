@@ -6,7 +6,7 @@
 
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -110,6 +110,20 @@ import {
  * @returns {JSX.Element} The join page component
  */
 export default function JoinPage() {
+  useEffect(() => {
+    document.title = 'Join Our Team | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Become part of FIRST Global Team Kenya')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Become part of FIRST Global Team Kenya'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [currentStep, setCurrentStep] = useState<'form' | 'ai-questions' | 'complete'>('form')
