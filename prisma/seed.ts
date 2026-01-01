@@ -79,30 +79,6 @@ async function main() {
     })
 
     console.log(`✅ Created/Updated user: ${user.email}`)
-
-    // Create user role assignment
-    await prisma.userRole.upsert({
-      where: {
-        userId_role_cohort_startDate: {
-          userId: user.id,
-          role: userData.role as any,
-          cohort: userData.cohort || '',
-          startDate: new Date()
-        }
-      },
-      update: {
-        isActive: true,
-        endDate: null
-      },
-      create: {
-        userId: user.id,
-        role: userData.role as any,
-        cohort: userData.cohort,
-        isActive: true,
-        assignedBy: 'SYSTEM',
-        notes: 'Test user created by seeder'
-      }
-    })
   }
 
   // Clear existing data  

@@ -17,6 +17,7 @@ datasource db {
 /// User model for authentication with role history
 model User {
   id            String    @id @default(uuid())
+  slug          String    @unique @default(cuid()) // Secure slug for URLs
   email         String    @unique
   firstName     String?
   lastName      String?
@@ -37,7 +38,6 @@ model User {
   adminActions  AuditLog[]    @relation("AdminAuditLogs")
   
   // Role-based relationships
-  userRoles     UserRole[]    // Multiple roles across years
   sentEmails    Email[]       @relation("SentEmails")
   receivedEmails Email[]      @relation("ReceivedEmails")
   emailDrafts   EmailDraft[]
@@ -59,29 +59,7 @@ model User {
   @@index([email])
 }
 
-/// User role assignments with history
-model UserRole {
-  id        String      @id @default(uuid())
-  role      Role
-  cohort    String?     // e.g., "FGC2025", "FGC2026"
-  startDate DateTime    @default(now())
-  endDate   DateTime?   // null means currently active
-  isActive  Boolean     @default(true)
-  
-  // Relations
-  userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Who assigned this role
-  assignedBy String?
-  notes      String?    // Admin notes about role assignment
-  
-  @@unique([userId, role, cohort, startDate])
-  @@index([userId])
-  @@index([role])
-  @@index([cohort])
-  @@index([isActive])
-}
+// UserRole model removed - using simple User.role field for better performance
 
 /// Available roles in the system
 enum Role {
@@ -206,6 +184,7 @@ model EmailLabel {
 /// Email campaigns
 model EmailCampaign {
   id          String      @id @default(uuid())
+  slug        String      @unique @default(cuid())
   name        String
   description String?
   status      CampaignStatus @default(DRAFT)
@@ -333,6 +312,7 @@ model MediaRevision {
 /// Application forms (created by admins)
 model ApplicationForm {
   id          String      @id @default(uuid())
+  slug        String      @unique @default(cuid())
   season      String      @unique // e.g., "FGC2026"
   title       String
   description String?
@@ -365,6 +345,7 @@ model ApplicationForm {
 /// Student applications
 model Application {
   id              String            @id @default(uuid())
+  slug            String            @unique @default(cuid())
   season          String            
   status          ApplicationStatus @default(DRAFT)
   
@@ -478,6 +459,7 @@ model ApplicationStatusHistory {
 /// Payment records (visible to super admin)
 model Payment {
   id          String      @id @default(uuid())
+  slug        String      @unique @default(cuid())
   amount      Float
   currency    String      @default("KES")
   purpose     String      // e.g., "Application Fee", "Donation", "Sponsorship"
