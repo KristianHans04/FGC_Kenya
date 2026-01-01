@@ -1,16 +1,14 @@
 /**
  * @file components/email/EmailViewer.tsx
- * @description Email viewer component with reply/forward functionality
- * @author Team Kenya Dev
+ * @description Email viewer component with improved UI and mobile responsiveness
+ * Fixed: Theme colors, mobile layout, responsive design
  */
 
 'use client'
 
-import { Card, CardContent, CardHeader } from '@/app/components/ui/Card'
-import { Button } from '@/app/components/ui/Button'
-import { Badge } from '@/app/components/ui/Badge'
-import { ScrollArea } from '@/app/components/ui/scroll-area'
-import { Separator } from '@/app/components/ui/separator'
+import { useState } from 'react'
+import { cn } from '@/app/lib/utils/cn'
+import { formatDate } from '@/app/lib/utils/date'
 import {
   X,
   Reply,
@@ -22,16 +20,12 @@ import {
   Paperclip,
   Printer,
   MoreVertical,
-  Download
+  Download,
+  ArrowLeft,
+  User,
+  Clock,
+  Mail
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/app/components/ui/dropdown-menu'
-import { format } from 'date-fns'
 
 interface EmailViewerProps {
   email: {
@@ -57,6 +51,8 @@ interface EmailViewerProps {
   onForward: () => void
   onDelete: () => void
   onArchive: () => void
+  onBack?: () => void
+  isFullView?: boolean
 }
 
 export default function EmailViewer({
@@ -66,171 +62,314 @@ export default function EmailViewer({
   onReplyAll,
   onForward,
   onDelete,
-  onArchive
+  onArchive,
+  onBack,
+  isFullView
 }: EmailViewerProps) {
+  const [isStarred, setIsStarred] = useState(email.isStarred)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank')
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>${email.subject}</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .header { border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
-              .meta { color: #666; margin: 5px 0; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h2>${email.subject}</h2>
-              <div class="meta">From: ${email.from}</div>
-              <div class="meta">To: ${email.to.join(', ')}</div>
-              <div class="meta">Date: ${format(new Date(email.sentAt || email.createdAt), 'PPpp')}</div>
-            </div>
-            <div>${email.body}</div>
-          </body>
-        </html>
-      `)
-      printWindow.document.close()
-      printWindow.print()
-    }
+    window.print()
+  }
+
+  const handleStar = () => {
+    setIsStarred(!isStarred)
+    // API call to update star status would go here
   }
 
   const downloadAttachment = (attachment: any) => {
-    // In production, this would download from your storage service
     console.log('Downloading:', attachment.name)
   }
 
-  return (
-    <>
-      <CardHeader className="flex flex-row items-start justify-between pb-3">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-semibold mb-2">{email.subject || '(no subject)'}</h2>
-          <div className="flex flex-wrap gap-2">
-            {email.labels.map(label => (
-              <Badge key={label} variant="secondary">{label}</Badge>
-            ))}
-            {email.isDraft && (
-              <Badge variant="outline">Draft</Badge>
+  // Mobile full-screen view
+  if (isFullView) {
+    return (
+      <div className="flex flex-col h-full bg-background">
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+          <button
+            onClick={onBack || onClose}
+            className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors"
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-5 w-5 text-foreground" />
+          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleStar}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label={isStarred ? 'Unstar' : 'Star'}
+            >
+              <Star className={cn(
+                "h-5 w-5",
+                isStarred ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"
+              )} />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Delete"
+            >
+              <Trash2 className="h-5 w-5 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              className="p-2 hover:bg-muted rounded-lg transition-colors relative"
+              aria-label="More options"
+            >
+              <MoreVertical className="h-5 w-5 text-muted-foreground" />
+              {showMoreMenu && (
+                <div className="absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-10">
+                  <button
+                    onClick={() => { onArchive(); setShowMoreMenu(false) }}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
+                  >
+                    Archive
+                  </button>
+                  <button
+                    onClick={() => { handlePrint(); setShowMoreMenu(false) }}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
+                  >
+                    Print
+                  </button>
+                </div>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4">
+            {/* Subject */}
+            <h1 className="text-xl font-semibold text-foreground mb-4">
+              {email.subject || '(no subject)'}
+            </h1>
+
+            {/* Sender Info */}
+            <div className="flex items-start gap-3 mb-4 pb-4 border-b border-border">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <User className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-foreground">{email.from}</div>
+                <div className="text-sm text-muted-foreground">
+                  to {email.to.join(', ')}
+                </div>
+                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {formatDate(new Date(email.sentAt || email.createdAt), 'PPp')}
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div 
+              className="prose prose-sm max-w-none text-foreground"
+              dangerouslySetInnerHTML={{ __html: email.body }}
+            />
+
+            {/* Attachments */}
+            {email.attachments.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-border">
+                <h3 className="text-sm font-medium text-foreground mb-3">
+                  Attachments ({email.attachments.length})
+                </h3>
+                <div className="space-y-2">
+                  {email.attachments.map((attachment, index) => (
+                    <button
+                      key={index}
+                      onClick={() => downloadAttachment(attachment)}
+                      className="flex items-center gap-3 w-full p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                    >
+                      <Paperclip className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-left text-sm text-foreground truncate">
+                        {attachment.name}
+                      </span>
+                      <Download className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm">
-            <Star className={`h-4 w-4 ${email.isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handlePrint}>
-            <Printer className="h-4 w-4" />
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Mark as unread</DropdownMenuItem>
-              <DropdownMenuItem>Add label</DropdownMenuItem>
-              <DropdownMenuItem>Move to folder</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Report spam</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Block sender</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
+
+        {/* Mobile Actions */}
+        <div className="flex border-t border-border bg-card">
+          <button
+            onClick={onReply}
+            className="flex-1 flex items-center justify-center gap-2 py-3 hover:bg-muted transition-colors"
+          >
+            <Reply className="h-4 w-4" />
+            <span className="text-sm font-medium">Reply</span>
+          </button>
+          <button
+            onClick={onReplyAll}
+            className="flex-1 flex items-center justify-center gap-2 py-3 hover:bg-muted transition-colors border-l border-border"
+          >
+            <ReplyAll className="h-4 w-4" />
+            <span className="text-sm font-medium">Reply All</span>
+          </button>
+          <button
+            onClick={onForward}
+            className="flex-1 flex items-center justify-center gap-2 py-3 hover:bg-muted transition-colors border-l border-border"
+          >
+            <Forward className="h-4 w-4" />
+            <span className="text-sm font-medium">Forward</span>
+          </button>
         </div>
-      </CardHeader>
+      </div>
+    )
+  }
 
-      <Separator />
+  // Desktop view
+  return (
+    <div className="flex flex-col h-full bg-card">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground truncate max-w-[60%]">
+          {email.subject || '(no subject)'}
+        </h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleStar}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            aria-label={isStarred ? 'Unstar' : 'Star'}
+          >
+            <Star className={cn(
+              "h-5 w-5",
+              isStarred ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"
+            )} />
+          </button>
+          <button
+            onClick={onArchive}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            aria-label="Archive"
+          >
+            <Archive className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            aria-label="Delete"
+          >
+            <Trash2 className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <button
+            onClick={handlePrint}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            aria-label="Print"
+          >
+            <Printer className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
 
-      <CardContent className="flex-1 overflow-hidden flex flex-col p-0">
-        {/* Email Metadata */}
-        <div className="p-4 space-y-3">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <div>
-                <span className="text-sm text-muted-foreground">From: </span>
-                <span className="text-sm font-medium">{email.from}</span>
-              </div>
-              <div>
-                <span className="text-sm text-muted-foreground">To: </span>
-                <span className="text-sm">{email.to.join(', ')}</span>
-              </div>
-              {email.cc.length > 0 && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Cc: </span>
-                  <span className="text-sm">{email.cc.join(', ')}</span>
-                </div>
-              )}
+      {/* Email Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-6 py-4">
+          {/* Sender Information */}
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <User className="h-6 w-6 text-primary" />
             </div>
-            <div className="text-sm text-muted-foreground">
-              {email.sentAt 
-                ? format(new Date(email.sentAt), 'PPpp')
-                : format(new Date(email.createdAt), 'PPpp')}
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-foreground">{email.from}</h3>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    <div>To: {email.to.join(', ')}</div>
+                    {email.cc.length > 0 && (
+                      <div>Cc: {email.cc.join(', ')}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {formatDate(new Date(email.sentAt || email.createdAt), 'PPp')}
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Labels */}
+          {email.labels.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {email.labels.map(label => (
+                <span
+                  key={label}
+                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-md"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Email Body */}
+          <div 
+            className="prose prose-sm max-w-none text-foreground"
+            dangerouslySetInnerHTML={{ __html: email.body }}
+          />
+
           {/* Attachments */}
           {email.attachments.length > 0 && (
-            <div className="pt-2">
-              <div className="text-sm font-medium mb-2">Attachments ({email.attachments.length})</div>
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-8 pt-4 border-t border-border">
+              <h3 className="text-sm font-medium text-foreground mb-4">
+                Attachments ({email.attachments.length})
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {email.attachments.map((attachment, index) => (
-                  <Button
+                  <button
                     key={index}
-                    variant="outline"
-                    size="sm"
                     onClick={() => downloadAttachment(attachment)}
+                    className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-left"
                   >
-                    <Paperclip className="mr-1 h-3 w-3" />
-                    {attachment.name}
-                    <Download className="ml-2 h-3 w-3" />
-                  </Button>
+                    <Paperclip className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <span className="flex-1 text-sm text-foreground truncate">
+                      {attachment.name}
+                    </span>
+                    <Download className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </button>
                 ))}
               </div>
             </div>
           )}
         </div>
+      </div>
 
-        <Separator />
-
-        {/* Email Body */}
-        <ScrollArea className="flex-1 p-4">
-          <div 
-            className="prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: email.body }}
-          />
-        </ScrollArea>
-
-        {/* Action Buttons */}
-        <div className="p-4 border-t flex items-center gap-2">
-          <Button onClick={onReply}>
-            <Reply className="mr-2 h-4 w-4" />
-            Reply
-          </Button>
-          <Button onClick={onReplyAll} variant="outline">
-            <ReplyAll className="mr-2 h-4 w-4" />
-            Reply All
-          </Button>
-          <Button onClick={onForward} variant="outline">
-            <Forward className="mr-2 h-4 w-4" />
-            Forward
-          </Button>
-          <div className="ml-auto flex gap-2">
-            <Button onClick={onArchive} variant="outline">
-              <Archive className="mr-2 h-4 w-4" />
-              Archive
-            </Button>
-            <Button onClick={onDelete} variant="outline">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </>
+      {/* Action Buttons */}
+      <div className="px-6 py-4 border-t border-border flex items-center gap-3">
+        <button
+          onClick={onReply}
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors flex items-center gap-2"
+        >
+          <Reply className="h-4 w-4" />
+          Reply
+        </button>
+        <button
+          onClick={onReplyAll}
+          className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors flex items-center gap-2"
+        >
+          <ReplyAll className="h-4 w-4" />
+          Reply All
+        </button>
+        <button
+          onClick={onForward}
+          className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors flex items-center gap-2"
+        >
+          <Forward className="h-4 w-4" />
+          Forward
+        </button>
+      </div>
+    </div>
   )
 }
