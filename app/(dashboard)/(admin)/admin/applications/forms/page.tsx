@@ -62,6 +62,21 @@ interface ApplicationForm {
 }
 
 export default function ApplicationFormsManagement() {
+  
+  useEffect(() => {
+    document.title = 'Application Forms | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage application form templates')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage application form templates'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [forms, setForms] = useState<ApplicationForm[]>([])
   const [selectedForm, setSelectedForm] = useState<ApplicationForm | null>(null)
   const [editingForm, setEditingForm] = useState<ApplicationForm | null>(null)

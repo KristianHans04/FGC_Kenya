@@ -17,7 +17,10 @@ import {
   Calendar,
   MapPin,
   GraduationCap,
-  Shield
+  Shield,
+  Upload,
+  Download,
+  FileText
 } from 'lucide-react'
 
 interface EmailGroup {
@@ -33,6 +36,7 @@ interface EmailGroup {
     travelHistory?: boolean
     isActive?: boolean
   }
+  manualEmails?: string[] // Added for manual email entries
   memberCount: number
   createdAt: string
   updatedAt: string
@@ -46,21 +50,42 @@ interface GroupMember {
   role: string
   school?: string
   year?: string
+  isManual?: boolean // Flag to identify manually added members
 }
 
 export default function EmailGroups() {
+  
+  useEffect(() => {
+    document.title = 'Email Groups | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage email recipient groups')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage email recipient groups'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [groups, setGroups] = useState<EmailGroup[]>([])
   const [selectedGroup, setSelectedGroup] = useState<EmailGroup | null>(null)
   const [members, setMembers] = useState<GroupMember[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [editingGroup, setEditingGroup] = useState<EmailGroup | null>(null)
+  const [manualEmailInput, setManualEmailInput] = useState('')
+  const [manualEmails, setManualEmails] = useState<string[]>([])
+  const [bulkEmailText, setBulkEmailText] = useState('')
+  const [showBulkImport, setShowBulkImport] = useState(false)
 
   // Form state
   const [formData, setFormData] = useState<{
     name: string
     description: string
     filters: Partial<EmailGroup['filters']>
+    manualEmails: string[]
   }>({
     name: '',
     description: '',
@@ -72,7 +97,8 @@ export default function EmailGroups() {
       gender: '',
       travelHistory: undefined,
       isActive: true
-    }
+    },
+    manualEmails: []
   })
 
   useEffect(() => {
@@ -117,7 +143,10 @@ export default function EmailGroups() {
       const response = await fetch('/api/admin/emails/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          manualEmails
+        })
       })
       
       if (response.ok) {
@@ -137,7 +166,10 @@ export default function EmailGroups() {
       const response = await fetch(`/api/admin/emails/groups/${editingGroup.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          manualEmails
+        })
       })
       
       if (response.ok) {
@@ -172,7 +204,44 @@ export default function EmailGroups() {
 
   const handleSendEmailToGroup = (group: EmailGroup) => {
     // Navigate to compose with group pre-selected
-    window.location.href = `/admin/emails/compose?group=${group.id}`
+    window.location.href = `/admin/emails/inbox?composeWithGroup=${group.id}`
+  }
+
+  const addManualEmail = () => {
+    const email = manualEmailInput.trim()
+    if (email && email.includes('@') && !manualEmails.includes(email)) {
+      setManualEmails([...manualEmails, email])
+      setManualEmailInput('')
+    }
+  }
+
+  const removeManualEmail = (email: string) => {
+    setManualEmails(manualEmails.filter(e => e !== email))
+  }
+
+  const handleBulkImport = () => {
+    const emails = bulkEmailText
+      .split(/[\n,;]/)
+      .map(e => e.trim())
+      .filter(e => e && e.includes('@'))
+    
+    const uniqueEmails = Array.from(new Set([...manualEmails, ...emails]))
+    setManualEmails(uniqueEmails)
+    setBulkEmailText('')
+    setShowBulkImport(false)
+  }
+
+  const exportEmails = () => {
+    if (!selectedGroup) return
+    
+    const emailList = members.map(m => m.email).join('\n')
+    const blob = new Blob([emailList], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${selectedGroup.name.replace(/\s+/g, '_')}_emails.txt`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   const resetForm = () => {
@@ -187,8 +256,11 @@ export default function EmailGroups() {
         gender: '',
         travelHistory: undefined,
         isActive: true
-      }
+      },
+      manualEmails: []
     })
+    setManualEmails([])
+    setManualEmailInput('')
   }
 
   const startEdit = (group: EmailGroup) => {
@@ -196,8 +268,10 @@ export default function EmailGroups() {
     setFormData({
       name: group.name,
       description: group.description,
-      filters: group.filters
+      filters: group.filters,
+      manualEmails: group.manualEmails || []
     })
+    setManualEmails(group.manualEmails || [])
   }
 
   // Available options for filters
@@ -231,7 +305,7 @@ export default function EmailGroups() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg flex items-center gap-2"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg flex items-center gap-2 hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           Create Group
@@ -275,10 +349,12 @@ export default function EmailGroups() {
                             <Users className="h-3 w-3" />
                             {group.memberCount} members
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(group.createdAt).toLocaleDateString()}
-                          </span>
+                          {group.manualEmails && group.manualEmails.length > 0 && (
+                            <span className="flex items-center gap-1">
+                              <UserPlus className="h-3 w-3" />
+                              {group.manualEmails.length} manual
+                            </span>
+                          )}
                         </div>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -297,6 +373,13 @@ export default function EmailGroups() {
               <div className="p-4 border-b flex justify-between items-center">
                 <h2 className="font-semibold text-lg">{selectedGroup.name}</h2>
                 <div className="flex gap-2">
+                  <button
+                    onClick={exportEmails}
+                    className="px-3 py-1.5 border rounded text-sm flex items-center gap-2 hover:bg-muted"
+                  >
+                    <Download className="h-3 w-3" />
+                    Export
+                  </button>
                   <button
                     onClick={() => handleSendEmailToGroup(selectedGroup)}
                     className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-sm flex items-center gap-2"
@@ -346,6 +429,12 @@ export default function EmailGroups() {
                         onRemove={() => {}} 
                       />
                     )}
+                    {selectedGroup.manualEmails && selectedGroup.manualEmails.length > 0 && (
+                      <FilterTag 
+                        label={`${selectedGroup.manualEmails.length} Manual Emails`} 
+                        onRemove={() => {}} 
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -358,19 +447,19 @@ export default function EmailGroups() {
                     <input
                       type="text"
                       placeholder="Search members..."
-                      className="pl-9 pr-3 py-1.5 border rounded text-sm"
+                      className="pl-9 pr-3 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
 
                 <div className="max-h-[400px] overflow-y-auto">
                   <table className="w-full">
-                    <thead className="text-sm text-muted-foreground border-b">
+                    <thead className="text-sm text-muted-foreground border-b sticky top-0 bg-card">
                       <tr>
                         <th className="text-left pb-2">Name</th>
                         <th className="text-left pb-2">Email</th>
                         <th className="text-left pb-2">Role</th>
-                        <th className="text-left pb-2">School</th>
+                        <th className="text-left pb-2">Source</th>
                       </tr>
                     </thead>
                     <tbody className="text-sm">
@@ -379,15 +468,21 @@ export default function EmailGroups() {
                           <td className="py-2">
                             {member.firstName || member.lastName
                               ? `${member.firstName || ''} ${member.lastName || ''}`.trim()
-                              : 'N/A'}
+                              : member.isManual ? 'External' : 'N/A'}
                           </td>
                           <td className="py-2">{member.email}</td>
                           <td className="py-2">
                             <span className="px-2 py-0.5 bg-muted rounded text-xs">
-                              {member.role}
+                              {member.isManual ? 'External' : member.role}
                             </span>
                           </td>
-                          <td className="py-2">{member.school || 'N/A'}</td>
+                          <td className="py-2">
+                            {member.isManual ? (
+                              <span className="text-xs text-muted-foreground">Manual</span>
+                            ) : (
+                              <span className="text-xs">{member.school || 'System'}</span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -410,7 +505,7 @@ export default function EmailGroups() {
           <motion.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
-            className="bg-card rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
           >
             <h2 className="text-xl font-bold mb-4">
               {editingGroup ? 'Edit Group' : 'Create Email Group'}
@@ -423,7 +518,7 @@ export default function EmailGroups() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="e.g., Female Students FGC2023 Travelers"
                 />
               </div>
@@ -433,175 +528,147 @@ export default function EmailGroups() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                   rows={3}
                   placeholder="Describe the purpose of this group..."
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Roles</label>
-                <div className="flex flex-wrap gap-2">
-                  {availableRoles.map(role => (
-                    <button
-                      key={role}
-                      onClick={() => {
-                        const roles = formData.filters.roles || []
-                        if (roles.includes(role)) {
-                          setFormData({
-                            ...formData,
-                            filters: {
-                              ...formData.filters,
-                              roles: roles.filter(r => r !== role)
-                            }
-                          })
-                        } else {
-                          setFormData({
-                            ...formData,
-                            filters: {
-                              ...formData.filters,
-                              roles: [...roles, role]
-                            }
-                          })
-                        }
-                      }}
-                      className={`px-3 py-1 rounded border ${
-                        formData.filters.roles?.includes(role)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      {role}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Cohorts</label>
-                <div className="flex flex-wrap gap-2">
-                  {availableCohorts.map(cohort => (
-                    <button
-                      key={cohort}
-                      onClick={() => {
-                        const cohorts = formData.filters.cohorts || []
-                        if (cohorts.includes(cohort)) {
-                          setFormData({
-                            ...formData,
-                            filters: {
-                              ...formData.filters,
-                              cohorts: cohorts.filter(c => c !== cohort)
-                            }
-                          })
-                        } else {
-                          setFormData({
-                            ...formData,
-                            filters: {
-                              ...formData.filters,
-                              cohorts: [...cohorts, cohort]
-                            }
-                          })
-                        }
-                      }}
-                      className={`px-3 py-1 rounded border ${
-                        formData.filters.cohorts?.includes(cohort)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      {cohort}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Gender</label>
-                <div className="flex gap-2">
+              {/* Manual Email Entry Section */}
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium">Manual Email Addresses</label>
                   <button
-                    onClick={() => setFormData({
-                      ...formData,
-                      filters: { ...formData.filters, gender: 'male' }
-                    })}
-                    className={`px-3 py-1 rounded border ${
-                      formData.filters.gender === 'male'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    }`}
+                    onClick={() => setShowBulkImport(true)}
+                    className="text-sm text-primary hover:underline flex items-center gap-1"
                   >
-                    Male
-                  </button>
-                  <button
-                    onClick={() => setFormData({
-                      ...formData,
-                      filters: { ...formData.filters, gender: 'female' }
-                    })}
-                    className={`px-3 py-1 rounded border ${
-                      formData.filters.gender === 'female'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    Female
-                  </button>
-                  <button
-                    onClick={() => setFormData({
-                      ...formData,
-                      filters: { ...formData.filters, gender: '' }
-                    })}
-                    className={`px-3 py-1 rounded border ${
-                      !formData.filters.gender
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    Any
+                    <Upload className="h-3 w-3" />
+                    Bulk Import
                   </button>
                 </div>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="email"
+                    value={manualEmailInput}
+                    onChange={(e) => setManualEmailInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        addManualEmail()
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    placeholder="Enter email address and press Enter"
+                  />
+                  <button
+                    onClick={addManualEmail}
+                    className="px-3 py-2 border rounded-lg hover:bg-muted text-sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                {manualEmails.length > 0 && (
+                  <div className="border rounded-lg p-2 max-h-32 overflow-y-auto">
+                    <div className="flex flex-wrap gap-1">
+                      {manualEmails.map(email => (
+                        <span
+                          key={email}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs"
+                        >
+                          {email}
+                          <button
+                            onClick={() => removeManualEmail(email)}
+                            className="hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {manualEmails.length} email{manualEmails.length !== 1 ? 's' : ''} added
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Travel History</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setFormData({
-                      ...formData,
-                      filters: { ...formData.filters, travelHistory: true }
-                    })}
-                    className={`px-3 py-1 rounded border ${
-                      formData.filters.travelHistory === true
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    Has Traveled
-                  </button>
-                  <button
-                    onClick={() => setFormData({
-                      ...formData,
-                      filters: { ...formData.filters, travelHistory: false }
-                    })}
-                    className={`px-3 py-1 rounded border ${
-                      formData.filters.travelHistory === false
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    Never Traveled
-                  </button>
-                  <button
-                    onClick={() => setFormData({
-                      ...formData,
-                      filters: { ...formData.filters, travelHistory: undefined }
-                    })}
-                    className={`px-3 py-1 rounded border ${
-                      formData.filters.travelHistory === undefined
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    Any
-                  </button>
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium mb-2">Filter by System Users</p>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Roles</label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableRoles.map(role => (
+                      <button
+                        key={role}
+                        onClick={() => {
+                          const roles = formData.filters.roles || []
+                          if (roles.includes(role)) {
+                            setFormData({
+                              ...formData,
+                              filters: {
+                                ...formData.filters,
+                                roles: roles.filter(r => r !== role)
+                              }
+                            })
+                          } else {
+                            setFormData({
+                              ...formData,
+                              filters: {
+                                ...formData.filters,
+                                roles: [...roles, role]
+                              }
+                            })
+                          }
+                        }}
+                        className={`px-3 py-1 rounded border transition-colors ${
+                          formData.filters.roles?.includes(role)
+                            ? 'bg-primary text-primary-foreground'
+                            : 'hover:bg-muted'
+                        }`}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium mb-2">Cohorts</label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableCohorts.map(cohort => (
+                      <button
+                        key={cohort}
+                        onClick={() => {
+                          const cohorts = formData.filters.cohorts || []
+                          if (cohorts.includes(cohort)) {
+                            setFormData({
+                              ...formData,
+                              filters: {
+                                ...formData.filters,
+                                cohorts: cohorts.filter(c => c !== cohort)
+                              }
+                            })
+                          } else {
+                            setFormData({
+                              ...formData,
+                              filters: {
+                                ...formData.filters,
+                                cohorts: [...cohorts, cohort]
+                              }
+                            })
+                          }
+                        }}
+                        className={`px-3 py-1 rounded border transition-colors ${
+                          formData.filters.cohorts?.includes(cohort)
+                            ? 'bg-primary text-primary-foreground'
+                            : 'hover:bg-muted'
+                        }`}
+                      >
+                        {cohort}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -622,6 +689,46 @@ export default function EmailGroups() {
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
               >
                 {editingGroup ? 'Update Group' : 'Create Group'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Bulk Import Modal */}
+      {showBulkImport && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            className="bg-card rounded-lg p-6 max-w-lg w-full"
+          >
+            <h3 className="text-lg font-semibold mb-4">Bulk Import Emails</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Paste email addresses separated by commas, semicolons, or new lines
+            </p>
+            <textarea
+              value={bulkEmailText}
+              onChange={(e) => setBulkEmailText(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg h-32 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder="john@example.com, jane@example.com
+user1@domain.com; user2@domain.com"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setShowBulkImport(false)
+                  setBulkEmailText('')
+                }}
+                className="px-4 py-2 border rounded-lg hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkImport}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+              >
+                Import
               </button>
             </div>
           </motion.div>

@@ -14,6 +14,21 @@ import {
 } from 'lucide-react'
 
 export default function AnalyticsPage() {
+  
+  useEffect(() => {
+    document.title = 'Analytics Dashboard | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'View comprehensive analytics and metrics')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'View comprehensive analytics and metrics'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [timeRange, setTimeRange] = useState('30d')
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<{

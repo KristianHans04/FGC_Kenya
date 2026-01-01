@@ -19,6 +19,21 @@ import {
 } from 'lucide-react'
 
 export default function SuperAdminUsersPage() {
+  
+  useEffect(() => {
+    document.title = 'Super Admin - User Management | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Advanced user management and permissions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Advanced user management and permissions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')

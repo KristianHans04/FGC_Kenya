@@ -38,6 +38,21 @@ interface RecentActivity {
 }
 
 export default function AdminDashboard() {
+  
+  useEffect(() => {
+    document.title = 'Admin Dashboard | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage your FIRST Global Team Kenya platform')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage your FIRST Global Team Kenya platform'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
@@ -271,7 +286,7 @@ export default function AdminDashboard() {
               ) : (
                 recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/50">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
                       {activity.type === 'application' && <FileText className="h-4 w-4 text-primary" />}
                       {activity.type === 'user' && <Users className="h-4 w-4 text-primary" />}
                       {activity.type === 'review' && <Eye className="h-4 w-4 text-primary" />}

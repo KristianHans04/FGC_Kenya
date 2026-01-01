@@ -39,6 +39,21 @@ interface UserStats {
 }
 
 export default function AdminUsersPage() {
+  
+  useEffect(() => {
+    document.title = 'User Management | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage users, roles and permissions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage users, roles and permissions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [users, setUsers] = useState<User[]>([])
   const [stats, setStats] = useState<UserStats | null>(null)
   const [loading, setLoading] = useState(false)

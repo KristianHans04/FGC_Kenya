@@ -62,6 +62,21 @@ type SortField = 'name' | 'email' | 'school' | 'year' | 'role' | 'createdAt' | '
 type SortDirection = 'asc' | 'desc'
 
 export default function SuperAdminDashboard() {
+  
+  useEffect(() => {
+    document.title = 'Super Admin Panel | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Advanced system administration tools')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Advanced system administration tools'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const { user } = useAuth()
   const router = useRouter()
   
@@ -599,7 +614,7 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {/* Role History Timeline */}
-                {selectedUser.cohortMemberships.length > 0 && (
+                {selectedUser.cohortMemberships?.length > 0 && (
                   <div>
                     <h3 className="font-semibold mb-2">Role History</h3>
                     <div className="space-y-2">
@@ -621,7 +636,7 @@ export default function SuperAdminDashboard() {
                 )}
 
                 {/* Payments */}
-                {selectedUser.payments.length > 0 && (
+                {selectedUser.payments?.length > 0 && (
                   <div>
                     <h3 className="font-semibold mb-2">Payment History</h3>
                     <div className="space-y-2">

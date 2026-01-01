@@ -41,6 +41,21 @@ interface Campaign {
 }
 
 export default function EmailCampaigns() {
+  
+  useEffect(() => {
+    document.title = 'Email Campaigns | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Create and manage email campaigns')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Create and manage email campaigns'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'draft' | 'scheduled' | 'sent'>('all')

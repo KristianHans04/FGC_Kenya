@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Calendar,
@@ -13,6 +13,21 @@ import {
 } from 'lucide-react'
 
 export default function AdminEventsPage() {
+  
+  useEffect(() => {
+    document.title = 'Event Management | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage FIRST Global events and competitions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage FIRST Global events and competitions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [events] = useState([
     {
       id: 1,

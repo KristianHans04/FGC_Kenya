@@ -17,6 +17,21 @@ import {
 } from 'lucide-react'
 
 export default function PaymentsPage() {
+  
+  useEffect(() => {
+    document.title = 'Payment Management | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Track payments and financial transactions')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Track payments and financial transactions'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [payments, setPayments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({

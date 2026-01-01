@@ -1,549 +1,465 @@
+/**
+ * @file app/(dashboard)/(admin)/admin/media/page.tsx
+ * @description Admin media management with semantic search, drafts, approval workflow
+ */
+
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   FileText,
   Search,
-  Filter,
   Plus,
   Edit,
   Trash2,
   Eye,
-  Clock,
   CheckCircle,
   XCircle,
-  AlertCircle,
-  Image,
-  Video,
-  Download,
-  Share2,
-  BarChart,
-  TrendingUp,
-  User,
-  Calendar,
-  Tag,
-  Brain,
-  X
+  Clock,
+  Filter,
+  MoreVertical,
+  Send
 } from 'lucide-react'
-// Simple debounce implementation
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(() => func(...args), wait)
-  }
-}
+import MediaEditor from '@/app/components/media/MediaEditor'
 
-interface MediaItem {
+interface Article {
   id: string
-  title: string
   slug: string
-  content: string
+  title: string
   excerpt: string
-  type: 'article' | 'video' | 'image' | 'document'
-  status: 'draft' | 'pending_approval' | 'approved' | 'published' | 'rejected'
-  author: {
-    id: string
-    email: string
-    firstName?: string
-    lastName?: string
-    role: string
-  }
-  category?: string
+  content: string
+  coverImage?: string
+  status: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED'
   tags: string[]
   viewCount: number
-  shareCount: number
   publishedAt?: string
   createdAt: string
   updatedAt: string
-  approvedBy?: {
+  cohortRestriction?: string
+  author: {
     id: string
-    email: string
     firstName?: string
     lastName?: string
+    email: string
+    role: string
   }
-  cohort?: string
-  semanticEmbedding?: any // For semantic search
+  reviewedBy?: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
+  }
+  reviewedAt?: string
+  reviewNotes?: string
 }
 
-export default function MediaManagement() {
-  const [media, setMedia] = useState<MediaItem[]>([])
+export default function AdminMediaManagement() {
+  const router = useRouter()
+  const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchMode, setSearchMode] = useState<'keyword' | 'semantic'>('keyword')
-  const [filter, setFilter] = useState({
-    status: 'all',
-    type: 'all',
-    author: 'all',
-    cohort: 'all'
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [view, setView] = useState<'list' | 'create' | 'edit'>('list')
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
+  const [stats, setStats] = useState({
+    total: 0,
+    drafts: 0,
+    pending: 0,
+    published: 0,
+    rejected: 0
   })
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null)
-  const [semanticSearchResults, setSemanticSearchResults] = useState<any[]>([])
 
   useEffect(() => {
-    fetchMedia()
-  }, [filter])
-
-  // Debounced semantic search
-  const performSemanticSearch = useCallback(
-    debounce(async (query: string) => {
-      if (!query || query.length < 3) {
-        setSemanticSearchResults([])
-        return
-      }
-
-      try {
-        const response = await fetch('/api/admin/media/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            query,
-            mode: 'semantic',
-            limit: 20
-          })
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          setSemanticSearchResults(data.data?.results || [])
-        }
-      } catch (error) {
-        console.error('Semantic search failed:', error)
-      }
-    }, 500),
-    []
-  )
+    document.title = 'Media Management | Admin Dashboard'
+  }, [])
 
   useEffect(() => {
-    if (searchMode === 'semantic' && searchTerm) {
-      performSemanticSearch(searchTerm)
+    if (view === 'list') {
+      fetchArticles()
+      fetchStats()
     }
-  }, [searchTerm, searchMode])
+  }, [view, statusFilter])
 
-  const fetchMedia = async () => {
+  const fetchArticles = async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (filter.status !== 'all') params.append('status', filter.status)
-      if (filter.type !== 'all') params.append('type', filter.type)
-      if (filter.author !== 'all') params.append('author', filter.author)
-      if (filter.cohort !== 'all') params.append('cohort', filter.cohort)
-      if (searchMode === 'keyword' && searchTerm) params.append('search', searchTerm)
-      
-      const response = await fetch(`/api/admin/media?${params}`)
+      if (statusFilter !== 'all') {
+        params.append('status', statusFilter)
+      }
+      if (searchTerm) {
+        params.append('search', searchTerm)
+      }
+
+      const response = await fetch(`/api/media/articles?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setMedia(data.data?.media || [])
+        setArticles(data.articles || [])
       }
     } catch (error) {
-      console.error('Failed to fetch media:', error)
+      console.error('Error fetching articles:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleApprove = async (mediaId: string) => {
+  const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/media', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ mediaId, action: 'approve' })
-      })
-      if (response.ok) {
-        fetchMedia()
-      }
+      const [total, drafts, pending, published, rejected] = await Promise.all([
+        fetch('/api/media/articles').then(r => r.json()).then(d => d.pagination?.total || 0),
+        fetch('/api/media/articles?status=DRAFT').then(r => r.json()).then(d => d.pagination?.total || 0),
+        fetch('/api/media/articles?status=PENDING_REVIEW').then(r => r.json()).then(d => d.pagination?.total || 0),
+        fetch('/api/media/articles?status=PUBLISHED').then(r => r.json()).then(d => d.pagination?.total || 0),
+        fetch('/api/media/articles?status=REJECTED').then(r => r.json()).then(d => d.pagination?.total || 0),
+      ])
+
+      setStats({ total, drafts, pending, published, rejected })
     } catch (error) {
-      console.error('Failed to approve media:', error)
+      console.error('Error fetching stats:', error)
     }
   }
 
-  const handleReject = async (mediaId: string, feedback?: string) => {
+  const handleSaveArticle = async (data: any, publish: boolean) => {
     try {
-      const response = await fetch('/api/admin/media', {
-        method: 'PUT',
+      const url = selectedArticle 
+        ? `/api/media/articles/${selectedArticle.slug}`
+        : '/api/media/articles'
+      
+      const method = selectedArticle ? 'PATCH' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mediaId, action: 'reject', feedback })
+        body: JSON.stringify(data)
       })
+
       if (response.ok) {
-        fetchMedia()
+        setView('list')
+        setSelectedArticle(null)
+        fetchArticles()
+        fetchStats()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to save article')
       }
     } catch (error) {
-      console.error('Failed to reject media:', error)
+      console.error('Error saving article:', error)
+      alert('Failed to save article')
     }
   }
 
-  const handlePublish = async (mediaId: string) => {
-    try {
-      const response = await fetch('/api/admin/media', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ mediaId, action: 'publish' })
-      })
-      if (response.ok) {
-        fetchMedia()
-      }
-    } catch (error) {
-      console.error('Failed to publish media:', error)
-    }
-  }
-
-  const handleDelete = async (mediaId: string) => {
-    if (!confirm('Are you sure you want to delete this media?')) return
+  const handleDeleteArticle = async (slug: string) => {
+    if (!confirm('Are you sure you want to delete this article?')) return
 
     try {
-      await fetch(`/api/admin/media/${mediaId}`, {
+      const response = await fetch(`/api/media/articles/${slug}`, {
         method: 'DELETE'
       })
-      fetchMedia()
-      if (selectedMedia?.id === mediaId) {
-        setSelectedMedia(null)
+
+      if (response.ok) {
+        fetchArticles()
+        fetchStats()
+      } else {
+        alert('Failed to delete article')
       }
     } catch (error) {
-      console.error('Failed to delete media:', error)
+      console.error('Error deleting article:', error)
+      alert('Failed to delete article')
     }
   }
 
-  const getStatusColor = (status: MediaItem['status']) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800'
-      case 'pending_approval': return 'bg-yellow-100 text-yellow-800'
-      case 'approved': return 'bg-blue-100 text-blue-800'
-      case 'published': return 'bg-green-100 text-green-800'
-      case 'rejected': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+  const handleApproveArticle = async (slug: string) => {
+    try {
+      const response = await fetch(`/api/media/articles/${slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PUBLISHED' })
+      })
+
+      if (response.ok) {
+        fetchArticles()
+        fetchStats()
+      }
+    } catch (error) {
+      console.error('Error approving article:', error)
     }
   }
 
-  const getTypeIcon = (type: MediaItem['type']) => {
-    switch (type) {
-      case 'article': return FileText
-      case 'video': return Video
-      case 'image': return Image
-      case 'document': return FileText
-      default: return FileText
+  const handleRejectArticle = async (slug: string, notes: string) => {
+    try {
+      const response = await fetch(`/api/media/articles/${slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'REJECTED', reviewNotes: notes })
+      })
+
+      if (response.ok) {
+        fetchArticles()
+        fetchStats()
+      }
+    } catch (error) {
+      console.error('Error rejecting article:', error)
     }
   }
 
-  const displayMedia = searchMode === 'semantic' && semanticSearchResults.length > 0
-    ? semanticSearchResults
-    : media
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
 
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, { class: string; icon: any }> = {
+      DRAFT: { class: 'bg-gray-100 text-gray-800', icon: Clock },
+      PENDING_REVIEW: { class: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      APPROVED: { class: 'bg-green-100 text-green-800', icon: CheckCircle },
+      PUBLISHED: { class: 'bg-blue-100 text-blue-800', icon: CheckCircle },
+      REJECTED: { class: 'bg-red-100 text-red-800', icon: XCircle },
+    }
+
+    const badge = badges[status] || badges.DRAFT
+    const Icon = badge.icon
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${badge.class}`}>
+        <Icon className="h-3 w-3" />
+        {status.replace('_', ' ')}
+      </span>
+    )
+  }
+
+  // Editor View
+  if (view === 'create' || view === 'edit') {
+    return (
+      <div className="p-6">
+        <MediaEditor
+          article={selectedArticle && selectedArticle.status !== 'REJECTED' ? {
+            id: selectedArticle.id,
+            title: selectedArticle.title,
+            excerpt: selectedArticle.excerpt,
+            content: selectedArticle.content,
+            coverImage: selectedArticle.coverImage,
+            tags: selectedArticle.tags,
+            status: selectedArticle.status as 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED'
+          } : undefined}
+          onSave={(data) => handleSaveArticle(data, false)}
+          onClose={() => {
+            setView('list')
+            setSelectedArticle(null)
+          }}
+        />
+      </div>
+    )
+  }
+
+  // List View
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Media Management</h1>
-          <p className="text-muted-foreground">Manage all platform media with semantic search</p>
+          <p className="text-muted-foreground mt-1">
+            Manage all articles and content across the platform
+          </p>
         </div>
-        <Link
-          href="/admin/media/create"
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg flex items-center gap-2"
+        <button
+          onClick={() => setView('create')}
+          className="btn-primary flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
-          Create Media
-        </Link>
+          Create Article
+        </button>
       </div>
 
-      {/* Search and Filters */}
-      <div className="bg-card p-4 rounded-lg border space-y-4">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              {searchMode === 'semantic' && (
-                <Brain className="h-4 w-4 text-primary" />
-              )}
-            </div>
-            <input
-              type="text"
-              placeholder={searchMode === 'semantic' 
-                ? "Search by concept, idea, or memory (e.g., 'that article about teamwork')"
-                : "Search by title, author, or keyword..."
-              }
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-2 border rounded-lg bg-background"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => setSearchMode('keyword')}
-              className={`px-3 py-2 rounded-lg border ${
-                searchMode === 'keyword' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'hover:bg-muted'
-              }`}
-            >
-              Keyword
-            </button>
-            <button
-              onClick={() => setSearchMode('semantic')}
-              className={`px-3 py-2 rounded-lg border flex items-center gap-2 ${
-                searchMode === 'semantic' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'hover:bg-muted'
-              }`}
-            >
-              <Brain className="h-4 w-4" />
-              Semantic
-            </button>
-          </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="card p-4">
+          <div className="text-sm text-muted-foreground">Total</div>
+          <div className="text-2xl font-bold">{stats.total}</div>
         </div>
-
-        <div className="flex gap-2">
-          <select
-            value={filter.status}
-            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-            className="px-3 py-2 border rounded-lg bg-background"
-          >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="pending_approval">Pending Approval</option>
-            <option value="approved">Approved</option>
-            <option value="published">Published</option>
-            <option value="rejected">Rejected</option>
-          </select>
-
-          <select
-            value={filter.type}
-            onChange={(e) => setFilter({ ...filter, type: e.target.value })}
-            className="px-3 py-2 border rounded-lg bg-background"
-          >
-            <option value="all">All Types</option>
-            <option value="article">Articles</option>
-            <option value="video">Videos</option>
-            <option value="image">Images</option>
-            <option value="document">Documents</option>
-          </select>
-
-          <select
-            value={filter.cohort}
-            onChange={(e) => setFilter({ ...filter, cohort: e.target.value })}
-            className="px-3 py-2 border rounded-lg bg-background"
-          >
-            <option value="all">All Cohorts</option>
-            <option value="FGC2023">FGC2023</option>
-            <option value="FGC2024">FGC2024</option>
-            <option value="FGC2025">FGC2025</option>
-          </select>
+        <div className="card p-4">
+          <div className="text-sm text-muted-foreground">Drafts</div>
+          <div className="text-2xl font-bold">{stats.drafts}</div>
         </div>
-
-        {searchMode === 'semantic' && searchTerm && (
-          <div className="text-sm text-muted-foreground">
-            <Brain className="inline h-3 w-3 mr-1" />
-            Using AI to find content matching: "{searchTerm}"
-          </div>
-        )}
+        <div className="card p-4">
+          <div className="text-sm text-muted-foreground">Pending Review</div>
+          <div className="text-2xl font-bold">{stats.pending}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-sm text-muted-foreground">Published</div>
+          <div className="text-2xl font-bold">{stats.published}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-sm text-muted-foreground">Rejected</div>
+          <div className="text-2xl font-bold">{stats.rejected}</div>
+        </div>
       </div>
 
-      {/* Media Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading ? (
-          <div className="col-span-full flex items-center justify-center h-32">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
-          </div>
-        ) : displayMedia.length === 0 ? (
-          <div className="col-span-full bg-card rounded-lg border p-12 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">
-              {searchTerm ? 'No media found matching your search' : 'No media found'}
-            </p>
-          </div>
-        ) : (
-          displayMedia.map((item) => {
-            const TypeIcon = getTypeIcon(item.type)
-            
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-card rounded-lg border overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => setSelectedMedia(item)}
-              >
-                {/* Thumbnail */}
-                <div className="h-48 bg-muted flex items-center justify-center">
-                  <TypeIcon className="h-12 w-12 text-muted-foreground" />
-                </div>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search articles by title, content, or tags..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && fetchArticles()}
+            className="input pl-10 w-full"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="input w-full sm:w-auto"
+        >
+          <option value="all">All Status</option>
+          <option value="DRAFT">Drafts</option>
+          <option value="PENDING_REVIEW">Pending Review</option>
+          <option value="APPROVED">Approved</option>
+          <option value="PUBLISHED">Published</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
+      </div>
 
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold line-clamp-2">{item.title}</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                      {item.status.replace('_', ' ')}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                    {item.excerpt}
-                  </p>
-
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                    <User className="h-3 w-3" />
-                    <span>{item?.author?.firstName || item?.author?.email?.split('@')[0] || 'Unknown'}</span>
-                    {item.cohort && (
-                      <>
+      {/* Articles List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : articles.length === 0 ? (
+        <div className="text-center py-12 card">
+          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No articles found</h3>
+          <p className="text-muted-foreground mb-4">
+            {searchTerm ? 'Try adjusting your search' : 'Get started by creating your first article'}
+          </p>
+          <button onClick={() => setView('create')} className="btn-primary">
+            Create Article
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {articles.map((article) => (
+            <motion.div
+              key={article.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card p-6"
+            >
+              <div className="flex gap-4">
+                {article.coverImage && (
+                  <img
+                    src={article.coverImage}
+                    alt={article.title}
+                    className="w-32 h-24 object-cover rounded-lg flex-shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-1 line-clamp-1">
+                        {article.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                        <span>By {article.author.firstName} {article.author.lastName}</span>
                         <span>•</span>
-                        <span>{item.cohort}</span>
+                        <span>{formatDate(article.createdAt)}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-3 w-3" />
+                          {article.viewCount} views
+                        </span>
+                        {article.cohortRestriction && (
+                          <>
+                            <span>•</span>
+                            <span className="text-blue-600">{article.cohortRestriction}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(article.status)}
+                    </div>
+                  </div>
+                  
+                  {article.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {article.tags.slice(0, 5).map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 bg-muted text-xs rounded-md"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 mt-4">
+                    <Link
+                      href={`/media/${article.slug}`}
+                      target="_blank"
+                      className="btn-secondary btn-sm"
+                    >
+                      <Eye className="h-3 w-3" />
+                      View
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setSelectedArticle(article)
+                        setView('edit')
+                      }}
+                      className="btn-secondary btn-sm"
+                    >
+                      <Edit className="h-3 w-3" />
+                      Edit
+                    </button>
+                    {article.status === 'PENDING_REVIEW' && (
+                      <>
+                        <button
+                          onClick={() => handleApproveArticle(article.slug)}
+                          className="btn-sm bg-green-100 text-green-800 hover:bg-green-200"
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => {
+                            const notes = prompt('Rejection notes (optional):')
+                            if (notes !== null) {
+                              handleRejectArticle(article.slug, notes)
+                            }
+                          }}
+                          className="btn-sm bg-red-100 text-red-800 hover:bg-red-200"
+                        >
+                          <XCircle className="h-3 w-3" />
+                          Reject
+                        </button>
                       </>
                     )}
+                    <button
+                      onClick={() => handleDeleteArticle(article.slug)}
+                      className="btn-sm bg-red-100 text-red-800 hover:bg-red-200"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Delete
+                    </button>
                   </div>
-
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {item.viewCount}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Share2 className="h-3 w-3" />
-                        {item.shareCount}
-                      </span>
-                    </div>
-                    <span className="text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  {item.status === 'pending_approval' && (
-                    <div className="flex gap-2 mt-3 pt-3 border-t">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleApprove(item.id)
-                        }}
-                        className="flex-1 px-3 py-1 bg-green-100 text-green-800 rounded text-sm hover:bg-green-200"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          const feedback = prompt('Rejection feedback (optional):')
-                          handleReject(item.id, feedback || undefined)
-                        }}
-                        className="flex-1 px-3 py-1 bg-red-100 text-red-800 rounded text-sm hover:bg-red-200"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
-
-                  {item.status === 'approved' && (
-                    <div className="mt-3 pt-3 border-t">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handlePublish(item.id)
-                        }}
-                        className="w-full px-3 py-1 bg-primary text-primary-foreground rounded text-sm"
-                      >
-                        Publish
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )
-          })
-        )}
-      </div>
-
-      {/* Media Detail Modal */}
-      {selectedMedia && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="bg-card rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold mb-2">{selectedMedia.title}</h2>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {selectedMedia.author?.firstName || selectedMedia.author?.email || 'Unknown'}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {new Date(selectedMedia.createdAt).toLocaleDateString()}
-                  </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedMedia.status)}`}>
-                    {selectedMedia.status}
-                  </span>
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedMedia(null)}
-                className="p-2 hover:bg-muted rounded"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="prose max-w-none mb-6">
-              <div dangerouslySetInnerHTML={{ __html: selectedMedia.content }} />
-            </div>
-
-            {selectedMedia.tags.length > 0 && (
-              <div className="flex items-center gap-2 mb-6">
-                <Tag className="h-4 w-4 text-muted-foreground" />
-                {selectedMedia.tags.map(tag => (
-                  <span key={tag} className="px-2 py-1 bg-muted rounded text-sm">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="flex justify-between items-center pt-4 border-t">
-              <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  {selectedMedia.viewCount} views
-                </span>
-                <span className="flex items-center gap-1">
-                  <Share2 className="h-4 w-4" />
-                  {selectedMedia.shareCount} shares
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <Link
-                  href={`/admin/media/${selectedMedia.id}/edit`}
-                  className="px-3 py-1.5 border rounded hover:bg-muted"
-                >
-                  Edit
-                </Link>
-                <Link
-                  href={`/admin/media/${selectedMedia.id}/analytics`}
-                  className="px-3 py-1.5 border rounded hover:bg-muted"
-                >
-                  Analytics
-                </Link>
-                <button
-                  onClick={() => {
-                    handleDelete(selectedMedia.id)
-                    setSelectedMedia(null)
-                  }}
-                  className="px-3 py-1.5 border rounded text-destructive hover:bg-destructive/10"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          ))}
         </div>
       )}
     </div>

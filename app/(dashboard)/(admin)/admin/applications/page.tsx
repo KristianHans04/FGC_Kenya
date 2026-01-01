@@ -50,6 +50,21 @@ interface Application {
 }
 
 export default function AdminApplicationsPage() {
+  
+  useEffect(() => {
+    document.title = 'Application Management | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Review and manage student applications')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Review and manage student applications'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
