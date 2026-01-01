@@ -59,12 +59,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }),
       prisma.user.count({
         where: {
-          userRoles: {
-            some: {
-              role: { in: ['ADMIN', 'SUPER_ADMIN'] },
-              isActive: true,
-            },
-          },
+          role: { in: ['ADMIN', 'SUPER_ADMIN'] },
           isActive: true,
         },
       }),
