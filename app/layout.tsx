@@ -3,7 +3,7 @@ import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/app/components/ThemeProvider'
 import { AuthProvider } from '@/app/lib/contexts/AuthContext'
-
+import { defaultMetadata } from '@/app/lib/config/metadata'
 import LayoutContent from '@/app/components/LayoutContent'
 
 const inter = Inter({ 
@@ -17,46 +17,7 @@ const poppins = Poppins({
   variable: '--font-poppins',
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://fgckenya.com'),
-  title: 'FIRST Global Team Kenya - Inspiring the Future of STEM',
-  description: 'Official website of FIRST Global Challenge Team Kenya. Join us in inspiring young Kenyans through robotics and STEM education.',
-  keywords: 'FIRST Global, Team Kenya, Robotics, STEM, Education, Kenya, Technology, Innovation',
-  authors: [{ name: 'FIRST Global Team Kenya' }],
-  openGraph: {
-    title: 'FIRST Global Team Kenya',
-    description: 'Inspiring the Future of STEM through Robotics',
-    url: 'https://fgckenya.com',
-    siteName: 'FIRST Global Team Kenya',
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'FIRST Global Team Kenya',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'FIRST Global Team Kenya',
-    description: 'Inspiring the Future of STEM through Robotics',
-    images: ['/images/twitter-image.jpg'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-}
+export const metadata: Metadata = defaultMetadata
 
 /**
  * RootLayout component

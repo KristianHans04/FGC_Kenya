@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -9,6 +11,7 @@ import ImageSlideshow from '@/app/components/ImageSlideshow'
 import CountdownTimer from '@/app/components/CountdownTimer'
 import MediaCarousel from '@/app/components/MediaCarousel'
 import { getFeaturedStories } from '@/app/lib/media'
+import LatestStories from '@/app/components/LatestStories'
 
 /**
  * HomePage component
@@ -18,6 +21,21 @@ import { getFeaturedStories } from '@/app/lib/media'
  * @returns {JSX.Element} The home page component
  */
 export default function HomePage() {
+  
+  useEffect(() => {
+    document.title = 'Home | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Welcome to FIRST Global Team Kenya - Inspiring young innovators through robotics')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Welcome to FIRST Global Team Kenya - Inspiring young innovators through robotics'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const teamKenyaActionImages = [
     '/images/TeamKenyaAction/IMG_0504.jpg',
     '/images/TeamKenyaAction/IMG_20221028_192857_962.webp',
@@ -383,6 +401,9 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Latest Stories Section */}
+      <LatestStories />
 
       {/* Call to Action Section */}
       <section className="py-20 bg-gradient-to-br from-kenya-green/10 to-kenya-red/10 overflow-hidden">
