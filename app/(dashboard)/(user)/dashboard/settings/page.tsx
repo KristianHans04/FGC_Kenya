@@ -30,6 +30,21 @@ interface UserProfile {
 }
 
 export default function SettingsPage() {
+  
+  useEffect(() => {
+    document.title = 'Account Settings | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage your account preferences')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage your account preferences'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const { user } = useAuth()
   const [profile, setProfile] = useState<UserProfile>({
     firstName: '',

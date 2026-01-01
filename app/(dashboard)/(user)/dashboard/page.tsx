@@ -109,6 +109,21 @@ const statusConfig = {
 }
 
 export default function DashboardPage() {
+  
+  useEffect(() => {
+    document.title = 'Dashboard | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Welcome to your FIRST Global Kenya dashboard')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Welcome to your FIRST Global Kenya dashboard'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [applications, setApplications] = useState<Application[]>([])
   const [stats, setStats] = useState<UserStats | null>(null)
   const [loading, setLoading] = useState(true)

@@ -63,6 +63,21 @@ const statusConfig = {
 const programs = Object.values(PROGRAMS)
 
 export default function MyApplicationsPage() {
+  
+  useEffect(() => {
+    document.title = 'My Applications | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Track your FIRST Global applications')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Track your FIRST Global applications'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedProgram, setSelectedProgram] = useState<string>('all')
