@@ -5,6 +5,21 @@ import { Users, Award, Calendar, Briefcase, User } from 'lucide-react'
 
 
 export default function AlumniNetworkPage() {
+  
+  useEffect(() => {
+    document.title = 'Alumni Network | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Connect with fellow FIRST Global alumni')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Connect with fellow FIRST Global alumni'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
 

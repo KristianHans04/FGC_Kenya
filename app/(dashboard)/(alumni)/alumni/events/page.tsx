@@ -5,6 +5,21 @@ import { Users, Award, Calendar, Briefcase, User } from 'lucide-react'
 
 
 export default function AlumniEventsPage() {
+  
+  useEffect(() => {
+    document.title = 'Alumni Events | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Discover and join alumni events')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Discover and join alumni events'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
 

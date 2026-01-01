@@ -5,6 +5,21 @@ import { Users, Award, Calendar, Briefcase, User } from 'lucide-react'
 
 
 export default function AlumniMentorshipPage() {
+  
+  useEffect(() => {
+    document.title = 'Alumni Mentorship | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Connect with mentors and mentees')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Connect with mentors and mentees'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
 

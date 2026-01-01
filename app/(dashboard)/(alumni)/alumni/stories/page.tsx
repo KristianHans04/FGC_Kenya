@@ -5,6 +5,21 @@ import { Users, Award, Calendar, Briefcase, User } from 'lucide-react'
 
 
 export default function AlumniStoriesPage() {
+  
+  useEffect(() => {
+    document.title = 'Success Stories | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Share and read inspiring alumni stories')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Share and read inspiring alumni stories'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
 
