@@ -221,7 +221,7 @@ export default function EmailComposer({
         "flex flex-col",
         isFullscreen 
           ? "h-full sm:max-w-none" 
-          : "h-[90vh] sm:h-auto sm:max-h-[85vh] sm:max-w-4xl sm:rounded-lg",
+          : "h-[90vh] sm:h-auto sm:max-h-[85vh] sm:max-w-3xl lg:max-w-2xl sm:rounded-lg",
         "animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95"
       )}>
         {/* Header */}

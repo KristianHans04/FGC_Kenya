@@ -87,7 +87,7 @@ export default function EmailViewer({
     return (
       <div className="flex flex-col h-full bg-background">
         {/* Mobile Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+        <div className="flex items-center justify-between px-4 py-3 border-b-2 border-border bg-muted/30">
           <button
             onClick={onBack || onClose}
             className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors"
@@ -140,7 +140,7 @@ export default function EmailViewer({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-background">
           <div className="p-4">
             {/* Subject */}
             <h1 className="text-xl font-semibold text-foreground mb-4">
@@ -197,7 +197,7 @@ export default function EmailViewer({
         </div>
 
         {/* Mobile Actions */}
-        <div className="flex border-t border-border bg-card">
+        <div className="flex border-t-2 border-border bg-muted/20">
           <button
             onClick={onReply}
             className="flex-1 flex items-center justify-center gap-2 py-3 hover:bg-muted transition-colors"
@@ -228,7 +228,7 @@ export default function EmailViewer({
   return (
     <div className="flex flex-col h-full bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+      <div className="flex items-center justify-between px-6 py-4 border-b-2 border-border bg-muted/30">
         <h2 className="text-lg font-semibold text-foreground truncate max-w-[60%]">
           {email.subject || '(no subject)'}
         </h2>
@@ -275,8 +275,8 @@ export default function EmailViewer({
       </div>
 
       {/* Email Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-6 py-4">
+      <div className="flex-1 overflow-y-auto bg-background">
+        <div className="px-6 py-6">
           {/* Sender Information */}
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -347,7 +347,7 @@ export default function EmailViewer({
       </div>
 
       {/* Action Buttons */}
-      <div className="px-6 py-4 border-t border-border flex items-center gap-3">
+      <div className="px-6 py-4 border-t-2 border-border bg-muted/20 flex items-center gap-3">
         <button
           onClick={onReply}
           className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors flex items-center gap-2"
