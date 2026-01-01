@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer'
 import type { Transporter } from 'nodemailer'
 import prisma from '@/app/lib/db'
 import type { ApplicationStatus } from '@/app/types/application'
+import { OTP_CONFIG } from '@/app/lib/auth/otp'
 import {
   otpLoginTemplate,
   welcomeTemplate,
@@ -214,7 +215,7 @@ function generateEmailContent(
 export async function sendOTPEmail(
   email: string,
   code: string,
-  expiryMinutes: number = 10
+  expiryMinutes: number = OTP_CONFIG.EXPIRY_MINUTES
 ): Promise<boolean> {
   const { subject, html, text } = otpLoginTemplate({ code, expiryMinutes })
   return sendEmail({ to: email, subject, html, text })
