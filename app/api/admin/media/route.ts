@@ -1,116 +1,146 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
+import prisma from '@/app/lib/prisma'
 
-export async function GET(req: NextRequest) {
-  try {
-    const authResult = await authenticateRequest(req)
-    if (!authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (!['ADMIN', 'SUPER_ADMIN', 'MENTOR'].includes(authResult.user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const searchParams = req.nextUrl.searchParams
-    const status = searchParams.get('status') || 'all'
-    const search = searchParams.get('search') || ''
-
-    // Mock media data
-    const media = [
-      {
-        id: '1',
-        title: 'Robot Assembly Guide',
-        type: 'video',
-        description: 'Complete guide for robot assembly',
-        status: 'approved',
-        uploadedBy: {
-          id: 'student1',
-          name: 'John Doe',
-          cohort: '2024'
-        },
-        uploadedAt: new Date().toISOString(),
-        approvedBy: authResult.user.role === ('MENTOR' as any) ? authResult.user.email : null,
-        tags: ['robotics', 'assembly', 'tutorial'],
-        views: 125,
-        size: '45MB',
-        url: '/media/video1.mp4'
-      }
-    ]
-
-    return NextResponse.json({
-      success: true,
-      data: { media }
-    })
-  } catch (error) {
-    console.error('Media fetch error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch media' },
-      { status: 500 }
-    )
-  }
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
-export async function POST(req: NextRequest) {
+// POST /api/admin/media - Create new article
+export async function POST(request: NextRequest) {
   try {
-    const authResult = await authenticateRequest(req)
+    const authResult = await authenticateRequest(request)
     if (!authResult.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const formData = await req.formData()
-    
-    // Here you would handle file upload and media creation
-    
-    return NextResponse.json({
-      success: true,
-      data: { message: 'Media uploaded successfully' }
-    })
-  } catch (error) {
-    console.error('Media upload error:', error)
-    return NextResponse.json(
-      { error: 'Failed to upload media' },
-      { status: 500 }
-    )
-  }
-}
+    const data = await request.json()
+    const {
+      title,
+      excerpt,
+      content,
+      coverImage,
+      tags = [],
+      status = 'draft',
+      scheduledPublishAt
+    } = data
 
-export async function PUT(req: NextRequest) {
-  try {
-    const authResult = await authenticateRequest(req)
-    if (!authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (!['ADMIN', 'SUPER_ADMIN', 'MENTOR'].includes(authResult.user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const body = await req.json()
-    const { mediaId, action } = body
-
-    if (!mediaId || !action) {
+    // Validate required fields for publishing
+    if (status === 'published' && (!title || !excerpt || !content || !coverImage)) {
       return NextResponse.json(
-        { error: 'Missing mediaId or action' },
+        { error: 'Title, excerpt, content, and cover image are required for publishing' },
         { status: 400 }
       )
     }
 
-    // Here you would handle the media update based on action (publish, approve, reject)
-    // For now, return success
+    // Calculate read time (average 200 words per minute)
+    const plainText = content.replace(/<[^>]*>/g, '')
+    const wordCount = plainText.split(/\s+/).filter((word: string) => word.length > 0).length
+    const readTime = `${Math.max(1, Math.ceil(wordCount / 200))} min`
+
+    // Generate unique slug
+    let slug = generateSlug(title || 'untitled')
+    let slugExists = await prisma.mediaArticle.findUnique({ where: { slug } })
+    let counter = 1
     
-    return NextResponse.json({
-      success: true,
-      data: { 
-        message: `Media ${action} successfully`,
-        mediaId,
-        action 
+    while (slugExists) {
+      slug = `${generateSlug(title || 'untitled')}-${counter}`
+      slugExists = await prisma.mediaArticle.findUnique({ where: { slug } })
+      counter++
+    }
+
+    // Get user details
+    const user = await prisma.user.findUnique({
+      where: { email: authResult.user.email },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        cohortMemberships: { 
+          where: { isActive: true },
+          select: { cohort: true, isActive: true }
+        }
       }
     })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Determine article status based on user role
+    let articleStatus = status
+    if (user.role === 'STUDENT') {
+      // Students' articles need approval
+      articleStatus = status === 'published' ? 'PENDING_REVIEW' : 'DRAFT'
+    } else if (status === 'published') {
+      articleStatus = 'PUBLISHED'
+    } else {
+      articleStatus = 'DRAFT'
+    }
+
+    // Get cohort restriction if user is a student or mentor
+    let cohortRestriction = null
+    if (user.role === 'STUDENT' || user.role === 'MENTOR') {
+      const activeMembership = user.cohortMemberships.find(m => m.isActive)
+      if (activeMembership) {
+        cohortRestriction = activeMembership.cohort
+      }
+    }
+
+    const article = await prisma.mediaArticle.create({
+      data: {
+        slug,
+        title: title || 'Untitled',
+        excerpt: excerpt || '',
+        content: content || '',
+        coverImage,
+        tags,
+        status: articleStatus,
+        // Status already determines if it's a draft
+        authorId: user.id,
+        publishedAt: articleStatus === 'PUBLISHED' ? new Date() : null,
+        viewCount: 0
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true
+          }
+        }
+      }
+    })
+
+    // Log the action
+    await prisma.auditLog.create({
+      data: {
+        action: 'ARTICLE_CREATED',
+        entityType: 'MediaArticle',
+        entityId: article.id,
+        userId: user.id,
+        details: {
+          title: title || 'Untitled',
+          status: articleStatus
+        }
+      }
+    })
+
+    return NextResponse.json({
+      success: true,
+      article
+    })
   } catch (error) {
-    console.error('Media update error:', error)
+    console.error('Error creating article:', error)
     return NextResponse.json(
-      { error: 'Failed to update media' },
+      { error: 'Failed to create article' },
       { status: 500 }
     )
   }
