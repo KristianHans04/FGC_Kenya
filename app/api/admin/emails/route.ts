@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
 import { prisma } from '@/app/lib/db'
 
+// In-memory storage for sent emails (in production, use a database)
+const sentEmails: any[] = []
+
 export async function GET(req: NextRequest) {
   try {
     const authResult = await authenticateRequest(req)
@@ -72,31 +75,31 @@ export async function GET(req: NextRequest) {
         }
       ]
     } else if (folder === 'sent') {
-      emails = [
-        {
-          id: '3',
-          subject: 'Re: Application Approved',
-          body: '<p>Your application has been approved. Welcome to FGC Kenya!</p>',
-          plainText: 'Your application has been approved. Welcome to FGC Kenya!',
-          toEmails: ['student@example.com'],
-          ccEmails: [],
-          bccEmails: [],
-          senderId: authResult.user.id,
-          sender: {
-            email: authResult.user.email,
-            name: 'Admin User'
-          },
-          isRead: true,
-          isStarred: false,
-          isDraft: false,
-          isArchived: false,
-          sentAt: new Date(Date.now() - 86400000).toISOString(),
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          threadId: null,
-          attachments: [],
-          labels: []
-        }
-      ]
+      // Include both the mock sent email and any actually sent emails
+      const mockSentEmail = {
+        id: '3',
+        subject: 'Re: Application Approved',
+        body: '<p>Your application has been approved. Welcome to FGC Kenya!</p>',
+        plainText: 'Your application has been approved. Welcome to FGC Kenya!',
+        toEmails: ['student@example.com'],
+        ccEmails: [],
+        bccEmails: [],
+        senderId: authResult.user.id,
+        sender: {
+          email: authResult.user.email,
+          name: 'Admin User'
+        },
+        isRead: true,
+        isStarred: false,
+        isDraft: false,
+        isArchived: false,
+        sentAt: new Date(Date.now() - 86400000).toISOString(),
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        threadId: null,
+        attachments: [],
+        labels: []
+      }
+      emails = [mockSentEmail, ...sentEmails]
     } else if (folder === 'drafts') {
       emails = [
         {
@@ -242,12 +245,40 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     
-    // Here you would implement email sending logic
-    // For now, return success
+    // Create a sent email record
+    const sentEmail = {
+      id: `sent-${Date.now()}`,
+      subject: body.subject || '(no subject)',
+      body: body.body || '',
+      plainText: body.body ? body.body.replace(/<[^>]*>/g, '') : '',
+      toEmails: body.to || [],
+      ccEmails: body.cc || [],
+      bccEmails: body.bcc || [],
+      senderId: authResult.user.id,
+      sender: {
+        email: authResult.user.email,
+        name: 'Admin User'
+      },
+      isRead: true,
+      isStarred: false,
+      isDraft: false,
+      isArchived: false,
+      sentAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      threadId: null,
+      attachments: body.attachments || [],
+      labels: []
+    }
+    
+    // Add to sent emails
+    sentEmails.unshift(sentEmail)
     
     return NextResponse.json({
       success: true,
-      data: { message: 'Email sent successfully' }
+      data: { 
+        message: 'Email sent successfully',
+        email: sentEmail
+      }
     })
   } catch (error) {
     console.error('Email send error:', error)
