@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest, AuthResult } from './auth'
-import { Role, hasPermission, getHighestRole } from '@/app/types/auth'
+import { Role, hasPermission } from '@/app/types/auth'
 import prisma from '@/app/lib/db'
 import type { AuthenticatedRequest } from './auth'
 
@@ -14,36 +14,20 @@ import type { AuthenticatedRequest } from './auth'
  * Extended authenticated request with role information
  */
 export interface RoleAuthenticatedRequest extends AuthenticatedRequest {
-  userRoles?: {
-    role: Role
-    cohort: string | null
-    isActive: boolean
-  }[]
   currentRole?: Role
   currentCohort?: string | null
 }
 
 /**
- * Get user's active roles from database
+ * Get user's role from database
  */
-async function getUserRoles(userId: string) {
-  const userRoles = await prisma.userRole.findMany({
-    where: {
-      userId,
-      isActive: true,
-      OR: [
-        { endDate: null },
-        { endDate: { gt: new Date() } }
-      ]
-    },
-    orderBy: { startDate: 'desc' }
+async function getUserRole(userId: string): Promise<Role> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true }
   })
 
-  return userRoles.map(ur => ({
-    role: ur.role as Role,
-    cohort: ur.cohort,
-    isActive: ur.isActive
-  }))
+  return (user?.role as Role) || Role.USER
 }
 
 /**
@@ -74,15 +58,34 @@ export function requireRole(allowedRoles: Role[], requireCohort?: string) {
       )
     }
 
-    // Get user's roles from database
-    const userRoles = await getUserRoles(user.id)
+    // Get user's role from database
+    const userRole = await getUserRole(user.id)
     
     // Check if user has any of the allowed roles
-    const hasAllowedRole = userRoles.some(ur => {
-      const roleMatch = allowedRoles.includes(ur.role)
-      const cohortMatch = !requireCohort || ur.cohort === requireCohort
-      return roleMatch && cohortMatch
-    })
+    const hasAllowedRole = allowedRoles.includes(userRole)
+    
+    // Check cohort if required
+    if (hasAllowedRole && requireCohort) {
+      const membership = await prisma.cohortMember.findFirst({
+        where: {
+          userId: user.id,
+          cohort: requireCohort,
+          isActive: true
+        }
+      })
+      if (!membership) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'NOT_IN_COHORT',
+              message: `You are not a member of cohort ${requireCohort}`
+            }
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     if (!hasAllowedRole) {
       return NextResponse.json(
@@ -90,23 +93,31 @@ export function requireRole(allowedRoles: Role[], requireCohort?: string) {
           success: false,
           error: {
             code: 'INSUFFICIENT_PERMISSIONS',
-            message: `This action requires one of these roles: ${allowedRoles.join(', ')}${requireCohort ? ` in cohort ${requireCohort}` : ''}`
+            message: `This action requires one of these roles: ${allowedRoles.join(', ')}`
           }
         },
         { status: 403 }
       )
     }
 
-    // Get current role (highest priority)
-    const currentRole = getHighestRole(userRoles as any)
-    const currentCohort = userRoles.find(ur => ur.role === currentRole)?.cohort || null
+    // Get current cohort if user is student or mentor
+    let currentCohort: string | null = null
+    if (userRole === Role.MENTOR || userRole === Role.STUDENT) {
+      const membership = await prisma.cohortMember.findFirst({
+        where: {
+          userId: user.id,
+          isActive: true
+        },
+        select: { cohort: true }
+      })
+      currentCohort = membership?.cohort || null
+    }
 
     // Attach role info to request
     const roleRequest = request as RoleAuthenticatedRequest
     roleRequest.user = user
     roleRequest.sessionId = authResult.sessionId
-    roleRequest.userRoles = userRoles
-    roleRequest.currentRole = currentRole
+    roleRequest.currentRole = userRole
     roleRequest.currentCohort = currentCohort
 
     return undefined
@@ -231,8 +242,8 @@ export async function canAccessCohort(
   requiredRole?: CohortRole
 ): Promise<boolean> {
   // Super admins and admins can access all cohorts
-  const userRoles = await getUserRoles(userId)
-  if (userRoles.some(ur => ur.role === Role.SUPER_ADMIN || ur.role === Role.ADMIN)) {
+  const userRole = await getUserRole(userId)
+  if (userRole === Role.SUPER_ADMIN || userRole === Role.ADMIN) {
     return true
   }
 
@@ -253,10 +264,10 @@ export async function canAccessCohort(
  * Get user's accessible cohorts
  */
 export async function getUserCohorts(userId: string): Promise<string[]> {
-  const userRoles = await getUserRoles(userId)
+  const userRole = await getUserRole(userId)
   
   // Super admins and admins can access all cohorts
-  if (userRoles.some(ur => ur.role === Role.SUPER_ADMIN || ur.role === Role.ADMIN)) {
+  if (userRole === Role.SUPER_ADMIN || userRole === Role.ADMIN) {
     const allCohorts = await prisma.cohortMember.findMany({
       distinct: ['cohort'],
       select: { cohort: true }

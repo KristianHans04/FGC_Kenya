@@ -68,7 +68,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
     }
 
     // Verify JWT token
-    const payload = verifyAccessToken(token)
+    const payload = await verifyAccessToken(token)
     if (!payload) {
       return {
         success: false,
