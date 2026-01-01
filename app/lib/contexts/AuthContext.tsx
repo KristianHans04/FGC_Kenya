@@ -63,43 +63,72 @@ export function AuthProvider({ children }: AuthProviderProps) {
   /**
    * Request OTP for login
    */
-  const login = async (email: string): Promise<void> => {
-    const response = await fetch('/api/auth/request-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email }),
-    })
+  const login = async (email: string): Promise<{ success: boolean; data?: { otpSentAt: number }; error?: { message: string } }> => {
+    try {
+      const response = await fetch('/api/auth/request-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email }),
+      })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error?.message || 'Failed to send OTP')
+      const result = await response.json()
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: { message: result.error?.message || 'Failed to send OTP' }
+        }
+      }
+
+      return {
+        success: true,
+        data: result.data
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: { message: error instanceof Error ? error.message : 'Failed to send OTP' }
+      }
     }
   }
 
   /**
    * Verify OTP and complete login
    */
-  const verifyOTP = async (email: string, code: string): Promise<string | undefined> => {
-    const response = await fetch('/api/auth/verify-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email, code }),
-    })
+  const verifyOTP = async (email: string, code: string): Promise<{ success: boolean; data?: any; error?: { message: string } }> => {
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, code }),
+      })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error?.message || 'Invalid OTP')
+      const result = await response.json()
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: { message: result.error?.message || 'Invalid OTP' }
+        }
+      }
+
+      setUser(result.data.user)
+      return {
+        success: true,
+        data: result.data
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: { message: error instanceof Error ? error.message : 'Invalid OTP' }
+      }
     }
-
-    const data = await response.json()
-    setUser(data.data.user)
-    return data.data.redirectUrl
   }
 
   /**

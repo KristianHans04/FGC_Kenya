@@ -144,8 +144,8 @@ export const MENTOR_NAVIGATION = {
     icon: Calendar,
   },
   MEDIA_APPROVALS: {
-    label: 'Media Approvals',
-    href: '/mentor/media/pending',
+    label: 'Review Articles',
+    href: '/mentor/media',
     icon: FileText,
   },
   MESSAGES: {
