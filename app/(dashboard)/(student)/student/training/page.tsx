@@ -13,6 +13,21 @@ import {
 } from 'lucide-react'
 
 export default function StudentTrainingPage() {
+  
+  useEffect(() => {
+    document.title = 'Training Modules | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Complete your FIRST Global training')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Complete your FIRST Global training'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [modules, setModules] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeModule, setActiveModule] = useState<any>(null)

@@ -5,6 +5,21 @@ import { User, Mail, Phone, School, Edit, Save } from 'lucide-react'
 
 
 export default function StudentProfilePage() {
+  
+  useEffect(() => {
+    document.title = 'Student Profile | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Manage your student profile information')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Manage your student profile information'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [profile, setProfile] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   

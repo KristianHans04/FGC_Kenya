@@ -42,6 +42,21 @@ interface TeamStats {
 }
 
 export default function StudentTeamPage() {
+  
+  useEffect(() => {
+    document.title = 'My Team | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Collaborate with your FIRST Global team')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Collaborate with your FIRST Global team'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [team, setTeam] = useState<{
     id: string
     name: string

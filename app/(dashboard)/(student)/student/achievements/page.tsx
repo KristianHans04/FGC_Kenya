@@ -43,6 +43,21 @@ interface AchievementStats {
 }
 
 export default function StudentAchievementsPage() {
+  
+  useEffect(() => {
+    document.title = 'My Achievements | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Track your accomplishments and badges')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Track your accomplishments and badges'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [stats, setStats] = useState<AchievementStats>({
     totalEarned: 0,

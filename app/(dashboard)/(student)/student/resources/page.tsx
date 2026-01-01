@@ -5,6 +5,21 @@ import { BookOpen, FileText, Video, Download, Search } from 'lucide-react'
 
 
 export default function StudentResourcesPage() {
+  
+  useEffect(() => {
+    document.title = 'Learning Resources | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Access learning materials and guides')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Access learning materials and guides'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const [resources, setResources] = useState([])
   const [loading, setLoading] = useState(true)
 

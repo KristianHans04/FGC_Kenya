@@ -63,6 +63,21 @@ interface MediaDraft {
 }
 
 export default function StudentDashboard() {
+  
+  useEffect(() => {
+    document.title = 'Student Dashboard | FIRST Global Team Kenya'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Your FIRST Global learning journey')
+    } else {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Your FIRST Global learning journey'
+      document.head.appendChild(meta)
+    }
+  }, [])
+
+
   const { user } = useAuth()
   const [cohort, setCohort] = useState<string>('')
   const [team, setTeam] = useState<TeamMember[]>([])
