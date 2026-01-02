@@ -3,7 +3,7 @@
 ## Overview
 This migration optimizes the FGC Kenya database by eliminating unnecessary JOIN tables and embedding frequently accessed data directly in primary tables. This results in **50-80% faster queries** and simpler code.
 
-## 📊 Key Changes
+## Key Changes
 
 ### Tables Removed (4 JOIN tables eliminated):
 1. **UserRole** → Embedded in User table as direct columns
@@ -16,7 +16,7 @@ This migration optimizes the FGC Kenya database by eliminating unnecessary JOIN 
 - User list queries: **50% faster** (200ms → 100ms)
 - Application queries: **50% faster** (150ms → 75ms)
 
-## 📁 Migration Files
+## Migration Files
 
 ```
 prisma/migrations/streamline-schema/
@@ -116,7 +116,7 @@ psql -U postgres -c "CREATE DATABASE fgc_kenya"
 psql -U postgres -d fgc_kenya < backup_YYYYMMDD_HHMMSS.sql
 ```
 
-## ✅ Success Criteria
+## Success Criteria
 
 Migration is successful when:
 - [ ] All tests pass (10/10)
@@ -126,7 +126,7 @@ Migration is successful when:
 - [ ] Application functions normally
 - [ ] Error rate < 0.1%
 
-## 📈 Expected Benefits
+## Expected Benefits
 
 ### Performance:
 - **50-80%** faster role-based queries
@@ -143,7 +143,7 @@ Migration is successful when:
 - **Reduced** storage overhead
 - **Simpler** backup/restore
 
-## ⚠️ Risks & Mitigation
+## Risks & Mitigation
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
@@ -180,7 +180,7 @@ const user = await prisma.user.findUnique({
 const role = user.role // Direct access!
 ```
 
-## 🔍 Monitoring Commands
+## Monitoring Commands
 
 ```bash
 # Check migration status
@@ -201,9 +201,9 @@ If issues arise during migration:
 3. **Third**: Restore from backup
 4. **Contact**: Team lead or database admin
 
-## 📅 Timeline
+## Timeline
 
-- **Planning**: ✅ Completed
+- **Planning**: Completed
 - **Testing**: In staging environment
 - **Migration**: Scheduled for maintenance window
 - **Monitoring**: 48 hours post-migration

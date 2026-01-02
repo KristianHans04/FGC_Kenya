@@ -72,6 +72,10 @@ export interface SafeUser {
   lastName: string | null
   school: string | null
   emailVerified: boolean
+  isBanned?: boolean
+  bannedAt?: string | null
+  bannedBy?: string | null
+  banReason?: string | null
   role?: Role  // Direct role field for streamlined schema
   roles?: {
     role: Role

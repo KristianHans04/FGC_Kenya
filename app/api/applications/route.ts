@@ -179,7 +179,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           season: '2026',
           title: 'FIRST Global Challenge Kenya 2026 Application',
           description: 'Application form for FGC Kenya 2026 cohort',
-          fields: {},
+          tabs: [],
           isActive: true,
           openDate: new Date(),
           closeDate: new Date('2026-12-31'),

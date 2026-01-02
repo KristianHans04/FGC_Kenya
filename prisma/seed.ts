@@ -78,7 +78,7 @@ async function main() {
       }
     })
 
-    console.log(`✅ Created/Updated user: ${user.email}`)
+    console.log(`Created/Updated user: ${user.email}`)
   }
 
   // Clear existing data  

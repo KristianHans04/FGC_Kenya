@@ -181,35 +181,6 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Subtle Stats */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="flex items-center space-x-3 p-4 bg-muted/50 rounded-lg">
-              <FileText className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Applications</p>
-                <p className="text-lg font-semibold">{stats.totalApplications}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 bg-muted/50 rounded-lg">
-              <Clock className="h-5 w-5 text-amber-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Active Applications</p>
-                <p className="text-lg font-semibold">{stats.activeApplications}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 bg-muted/50 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Submitted</p>
-                <p className="text-lg font-semibold">{stats.submittedApplications}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Applications List */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">

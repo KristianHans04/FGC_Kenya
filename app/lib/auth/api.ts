@@ -78,6 +78,32 @@ export async function authenticateRequest(
 }
 
 /**
+ * Get current authenticated user from request
+ * @param request - Optional NextRequest object (uses headers if not provided)
+ * @returns User information or null if not authenticated
+ */
+export async function getCurrentUser(request?: NextRequest): Promise<AuthenticatedUser | null> {
+  try {
+    // If no request provided, try to get from headers
+    if (!request) {
+      return null
+    }
+    
+    const authResult = await authenticateRequest(request)
+    
+    // If authentication failed, return null
+    if (authResult instanceof NextResponse) {
+      return null
+    }
+    
+    return authResult.user
+  } catch (error) {
+    console.error('Failed to get current user:', error)
+    return null
+  }
+}
+
+/**
  * Require specific roles for API access
  * @param request - Next.js request object
  * @param allowedRoles - Array of allowed roles

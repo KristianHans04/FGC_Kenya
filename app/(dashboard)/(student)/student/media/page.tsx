@@ -17,9 +17,12 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Send
+  Send,
+  Trash2,
+  Search
 } from 'lucide-react'
-import MediaEditor from '@/app/components/media/MediaEditor'
+import MediaEditorV2 from '@/app/components/media/MediaEditorV2'
+import { cn } from '@/app/lib/utils/cn'
 
 interface Article {
   id: string
@@ -68,7 +71,7 @@ export default function StudentMediaPage() {
     }
   }
 
-  const handleSaveArticle = async (data: any, publish: boolean) => {
+  const handleSaveArticle = async (data: any, isDraft: boolean) => {
     try {
       const url = selectedArticle
         ? `/api/media/articles/${selectedArticle.slug}`
@@ -128,8 +131,8 @@ export default function StudentMediaPage() {
   if (view === 'create' || view === 'edit') {
     return (
       <div className="p-6">
-        <MediaEditor
-          article={selectedArticle && selectedArticle.status !== 'REJECTED' ? {
+        <MediaEditorV2
+          article={selectedArticle ? {
             id: selectedArticle.id,
             title: selectedArticle.title,
             excerpt: selectedArticle.excerpt,
@@ -138,11 +141,12 @@ export default function StudentMediaPage() {
             tags: selectedArticle.tags,
             status: selectedArticle.status as 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED'
           } : undefined}
-          onSave={(data) => handleSaveArticle(data, false)}
+          onSave={handleSaveArticle}
           onClose={() => {
             setView('list')
             setSelectedArticle(null)
           }}
+          userRole="STUDENT"
         />
       </div>
     )

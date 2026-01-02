@@ -130,7 +130,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
 
     // Update cookies with new tokens
-    response.cookies.set('access_token', newTokens.accessToken, {
+    response.cookies.set('auth_token', newTokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

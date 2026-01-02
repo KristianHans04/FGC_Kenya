@@ -25,13 +25,8 @@ import {
 
 // SUPER ADMIN Navigation - Full system access  
 export const SUPER_ADMIN_NAVIGATION = {
-  DASHBOARD: {
-    label: 'Super Admin Dashboard',
-    href: '/admin/super',
-    icon: Shield,
-  },
   USER_MANAGEMENT: {
-    label: 'All Users',
+    label: 'User Management',
     href: '/admin/super/users',
     icon: Users,
   },
@@ -280,7 +275,7 @@ export function getNavigationByRole(role: string) {
 export function getDashboardRoute(role: string) {
   switch (role) {
     case 'SUPER_ADMIN':
-      return '/admin/super'
+      return '/admin/super/users'
     case 'ADMIN':
       return '/admin'
     case 'MENTOR':

@@ -50,7 +50,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(null)
         }
       } else {
+        // Clear user if auth check fails
         setUser(null)
+        // Clear any stale cookies on 401
+        if (response.status === 401) {
+          document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error)
@@ -112,18 +117,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const result = await response.json()
 
       if (!response.ok) {
+        console.error('OTP verification failed:', result.error)
         return {
           success: false,
           error: { message: result.error?.message || 'Invalid OTP' }
         }
       }
 
-      setUser(result.data.user)
+      // Update user state with the authenticated user
+      if (result.data?.user) {
+        setUser(result.data.user)
+        setIsLoading(false)
+      }
+      
       return {
         success: true,
         data: result.data
       }
     } catch (error) {
+      console.error('OTP verification error:', error)
       return {
         success: false,
         error: { message: error instanceof Error ? error.message : 'Invalid OTP' }

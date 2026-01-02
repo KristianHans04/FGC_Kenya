@@ -242,7 +242,7 @@ export async function PUT(
     if (application.user.email) {
       await sendApplicationStatusEmail(
         application.email,
-        application.user.firstName || application.firstName,
+        application.user.firstName || application.firstName || 'Applicant',
         application.id,
         reviewData.status as ApplicationStatus,
         reviewData.notes,

@@ -136,12 +136,7 @@ export default function EmailLayout() {
     if (getCurrentFolder() === folderId) {
       return emails.filter(e => !e.isRead).length
     }
-    // Return mock unread counts when not in that folder
-    switch(folderId) {
-      case 'inbox': return 2
-      case 'drafts': return 1
-      default: return 0
-    }
+    return 0
   }
 
   const navItems = [
@@ -186,7 +181,7 @@ export default function EmailLayout() {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                     isActive
-                      ? "bg-primary/10 text-primary font-medium"
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
@@ -292,9 +287,17 @@ export default function EmailLayout() {
                   key={email.id}
                   className={cn(
                     "flex items-start gap-3 p-4 hover:bg-muted/50 cursor-pointer transition-colors",
-                    !email.isRead && "bg-primary/5"
+                    !email.isRead && "bg-green-50 dark:bg-green-900/20"
                   )}
-                  onClick={() => setCurrentEmail(email)}
+                  onClick={() => {
+                    // Mark email as read
+                    const updatedEmail = { ...email, isRead: true }
+                    setCurrentEmail(updatedEmail)
+                    // Update emails list
+                    setEmails(prev => prev.map(e => 
+                      e.id === email.id ? { ...e, isRead: true } : e
+                    ))
+                  }}
                 >
                   <input
                     type="checkbox"
@@ -351,11 +354,26 @@ export default function EmailLayout() {
             }}
             onClose={() => setCurrentEmail(null)}
             onBack={() => setCurrentEmail(null)}
-            onReply={() => console.log('Reply')}
-            onReplyAll={() => console.log('Reply All')}
-            onForward={() => console.log('Forward')}
-            onDelete={() => console.log('Delete')}
-            onArchive={() => console.log('Archive')}
+            onReply={() => {
+              setShowComposer(true)
+              setCurrentEmail(null)
+            }}
+            onReplyAll={() => {
+              setShowComposer(true)
+              setCurrentEmail(null)
+            }}
+            onForward={() => {
+              setShowComposer(true)
+              setCurrentEmail(null)
+            }}
+            onDelete={() => {
+              setEmails(prev => prev.filter(e => e.id !== currentEmail.id))
+              setCurrentEmail(null)
+            }}
+            onArchive={() => {
+              setEmails(prev => prev.filter(e => e.id !== currentEmail.id))
+              setCurrentEmail(null)
+            }}
           />
         </div>
       )}
@@ -383,9 +401,27 @@ export default function EmailLayout() {
               })
               
               if (response.ok) {
+                const result = await response.json()
                 setShowComposer(false)
                 setSendSuccess(true)
-                await fetchEmails()
+                
+                // If we're in the sent folder, add the email immediately
+                if (getCurrentFolder() === 'sent') {
+                  const sentEmail = result.data.email
+                  // Convert API format to component format
+                  const formattedEmail = {
+                    ...sentEmail,
+                    from: sentEmail.sender.email,
+                    to: sentEmail.toEmails,
+                    cc: sentEmail.ccEmails,
+                    bcc: sentEmail.bccEmails,
+                    plainText: sentEmail.plainText || ''
+                  }
+                  setEmails(prev => [formattedEmail, ...prev])
+                } else {
+                  // Otherwise refresh to get updated counts
+                  await fetchEmails()
+                }
               } else {
                 console.error('Failed to send email')
               }

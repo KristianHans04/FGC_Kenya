@@ -50,7 +50,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
       token = authHeader.substring(7) // Remove 'Bearer '
     } else {
       // Try to get token from cookie
-      const cookieToken = request.cookies.get('access_token')
+      const cookieToken = request.cookies.get('auth_token')
       if (cookieToken) {
         token = cookieToken.value
       }

@@ -6,3 +6,4 @@
 
 export * from './otp'
 export * from './jwt'
+export { getCurrentUser } from './api'

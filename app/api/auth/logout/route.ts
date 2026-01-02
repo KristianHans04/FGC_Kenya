@@ -59,7 +59,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
 
     // Clear cookies
-    response.cookies.set('access_token', '', {
+    response.cookies.set('auth_token', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

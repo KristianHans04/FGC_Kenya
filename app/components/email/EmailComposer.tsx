@@ -452,10 +452,14 @@ export default function EmailComposer({
             className="min-h-[200px] p-4 text-foreground focus:outline-none"
             data-placeholder="Write your message..."
             dir="ltr"
-            style={{ direction: 'ltr' }}
-            dangerouslySetInnerHTML={{ __html: body }}
+            style={{ direction: 'ltr', unicodeBidi: 'plaintext' }}
             onInput={(e) => setBody(e.currentTarget.innerHTML)}
-          />
+            suppressContentEditableWarning={true}
+          >
+            {body === '' && (
+              <span className="text-muted-foreground">Write your message...</span>
+            )}
+          </div>
           
           {/* Attachments */}
           {attachments.length > 0 && (

@@ -16,7 +16,7 @@ interface TestResult {
 async function testMigration(): Promise<void> {
   const results: TestResult[] = []
   
-  console.log('🔍 Starting migration tests...\n')
+  console.log('Starting migration tests...\n')
   
   try {
     // Test 1: Check if User table has new columns
@@ -217,7 +217,7 @@ async function testMigration(): Promise<void> {
     
     let passedCount = 0
     results.forEach(result => {
-      const icon = result.passed ? '✅' : '❌'
+      const icon = result.passed ? 'PASS' : 'FAIL'
       console.log(`${icon} ${result.test}: ${result.message}`)
       if (result.passed) passedCount++
     })
@@ -226,9 +226,9 @@ async function testMigration(): Promise<void> {
     console.log(`Summary: ${passedCount}/${results.length} tests passed`)
     
     if (passedCount === results.length) {
-      console.log('🎉 All tests passed! Migration successful.')
+      console.log('All tests passed! Migration successful.')
     } else {
-      console.log('⚠️  Some tests failed. Review the migration.')
+      console.log('Some tests failed. Review the migration.')
     }
     
     await prisma.$disconnect()

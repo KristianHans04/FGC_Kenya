@@ -66,7 +66,7 @@ export function createApplicationSubmittedTemplate(data: ApplicationSubmissionDa
   const reference = applicationId.slice(0, 8).toUpperCase()
   
   const htmlContent = `
-    <h2>Application Received! ✅</h2>
+    <h2>Application Received!</h2>
     
     <p>Dear ${firstName},</p>
     
@@ -183,7 +183,7 @@ export function createApplicationStatusTemplate(data: ApplicationStatusData): Em
   if (interviewDate && status === 'INTERVIEW_SCHEDULED') {
     additionalContent += `
       <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7b1fa2;">
-        <h3 style="margin-top: 0; color: #7b1fa2;">📅 Interview Details</h3>
+        <h3 style="margin-top: 0; color: #7b1fa2;">Interview Details</h3>
         <p><strong>Date & Time:</strong> ${interviewDate.toLocaleDateString('en-KE', { 
           weekday: 'long', 
           year: 'numeric', 
@@ -218,7 +218,7 @@ export function createApplicationStatusTemplate(data: ApplicationStatusData): Em
     const steps = nextSteps || defaultNextSteps
     
     additionalContent += `
-      <h3>🎉 Next Steps as a Team Member</h3>
+      <h3>Next Steps as a Team Member</h3>
       <ol style="line-height: 1.8;">
         ${steps.map(step => `<li>${step}</li>`).join('')}
       </ol>
@@ -334,7 +334,7 @@ function getStatusInfo(status: ApplicationStatus): { title: string; message: str
       message: 'Thank you for completing your interview. Our selection committee is now making the final decisions.' 
     },
     ACCEPTED: { 
-      title: 'Congratulations! You\'ve Been Selected for Team Kenya! 🎉', 
+      title: 'Congratulations! You\'ve Been Selected for Team Kenya!', 
       message: 'We are thrilled to inform you that you have been selected to join FIRST Global Team Kenya! Welcome to the team!' 
     },
     REJECTED: { 

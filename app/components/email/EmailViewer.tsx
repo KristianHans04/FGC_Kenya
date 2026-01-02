@@ -147,19 +147,30 @@ export default function EmailViewer({
               {email.subject || '(no subject)'}
             </h1>
 
-            {/* Sender Info */}
-            <div className="flex items-start gap-3 mb-4 pb-4 border-b border-border">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <User className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-foreground">{email.from}</div>
-                <div className="text-sm text-muted-foreground">
-                  to {email.to.join(', ')}
+            {/* Sender Info with Background */}
+            <div className="bg-muted/20 -m-4 p-4 mb-4 border-b border-border">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <User className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {formatDate(new Date(email.sentAt || email.createdAt), 'PPp')}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-foreground">{email.from}</div>
+                  <div className="text-sm text-muted-foreground space-y-0.5 mt-1">
+                    <div className="flex gap-2">
+                      <span className="font-medium">To:</span>
+                      <span className="truncate">{email.to.join(', ')}</span>
+                    </div>
+                    {email.cc.length > 0 && (
+                      <div className="flex gap-2">
+                        <span className="font-medium">Cc:</span>
+                        <span className="truncate">{email.cc.join(', ')}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {formatDate(email.sentAt || email.createdAt)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -276,9 +287,9 @@ export default function EmailViewer({
 
       {/* Email Content */}
       <div className="flex-1 overflow-y-auto bg-background">
-        <div className="px-6 py-6">
-          {/* Sender Information */}
-          <div className="flex items-start gap-4 mb-6">
+        {/* Sender Information Section with Different Background */}
+        <div className="bg-muted/20 border-b border-border px-6 py-4">
+          <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <User className="h-6 w-6 text-primary" />
             </div>
@@ -286,19 +297,29 @@ export default function EmailViewer({
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-semibold text-foreground">{email.from}</h3>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    <div>To: {email.to.join(', ')}</div>
+                  <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                    <div className="flex gap-2">
+                      <span className="font-medium min-w-[30px]">To:</span>
+                      <span>{email.to.join(', ')}</span>
+                    </div>
                     {email.cc.length > 0 && (
-                      <div>Cc: {email.cc.join(', ')}</div>
+                      <div className="flex gap-2">
+                        <span className="font-medium min-w-[30px]">Cc:</span>
+                        <span>{email.cc.join(', ')}</span>
+                      </div>
                     )}
                   </div>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {formatDate(new Date(email.sentAt || email.createdAt), 'PPp')}
+                  {formatDate(email.sentAt || email.createdAt)}
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Email Body Content */}
+        <div className="px-6 py-6">
 
           {/* Labels */}
           {email.labels.length > 0 && (

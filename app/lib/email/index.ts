@@ -63,8 +63,11 @@ interface SendEmailOptions {
  * @returns Promise resolving to success boolean
  */
 export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
-  // In development or when EMAIL_PROVIDER is 'console', log email instead of sending
-  if (process.env.NODE_ENV === 'development' || process.env.EMAIL_PROVIDER === 'console' || !EMAIL_CONFIG.user) {
+  // In development with maildev/localhost SMTP, send actual emails
+  const isUsingMaildev = EMAIL_CONFIG.host === 'localhost' && EMAIL_CONFIG.port === 1025;
+
+  // In development without proper email config OR when EMAIL_PROVIDER is 'console', log email
+  if ((process.env.NODE_ENV === 'development' && !isUsingMaildev && !EMAIL_CONFIG.user) || process.env.EMAIL_PROVIDER === 'console') {
     console.log('\n' + '='.repeat(60))
     console.log('[EMAIL PREVIEW] Development Mode')
     console.log('='.repeat(60))

@@ -10,6 +10,7 @@ import { useAuth } from '@/app/lib/contexts/AuthContext'
 import { VALIDATION, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/app/lib/constants'
 import OTPVerification from '@/app/components/auth/OTPVerification'
 import { getDashboardRoute } from '@/app/lib/constants/navigation'
+import { handleAuthRedirect, logAuthError } from '@/app/lib/utils/auth-errors'
 import { OTP_CONFIG } from '@/app/lib/auth/otp'
 
 export default function LoginPage() {
@@ -27,32 +28,30 @@ export default function LoginPage() {
     }
   }, [])
 
-  // Initialize state from sessionStorage to persist across reloads
-  const [email, setEmail] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('otp_email') || ''
-    }
-    return ''
-  })
-  const [step, setStep] = useState<'email' | 'otp'>(() => {
-    if (typeof window !== 'undefined') {
-      return (sessionStorage.getItem('otp_step') as 'email' | 'otp') || 'email'
-    }
-    return 'email'
-  })
+  // Initialize state with default values, load from sessionStorage in useEffect
+  const [email, setEmail] = useState('')
+  const [step, setStep] = useState<'email' | 'otp'>('email')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [otpSentAt, setOtpSentAt] = useState<number | undefined>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('otp_sent_at')
-      return stored ? parseInt(stored, 10) : undefined
-    }
-    return undefined
-  })
-  const { login, verifyOTP, isAuthenticated, user } = useAuth()
+  const [otpSentAt, setOtpSentAt] = useState<number | undefined>(undefined)
+  const [isHydrated, setIsHydrated] = useState(false)
+  const { login, verifyOTP, isAuthenticated, user, isLoading: authLoading } = useAuth()
   const router = useRouter()
+
+  // Load state from sessionStorage after hydration
+  useEffect(() => {
+    const storedEmail = sessionStorage.getItem('otp_email')
+    const storedStep = sessionStorage.getItem('otp_step') as 'email' | 'otp'
+    const storedOtpSentAt = sessionStorage.getItem('otp_sent_at')
+    
+    if (storedEmail) setEmail(storedEmail)
+    if (storedStep) setStep(storedStep)
+    if (storedOtpSentAt) setOtpSentAt(parseInt(storedOtpSentAt, 10))
+    
+    setIsHydrated(true)
+  }, [])
 
   // Save state to sessionStorage whenever it changes
   useEffect(() => {
@@ -96,15 +95,36 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && !authLoading) {
       const dashboardRoute = getDashboardRoute(user.role || 'USER')
-      router.push(dashboardRoute)
+      console.log('Redirecting to:', dashboardRoute, 'User role:', user.role)
+      router.replace(dashboardRoute)
     }
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, authLoading])
 
-  // Don't render the login form if already authenticated
-  if (isAuthenticated) {
-    return null
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    )
+  }
+  
+  // Don't show authenticated state on login page - this might be stale
+  // Let the useEffect handle the redirect
+  
+  // Wait for hydration before showing the form
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    )
   }
 
   const validateEmail = (email: string) => {
@@ -166,10 +186,10 @@ export default function LoginPage() {
         if (errorMessage.includes('Please wait')) {
           const match = errorMessage.match(/(\d+) seconds/)
           if (match) {
-            errorMessage = `⏰ Too soon! Please wait ${match[1]} seconds before requesting a new code.`
+            errorMessage = `Too soon! Please wait ${match[1]} seconds before requesting a new code.`
           }
         } else if (errorMessage.includes('Too many OTP requests')) {
-          errorMessage = '🔒 Too many attempts. Please try again in an hour for security reasons.'
+          errorMessage = 'Too many attempts. Please try again in an hour for security reasons.'
         }
         
         setError(errorMessage)
@@ -187,6 +207,8 @@ export default function LoginPage() {
 
     try {
       const result = await verifyOTP(email, otp)
+      console.log('OTP Verification result:', result)
+      
       if (result.success) {
         setSuccess(SUCCESS_MESSAGES.AUTHENTICATION.LOGIN_SUCCESS)
         
@@ -195,22 +217,23 @@ export default function LoginPage() {
         sessionStorage.removeItem('otp_step')
         sessionStorage.removeItem('otp_sent_at')
         
-        // Redirect based on user role
-        if (result.data?.user?.role) {
-          const dashboardRoute = getDashboardRoute(result.data.user.role)
-          setTimeout(() => {
-            router.push(dashboardRoute)
-          }, 500)
-        } else {
-          // Fallback to default dashboard
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 500)
-        }
+        // Get redirect URL from response or determine based on role
+        const redirectUrl = result.data?.redirectUrl || 
+                          (result.data?.user?.role ? getDashboardRoute(result.data.user.role) : '/dashboard')
+        
+        console.log('Redirecting to:', redirectUrl)
+        
+        // Use auth redirect utility for reliable redirection
+        setTimeout(() => {
+          handleAuthRedirect(redirectUrl, router, '/dashboard')
+        }, 500)
       } else {
-        setError(result.error?.message || ERROR_MESSAGES.AUTHENTICATION.OTP_EXPIRED)
+        const errorMsg = result.error?.message || ERROR_MESSAGES.AUTHENTICATION.OTP_EXPIRED
+        console.error('OTP verification failed:', errorMsg)
+        setError(errorMsg)
       }
     } catch (err) {
+      console.error('OTP verify error:', err)
       setError(err instanceof Error ? err.message : ERROR_MESSAGES.AUTHENTICATION.INVALID_CREDENTIALS)
     }
   }

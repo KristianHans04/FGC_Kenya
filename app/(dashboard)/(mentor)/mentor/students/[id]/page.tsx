@@ -109,7 +109,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
         title: 'Fast Learner',
         description: 'Completed 5 modules in first month',
         earnedAt: '2024-02-15',
-        icon: '🚀'
+        icon: 'rocket'
       },
       {
         id: '2',

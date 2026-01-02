@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
 import { prisma } from '@/app/lib/db'
 
-// In-memory storage for sent emails (in production, use a database)
-const sentEmails: any[] = []
+// In-memory storage for emails (in production, use a database)
+// Using Map for better performance and persistence during the session
+const emailStore = new Map<string, any[]>([
+  ['sent', []],
+  ['drafts', []],
+  ['trash', []],
+  ['archived', []]
+])
 
 export async function GET(req: NextRequest) {
   try {
@@ -99,33 +105,32 @@ export async function GET(req: NextRequest) {
         attachments: [],
         labels: []
       }
-      emails = [mockSentEmail, ...sentEmails]
+      emails = [mockSentEmail, ...(emailStore.get('sent') || [])]
     } else if (folder === 'drafts') {
-      emails = [
-        {
-          id: '4',
-          subject: 'Team Update - Draft',
-          body: '<p>This is a draft email about the team update...</p>',
-          plainText: 'This is a draft email about the team update...',
-          toEmails: ['team@fgckenya.org'],
-          ccEmails: [],
-          bccEmails: [],
-          senderId: authResult.user.id,
-          sender: {
-            email: authResult.user.email,
-            name: 'Admin User'
-          },
-          isRead: true,
-          isStarred: false,
-          isDraft: true,
-          isArchived: false,
-          sentAt: null,
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
-          threadId: null,
-          attachments: [],
-          labels: []
-        }
-      ]
+      const mockDraft = {
+        id: '4',
+        subject: 'Team Update - Draft',
+        body: '<p>This is a draft email about the team update...</p>',
+        plainText: 'This is a draft email about the team update...',
+        toEmails: ['team@fgckenya.org'],
+        ccEmails: [],
+        bccEmails: [],
+        senderId: authResult.user.id,
+        sender: {
+          email: authResult.user.email,
+          name: 'Admin User'
+        },
+        isRead: true,
+        isStarred: false,
+        isDraft: true,
+        isArchived: false,
+        sentAt: null,
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+        threadId: null,
+        attachments: [],
+        labels: []
+      }
+      emails = [mockDraft, ...(emailStore.get('drafts') || [])]
     } else if (folder === 'starred') {
       emails = [
         {
@@ -153,57 +158,55 @@ export async function GET(req: NextRequest) {
         }
       ]
     } else if (folder === 'archived') {
-      emails = [
-        {
-          id: '5',
-          subject: 'Old Newsletter - January 2024',
-          body: '<p>This is an archived newsletter...</p>',
-          plainText: 'This is an archived newsletter...',
-          toEmails: ['all@fgckenya.org'],
-          ccEmails: [],
-          bccEmails: [],
-          senderId: 'marketing',
-          sender: {
-            email: 'marketing@fgckenya.org',
-            name: 'Marketing Team'
-          },
-          isRead: true,
-          isStarred: false,
-          isDraft: false,
-          isArchived: true,
-          sentAt: new Date('2024-01-15').toISOString(),
-          createdAt: new Date('2024-01-15').toISOString(),
-          threadId: null,
-          attachments: [],
-          labels: ['Newsletter']
-        }
-      ]
+      const mockArchived = {
+        id: '5',
+        subject: 'Old Newsletter - January 2024',
+        body: '<p>This is an archived newsletter...</p>',
+        plainText: 'This is an archived newsletter...',
+        toEmails: ['all@fgckenya.org'],
+        ccEmails: [],
+        bccEmails: [],
+        senderId: 'marketing',
+        sender: {
+          email: 'marketing@fgckenya.org',
+          name: 'Marketing Team'
+        },
+        isRead: true,
+        isStarred: false,
+        isDraft: false,
+        isArchived: true,
+        sentAt: new Date('2024-01-15').toISOString(),
+        createdAt: new Date('2024-01-15').toISOString(),
+        threadId: null,
+        attachments: [],
+        labels: ['Newsletter']
+      }
+      emails = [mockArchived, ...(emailStore.get('archived') || [])]
     } else if (folder === 'trash') {
-      emails = [
-        {
-          id: '6',
-          subject: 'Spam Message',
-          body: '<p>This message was marked as spam...</p>',
-          plainText: 'This message was marked as spam...',
-          toEmails: ['admin@fgckenya.org'],
-          ccEmails: [],
-          bccEmails: [],
-          senderId: 'unknown',
-          sender: {
-            email: 'spam@example.com',
-            name: 'Unknown Sender'
-          },
-          isRead: true,
-          isStarred: false,
-          isDraft: false,
-          isArchived: false,
-          sentAt: new Date(Date.now() - 604800000).toISOString(),
-          createdAt: new Date(Date.now() - 604800000).toISOString(),
-          threadId: null,
-          attachments: [],
-          labels: ['Spam']
-        }
-      ]
+      const mockTrash = {
+        id: '6',
+        subject: 'Spam Message',
+        body: '<p>This message was marked as spam...</p>',
+        plainText: 'This message was marked as spam...',
+        toEmails: ['admin@fgckenya.org'],
+        ccEmails: [],
+        bccEmails: [],
+        senderId: 'unknown',
+        sender: {
+          email: 'spam@example.com',
+          name: 'Unknown Sender'
+        },
+        isRead: true,
+        isStarred: false,
+        isDraft: false,
+        isArchived: false,
+        sentAt: new Date(Date.now() - 604800000).toISOString(),
+        createdAt: new Date(Date.now() - 604800000).toISOString(),
+        threadId: null,
+        attachments: [],
+        labels: ['Spam']
+      }
+      emails = [mockTrash, ...(emailStore.get('trash') || [])]
     }
 
     // Apply search filter if provided
@@ -271,7 +274,9 @@ export async function POST(req: NextRequest) {
     }
     
     // Add to sent emails
+    const sentEmails = emailStore.get('sent') || []
     sentEmails.unshift(sentEmail)
+    emailStore.set('sent', sentEmails)
     
     return NextResponse.json({
       success: true,

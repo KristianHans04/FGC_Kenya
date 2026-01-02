@@ -87,7 +87,7 @@ export function createAdminNewApplicationTemplate(data: AdminNewApplicationData)
   const reference = applicationId.slice(0, 8).toUpperCase()
   
   const htmlContent = `
-    <h2>📋 New Application Submitted</h2>
+    <h2>New Application Submitted</h2>
     
     <p>A new application has been submitted for the <strong>${season} season</strong> and requires review.</p>
     
@@ -213,7 +213,7 @@ export function createAdminStatusChangeTemplate(data: AdminStatusChangeData): Em
   const reference = applicationId.slice(0, 8).toUpperCase()
   
   const htmlContent = `
-    <h2>📝 Application Status Updated</h2>
+    <h2>Application Status Updated</h2>
     
     <p>An application status has been changed and logged in the system.</p>
     
@@ -316,10 +316,10 @@ export function createAdminSystemNotificationTemplate(data: AdminSystemNotificat
   const preheader = message
   
   const typeInfo = {
-    error: { emoji: '🚨', color: '#c62828', bgColor: '#ffebee' },
-    warning: { emoji: '⚠️', color: '#ef6c00', bgColor: '#fff3e0' },
-    info: { emoji: 'ℹ️', color: '#1565c0', bgColor: '#e3f2fd' },
-    success: { emoji: '✅', color: '#2e7d32', bgColor: '#e8f5e9' }
+    error: { emoji: 'ERROR', color: '#c62828', bgColor: '#ffebee' },
+    warning: { emoji: 'WARNING', color: '#ef6c00', bgColor: '#fff3e0' },
+    info: { emoji: 'INFO', color: '#1565c0', bgColor: '#e3f2fd' },
+    success: { emoji: 'SUCCESS', color: '#2e7d32', bgColor: '#e8f5e9' }
   }
   
   const { emoji, color, bgColor } = typeInfo[type]

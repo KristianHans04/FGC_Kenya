@@ -22,9 +22,38 @@ model User {
   firstName     String?
   lastName      String?
   phone         String?
+  
+  // Extended profile (for auto-fill)
+  dateOfBirth   DateTime?
+  gender        String?
+  nationality   String?
+  
+  // Education
   school        String?   // Current or last school
+  grade         String?
+  county        String?
+  homeAddress   String?
+  
+  // Parent/Guardian Info
+  parentName    String?
+  parentPhone   String?
+  parentEmail   String?
+  
+  // Professional/Portfolio Links
+  linkedinUrl   String?
+  githubUrl     String?
+  portfolioUrl  String?
+  
   role          Role      @default(USER)  // Direct role field
   isActive      Boolean   @default(true)
+  
+  // Ban management
+  isBanned      Boolean   @default(false)
+  bannedAt      DateTime?
+  bannedBy      String?
+  banReason     String?
+  banExpiresAt  DateTime?
+  
   emailVerified Boolean   @default(false)
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
@@ -317,8 +346,15 @@ model ApplicationForm {
   title       String
   description String?
   
-  // Form structure
-  fields      Json        // JSON schema for form fields
+  // Form structure with tabs
+  tabs        Json        // Array of tabs with fields
+  // Tab structure: { id, title, description, fields: [...], order }
+  // Field structure: { id, type, label, required, options, validation, autoFillFrom }
+  
+  // Settings
+  allowSaveDraft Boolean   @default(true)
+  requireDocumentLinks Boolean @default(true)
+  enableAutoFill Boolean   @default(true)
   
   // Status
   isActive    Boolean     @default(false)
@@ -349,27 +385,28 @@ model Application {
   season          String            
   status          ApplicationStatus @default(DRAFT)
   
-  // Form responses
-  responses       Json              // Dynamic based on form fields
+  // Form responses organized by tabs
+  responses       Json              // { tabId: { fieldId: value } }
+  completedTabs   String[]          // Array of completed tab IDs
+  currentTab      String?           // Current tab being edited
+  progress        Float             @default(0) // Progress percentage
   
-  // Personal Information (standard fields)
-  firstName       String
-  lastName        String
+  // Personal Information (from settings/auto-fill)
+  firstName       String?
+  lastName        String?
   email           String
-  phone           String
-  dateOfBirth     DateTime
+  phone           String?
+  dateOfBirth     DateTime?
   gender          String?
   nationality     String            @default("Kenyan")
   
-  // Educational Information
-  school          String
-  grade           String
-  county          String
+  // Educational Information (from settings/auto-fill)
+  school          String?
+  grade           String?
+  county          String?
   
-  // Documents
-  resumeUrl       String?
-  recommendationUrl String?
-  portfolioUrl    String?
+  // Document Links (not file uploads)
+  documentLinks   Json?             // { type: url, preview?: metadata }
   
   // Consent
   parentConsent   Boolean           @default(false)
@@ -594,6 +631,8 @@ enum AuditAction {
   USER_ROLE_CHANGED
   USER_ROLE_ASSIGNED
   USER_ROLE_REVOKED
+  USER_BANNED
+  USER_UNBANNED
   
   // Application Management
   APPLICATION_CREATED

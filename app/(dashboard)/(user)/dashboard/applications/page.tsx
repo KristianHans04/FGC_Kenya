@@ -83,9 +83,11 @@ export default function MyApplicationsPage() {
   const [selectedProgram, setSelectedProgram] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [activeForm, setActiveForm] = useState<any>(null)
 
   useEffect(() => {
     fetchApplications()
+    checkActiveForm()
   }, [])
 
   const fetchApplications = async () => {
@@ -113,8 +115,8 @@ export default function MyApplicationsPage() {
         {
           id: '2',
           status: 'DRAFT',
-          season: '2027',
-          program: 'fgc-2027',
+          season: '2026',
+          program: 'fgc-2026',
           createdAt: '2024-02-01T09:00:00Z',
           submittedAt: null,
           reviewedAt: null,
@@ -123,6 +125,25 @@ export default function MyApplicationsPage() {
       ])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkActiveForm = async () => {
+    try {
+      const response = await fetch('/api/applications/forms/active')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.form) {
+          setActiveForm(data.form)
+        }
+      }
+    } catch (error) {
+      // For development, assume FGC 2026 is active
+      setActiveForm({
+        season: 'FGC2026',
+        title: 'FIRST Global Challenge 2026',
+        closeDate: new Date('2026-03-31')
+      })
     }
   }
 
@@ -165,13 +186,70 @@ export default function MyApplicationsPage() {
         </div>
 
         <Link
-          href="/join"
+          href="/dashboard/applications/apply"
           className="btn-primary flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           New Application
         </Link>
       </div>
+
+      {/* Active Application Form Banner */}
+      {activeForm && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-6 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                  Applications Open
+                </span>
+              </div>
+              <h2 className="text-lg font-semibold mb-1">{activeForm.title}</h2>
+              <p className="text-sm text-muted-foreground">
+                Apply now to join Team Kenya for the FIRST Global Challenge
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Closes on {new Date(activeForm.closeDate).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {applications.find(app => app.season === '2026' && app.status === 'DRAFT') ? (
+                <Link
+                  href="/dashboard/applications/apply"
+                  className="btn-secondary flex items-center gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Continue Application
+                </Link>
+              ) : applications.find(app => app.season === '2026' && app.status !== 'DRAFT') ? (
+                <button
+                  disabled
+                  className="btn-outline opacity-50 cursor-not-allowed"
+                >
+                  Already Applied
+                </button>
+              ) : (
+                <Link
+                  href="/dashboard/applications/apply"
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Start Application
+                </Link>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -272,11 +350,11 @@ export default function MyApplicationsPage() {
                   <div className="flex gap-2">
                     {application.status === 'DRAFT' && (
                       <Link
-                        href={`/join?edit=${application.id}`}
+                        href={`/dashboard/applications/apply?edit=${application.id}`}
                         className="btn-secondary flex items-center gap-2"
                       >
                         <Edit className="h-4 w-4" />
-                        Edit
+                        Continue
                       </Link>
                     )}
                     <Link

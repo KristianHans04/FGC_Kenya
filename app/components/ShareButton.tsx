@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Share2, X } from 'lucide-react'
 
@@ -14,9 +14,14 @@ import { Share2, X } from 'lucide-react'
  */
 export default function ShareButton({ title, text }: { title: string; text: string }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [currentUrl, setCurrentUrl] = useState('')
+
+  // Set URL on client side only to avoid hydration mismatch
+  useEffect(() => {
+    setCurrentUrl(window.location.href)
+  }, [])
 
   const shareMessage = `I really think you should read this: ${title}`
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
 
   const shareLinks = [
     {

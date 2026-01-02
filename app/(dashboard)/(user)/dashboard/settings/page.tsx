@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
 import {
-
   MapPin,
   User,
   GraduationCap,
@@ -12,7 +11,10 @@ import {
   Save,
   Loader2,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Calendar,
+  Globe,
+  Link as LinkIcon
 } from 'lucide-react'
 
 interface UserProfile {
@@ -20,6 +22,9 @@ interface UserProfile {
   lastName: string
   email: string
   phone: string
+  dateOfBirth: string
+  gender: string
+  nationality: string
   school: string
   grade: string
   county: string
@@ -27,6 +32,9 @@ interface UserProfile {
   parentName: string
   parentPhone: string
   parentEmail: string
+  linkedinUrl: string
+  githubUrl: string
+  portfolioUrl: string
 }
 
 export default function SettingsPage() {
@@ -51,13 +59,19 @@ export default function SettingsPage() {
     lastName: '',
     email: '',
     phone: '',
+    dateOfBirth: '',
+    gender: '',
+    nationality: 'Kenyan',
     school: '',
     grade: '',
     county: '',
     homeAddress: '',
     parentName: '',
     parentPhone: '',
-    parentEmail: ''
+    parentEmail: '',
+    linkedinUrl: '',
+    githubUrl: '',
+    portfolioUrl: ''
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -80,13 +94,19 @@ export default function SettingsPage() {
             lastName: data.data.lastName || '',
             email: data.data.email || user?.email || '',
             phone: data.data.phone || '',
+            dateOfBirth: data.data.dateOfBirth ? data.data.dateOfBirth.split('T')[0] : '',
+            gender: data.data.gender || '',
+            nationality: data.data.nationality || 'Kenyan',
             school: data.data.school || '',
             grade: data.data.grade || '',
             county: data.data.county || '',
             homeAddress: data.data.homeAddress || '',
             parentName: data.data.parentName || '',
             parentPhone: data.data.parentPhone || '',
-            parentEmail: data.data.parentEmail || ''
+            parentEmail: data.data.parentEmail || '',
+            linkedinUrl: data.data.linkedinUrl || '',
+            githubUrl: data.data.githubUrl || '',
+            portfolioUrl: data.data.portfolioUrl || ''
           })
         }
       } else {
@@ -212,6 +232,48 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Date of Birth</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="date"
+                  value={profile.dateOfBirth}
+                  onChange={(e) => handleChange('dateOfBirth', e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Gender</label>
+              <select
+                value={profile.gender}
+                onChange={(e) => handleChange('gender', e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Nationality</label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={profile.nationality}
+                  onChange={(e) => handleChange('nationality', e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                  placeholder="Kenyan"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -287,6 +349,58 @@ export default function SettingsPage() {
                 className="w-full px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background resize-none"
                 placeholder="Your complete home address"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Professional Links */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <LinkIcon className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Professional Links</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">LinkedIn Profile</label>
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="url"
+                  value={profile.linkedinUrl}
+                  onChange={(e) => handleChange('linkedinUrl', e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                  placeholder="https://linkedin.com/in/username"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">GitHub Profile</label>
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="url"
+                  value={profile.githubUrl}
+                  onChange={(e) => handleChange('githubUrl', e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                  placeholder="https://github.com/username"
+                />
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">Portfolio Website</label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="url"
+                  value={profile.portfolioUrl}
+                  onChange={(e) => handleChange('portfolioUrl', e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary bg-background"
+                  placeholder="https://your-portfolio.com"
+                />
+              </div>
             </div>
           </div>
         </div>

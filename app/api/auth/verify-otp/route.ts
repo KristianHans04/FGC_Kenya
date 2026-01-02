@@ -187,8 +187,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       } as ApiResponse<AuthResponse>)
     )
 
-    // Set secure HTTP-only cookies
-    response.cookies.set('access_token', accessToken, {
+    // Set secure HTTP-only cookies with consistent naming
+    response.cookies.set('auth_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

@@ -23,7 +23,7 @@ import {
   MoreVertical,
   Send
 } from 'lucide-react'
-import MediaEditor from '@/app/components/media/MediaEditor'
+import MediaEditorV2 from '@/app/components/media/MediaEditorV2'
 
 interface Article {
   id: string
@@ -122,7 +122,7 @@ export default function AdminMediaManagement() {
     }
   }
 
-  const handleSaveArticle = async (data: any, publish: boolean) => {
+  const handleSaveArticle = async (data: any, isDraft: boolean) => {
     try {
       const url = selectedArticle 
         ? `/api/media/articles/${selectedArticle.slug}`
@@ -143,11 +143,11 @@ export default function AdminMediaManagement() {
         fetchStats()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to save article')
+        throw new Error(error.error || 'Failed to save article')
       }
     } catch (error) {
       console.error('Error saving article:', error)
-      alert('Failed to save article')
+      throw error
     }
   }
 
@@ -236,24 +236,23 @@ export default function AdminMediaManagement() {
   // Editor View
   if (view === 'create' || view === 'edit') {
     return (
-      <div className="p-6">
-        <MediaEditor
-          article={selectedArticle && selectedArticle.status !== 'REJECTED' ? {
-            id: selectedArticle.id,
-            title: selectedArticle.title,
-            excerpt: selectedArticle.excerpt,
-            content: selectedArticle.content,
-            coverImage: selectedArticle.coverImage,
-            tags: selectedArticle.tags,
-            status: selectedArticle.status as 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED'
-          } : undefined}
-          onSave={(data) => handleSaveArticle(data, false)}
-          onClose={() => {
-            setView('list')
-            setSelectedArticle(null)
-          }}
-        />
-      </div>
+      <MediaEditorV2
+        article={selectedArticle ? {
+          id: selectedArticle.id,
+          title: selectedArticle.title,
+          excerpt: selectedArticle.excerpt,
+          content: selectedArticle.content,
+          coverImage: selectedArticle.coverImage,
+          tags: selectedArticle.tags,
+          status: selectedArticle.status as 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED'
+        } : undefined}
+        onSave={handleSaveArticle}
+        onClose={() => {
+          setView('list')
+          setSelectedArticle(null)
+        }}
+        userRole="ADMIN"
+      />
     )
   }
 

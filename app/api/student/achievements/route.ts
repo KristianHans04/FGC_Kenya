@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         id: 'ach1',
         title: 'Quick Learner',
         description: 'Complete your first module',
-        icon: '🎯',
+        icon: 'target',
         earned: true,
         earnedAt: '2024-01-20',
         category: 'Learning'
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         id: 'ach2',
         title: 'Team Player',
         description: 'Collaborate on 5 team projects',
-        icon: '🤝',
+        icon: 'handshake',
         earned: true,
         earnedAt: '2024-02-15',
         category: 'Collaboration'
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
         id: 'ach3',
         title: 'Innovation Master',
         description: 'Submit 3 innovative solutions',
-        icon: '💡',
+        icon: 'lightbulb',
         earned: false,
         progress: '1/3',
         category: 'Innovation'
