@@ -1,6 +1,6 @@
 # Database Schema Streamlining Migration
 
-## 🎯 Overview
+## Overview
 This migration optimizes the FGC Kenya database by eliminating unnecessary JOIN tables and embedding frequently accessed data directly in primary tables. This results in **50-80% faster queries** and simpler code.
 
 ## 📊 Key Changes
@@ -29,7 +29,7 @@ prisma/migrations/streamline-schema/
 └── schema-streamlined.prisma   # New schema definition
 ```
 
-## 🚀 Migration Process
+## Migration Process
 
 ### Prerequisites
 - PostgreSQL 12+ 
@@ -102,7 +102,7 @@ DROP TABLE IF EXISTS "_backup_EmailLabel_20241231";
 DROP TABLE IF EXISTS "_backup_CohortMember_20241231";
 ```
 
-## 🔄 Rollback Process
+## Rollback Process
 
 If issues occur, rollback immediately:
 
@@ -152,7 +152,7 @@ Migration is successful when:
 | Performance degradation | Medium | Test in staging first |
 | Code incompatibility | Low | Code updates documented |
 
-## 📝 Code Changes Summary
+## Code Changes Summary
 
 ### Before:
 ```typescript
@@ -193,7 +193,7 @@ psql -c "SELECT query, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec
 grep ERROR logs/app.log | tail -20
 ```
 
-## 📞 Support
+## Support
 
 If issues arise during migration:
 1. **First**: Check logs in `logs/migration.log`

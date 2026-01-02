@@ -140,5 +140,8 @@ redis_data/
 # AI Documentations Master
 AI_DOCUMENTATIONS.mdtemp_docs/
 
+# Internal documentation (contains detailed implementation details)
+docs/internal/
+
 #Github Copilot
 .github/*

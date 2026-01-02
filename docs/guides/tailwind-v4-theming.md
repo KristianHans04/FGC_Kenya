@@ -132,7 +132,7 @@ Instead of hardcoding colors with dark mode variants, use semantic names:
   <p className="text-gray-600 dark:text-gray-400">Secondary text</p>
 </div>
 
-// ✅ CORRECT - Semantic colors
+// CORRECT - Semantic colors
 <div className="bg-card text-card-foreground">
   <p className="text-muted-foreground">Secondary text</p>
 </div>
@@ -179,7 +179,7 @@ Always define colors for both light and dark modes:
   --color-special: #FF0000;
 }
 
-/* ✅ Complete definition */
+/* Complete definition */
 @theme {
   --color-special: #FF0000;
 }
@@ -195,7 +195,7 @@ Use meaningful, semantic names for colors:
 --color-gray-50: #F9FAFB;
 --color-gray-900: #111827;
 
-/* ✅ Semantic naming */
+/* Semantic naming */
 --color-background: #F9FAFB;
 --color-foreground: #111827;
 ```

@@ -1,3 +1,3 @@
 # GEMINI.md
 
-See [docs/guides/development-standards.md](docs/guides/development-standards.md) for the complete guidelines.
+See [docs/internal/guides/development-standards.md](docs/internal/guides/development-standards.md) for the complete guidelines.
