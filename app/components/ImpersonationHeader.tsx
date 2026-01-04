@@ -112,11 +112,6 @@ export default function ImpersonationHeader() {
           </button>
         </div>
       </div>
-      
-      {/* Warning bar */}
-      <div className="bg-yellow-600 dark:bg-yellow-700 px-4 py-1 text-xs text-center">
-        ⚠️ All actions taken in this mode will be performed as the impersonated user. Be careful!
-      </div>
     </div>
   )
 }

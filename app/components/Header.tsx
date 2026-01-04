@@ -66,14 +66,14 @@ export default function Header() {
           <div className="flex flex-1 items-center">
             <Link href="/" className="flex items-center space-x-3">
               <div className="relative w-12 h-12">
-                <Image
-                  src="/images/FGC_Logo.svg"
-                  alt="FIRST Global Team Kenya Logo"
-                  width={48}
-                  height={48}
-                  className={`transition-all duration-300 ${mounted && currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
-                  priority
-                />
+                  <Image
+                    src="/images/Logo/FGC_KExFGC-logo.svg"
+                    alt="FIRST Global Team Kenya Logo"
+                    width={48}
+                    height={48}
+                    className={`transition-all duration-300 ${mounted && currentTheme === 'dark' ? 'brightness-0 invert' : ''}`}
+                    priority
+                  />
               </div>
               <div>
                 <p className="text-lg font-bold font-heading"><i>FIRST</i> Global</p>
@@ -185,7 +185,7 @@ export default function Header() {
           <Link href="/" className="flex items-center space-x-3">
             <div className="relative w-12 h-12">
               <Image
-                src="/images/FGC_Logo.svg"
+                src="/images/Logo/FGC_KExFGC-logo.svg"
                 alt="FIRST Global Team Kenya Logo"
                 width={48}
                 height={48}

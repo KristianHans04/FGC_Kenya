@@ -27,12 +27,17 @@ import { useTheme } from 'next-themes'
 interface SidebarProps {
   variant?: 'user' | 'admin'
   className?: string
+  hideMobileButton?: boolean
+  mobileMenuOpen?: boolean
+  onMobileMenuToggle?: () => void
 }
 
-export default function Sidebar({ className }: SidebarProps) {
+export default function Sidebar({ className, hideMobileButton = false, mobileMenuOpen, onMobileMenuToggle }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false)
+  const isMobileOpen = mobileMenuOpen !== undefined ? mobileMenuOpen : internalMobileOpen
+  const setIsMobileOpen = onMobileMenuToggle || setInternalMobileOpen
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
@@ -85,13 +90,13 @@ export default function Sidebar({ className }: SidebarProps) {
           isCollapsed && !isHovered && "justify-center"
         )}>
           <div className="relative w-10 h-10 flex-shrink-0">
-            <Image
-              src="/images/FGC_Logo.svg"
-              alt="FGC Kenya"
-              width={40}
-              height={40}
-              className="transition-all duration-300"
-            />
+             <Image
+               src="/images/Logo/FGC_KExFGC-logo.svg"
+               alt="FGC Kenya"
+               width={40}
+               height={40}
+               className="transition-all duration-300"
+             />
           </div>
           {(!isCollapsed || isHovered) && (
             <div>
@@ -106,7 +111,7 @@ export default function Sidebar({ className }: SidebarProps) {
         {/* Collapse button - Desktop only */}
         <button
           onClick={toggleCollapsed}
-          className="hidden lg:block p-1 hover:bg-muted rounded transition-colors"
+          className="hidden md:block p-1 hover:bg-muted rounded transition-colors"
         >
           {isCollapsed && !isHovered ? (
             <ChevronRight className="h-4 w-4" />
@@ -208,13 +213,15 @@ export default function Sidebar({ className }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-background border rounded-lg shadow-md"
-      >
-        {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
+      {/* Mobile Menu Button - only show if not hidden */}
+      {!hideMobileButton && (
+        <button
+          onClick={() => typeof setIsMobileOpen === 'function' && setIsMobileOpen(!isMobileOpen)}
+          className="md:hidden fixed top-4 left-4 z-50 p-2 bg-background border rounded-lg shadow-md"
+        >
+          {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      )}
 
       {/* Mobile Sidebar */}
       <AnimatePresence>
@@ -225,8 +232,8 @@ export default function Sidebar({ className }: SidebarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+              onClick={() => typeof setIsMobileOpen === 'function' && setIsMobileOpen(false)}
+              className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
             />
             
             {/* Sidebar */}
@@ -235,7 +242,7 @@ export default function Sidebar({ className }: SidebarProps) {
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="lg:hidden fixed left-0 top-0 h-full w-72 bg-background border-r z-50 flex flex-col"
+              className="md:hidden fixed left-0 top-0 h-full w-72 bg-background border-r z-50 flex flex-col"
             >
               {sidebarContent}
             </motion.aside>
@@ -246,8 +253,8 @@ export default function Sidebar({ className }: SidebarProps) {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col bg-background border-r transition-all duration-300",
-          isCollapsed && !isHovered ? "w-16" : "w-64",
+          "hidden md:flex flex-col bg-background border-r transition-all duration-300",
+          isCollapsed && !isHovered ? "w-16" : "md:w-56 lg:w-64",
           className
         )}
         onMouseEnter={() => setIsHovered(true)}
