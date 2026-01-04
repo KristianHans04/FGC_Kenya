@@ -20,7 +20,9 @@ import {
   Send,
   Inbox,
   Edit,
-  Network
+  Network,
+  CheckSquare,
+  ClipboardList
 } from 'lucide-react'
 
 // SUPER ADMIN Navigation - Full system access  
@@ -35,25 +37,10 @@ export const SUPER_ADMIN_NAVIGATION = {
     href: '/admin/applications',
     icon: FileText,
   },
-  FORMS: {
-    label: 'Form Builder',
-    href: '/admin/applications/forms',
-    icon: FileText,
-  },
   EMAILS: {
-    label: 'Email Inbox',
+    label: 'Emails',
     href: '/admin/emails/inbox',
     icon: Mail,
-  },
-  EMAIL_GROUPS: {
-    label: 'Email Groups',
-    href: '/admin/emails/groups',
-    icon: Users,
-  },
-  CAMPAIGNS: {
-    label: 'Campaigns',
-    href: '/admin/emails/campaigns', 
-    icon: Send,
   },
   MEDIA: {
     label: 'Media Management',
@@ -69,6 +56,16 @@ export const SUPER_ADMIN_NAVIGATION = {
     label: 'Analytics',
     href: '/admin/analytics',
     icon: BarChart3,
+  },
+  CALENDAR: {
+    label: 'Calendar',
+    href: '/admin/calendar',
+    icon: Calendar,
+  },
+  TASKS: {
+    label: 'Task Management',
+    href: '/admin/tasks',
+    icon: ClipboardList,
   },
 }
 
@@ -114,6 +111,16 @@ export const ADMIN_NAVIGATION = {
     href: '/admin/media',
     icon: BookOpen,
   },
+  CALENDAR: {
+    label: 'Calendar',
+    href: '/admin/calendar',
+    icon: Calendar,
+  },
+  TASKS: {
+    label: 'Task Management',
+    href: '/admin/tasks',
+    icon: ClipboardList,
+  },
 }
 
 // MENTOR Navigation
@@ -148,6 +155,16 @@ export const MENTOR_NAVIGATION = {
     href: '/mentor/messages',
     icon: MessageSquare,
   },
+  CALENDAR: {
+    label: 'Calendar',
+    href: '/mentor/calendar',
+    icon: Calendar,
+  },
+  TASKS: {
+    label: 'Tasks',
+    href: '/mentor/tasks',
+    icon: CheckSquare,
+  },
   PROFILE: {
     label: 'My Profile',
     href: '/mentor/profile',
@@ -162,30 +179,30 @@ export const STUDENT_NAVIGATION = {
     href: '/student',
     icon: Home,
   },
-  TRAINING: {
-    label: 'Training Modules',
-    href: '/student/training',
-    icon: BookOpen,
+  CALENDAR: {
+    label: 'Calendar',
+    href: '/student/calendar',
+    icon: Calendar,
   },
-  MEDIA: {
-    label: 'My Content',
-    href: '/student/media',
-    icon: FileText,
+  TASKS: {
+    label: 'Tasks',
+    href: '/student/tasks',
+    icon: CheckSquare,
   },
   TEAM: {
     label: 'My Team',
     href: '/student/team',
     icon: Users,
   },
-  ACHIEVEMENTS: {
-    label: 'Achievements',
-    href: '/student/achievements',
-    icon: Award,
-  },
   RESOURCES: {
     label: 'Resources',
     href: '/student/resources',
     icon: BookOpen,
+  },
+  MEDIA: {
+    label: 'My Content',
+    href: '/student/media',
+    icon: FileText,
   },
   PROFILE: {
     label: 'My Profile',
@@ -226,6 +243,11 @@ export const ALUMNI_NAVIGATION = {
     href: '/alumni/jobs',
     icon: Briefcase,
   },
+  CALENDAR: {
+    label: 'Alumni Calendar',
+    href: '/alumni/calendar',
+    icon: Calendar,
+  },
   PROFILE: {
     label: 'My Profile',
     href: '/alumni/profile',
@@ -244,6 +266,11 @@ export const USER_NAVIGATION = {
     label: 'Applications',
     href: '/dashboard/applications',
     icon: FileText,
+  },
+  CALENDAR: {
+    label: 'Events Calendar',
+    href: '/dashboard/calendar',
+    icon: Calendar,
   },
   PROFILE: {
     label: 'My Profile',

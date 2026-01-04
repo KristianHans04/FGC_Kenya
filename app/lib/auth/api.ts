@@ -24,10 +24,23 @@ async function verifyToken(token: string): Promise<AuthenticatedUser | null> {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET!)
     const { payload } = await jwtVerify(token, secret)
     
+    // Handle both old format (payload.role) and new format (payload.roles array)
+    let userRole = payload.role as string
+    
+    if (!userRole && payload.roles && Array.isArray(payload.roles)) {
+      // Extract role from roles array (new format)
+      userRole = (payload.roles as any[])[0]?.role || 'USER'
+    }
+    
+    if (!userRole) {
+      console.error('No role found in token payload:', payload)
+      userRole = 'USER' // Default fallback
+    }
+    
     return {
-      id: payload.sub as string,
+      id: payload.sub || payload.userId as string,
       email: payload.email as string,
-      role: payload.role as string,
+      role: userRole,
     }
   } catch (error) {
     console.error('Token verification failed:', error)

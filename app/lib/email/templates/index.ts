@@ -171,3 +171,70 @@ export const EMAIL_TEMPLATES = {
 } as const
 
 export type EmailTemplateType = keyof typeof EMAIL_TEMPLATES
+
+/**
+ * Generic email data interface
+ */
+export interface GenericEmailData {
+  recipientName?: string
+  subject: string
+  body: string
+  footerNote?: string
+}
+
+/**
+ * Create a generic professional email template
+ * Uses the same base template as OTP emails for consistency
+ * @param data - Generic email data
+ * @returns Complete email template with subject, HTML, and text versions
+ */
+export function createGenericEmailTemplate(data: GenericEmailData): { subject: string; html: string; text: string } {
+  const { recipientName, subject, body, footerNote } = data
+  
+  const preheader = subject.substring(0, 100)
+  
+  const htmlContent = `
+    ${recipientName ? `<h2>Hello ${recipientName},</h2>` : '<h2>Hello,</h2>'}
+    
+    <div style="line-height: 1.6; color: #333;">
+      ${body}
+    </div>
+    
+    ${footerNote ? `
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+      <p style="color: #666; font-size: 12px; margin: 0;">
+        ${footerNote}
+      </p>
+    </div>
+    ` : ''}
+    
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+      <p style="margin: 0; color: #666;">
+        Best regards,<br>
+        <strong>FIRST Global Team Kenya</strong>
+      </p>
+    </div>
+  `
+  
+  // Import createBaseTemplate from the base module
+  const { createBaseTemplate: baseTemplate } = require('./base')
+  
+  const html = baseTemplate(htmlContent, {
+    title: subject,
+    preheader
+  })
+  
+  // Plain text version
+  const text = `
+${recipientName ? `Hello ${recipientName},` : 'Hello,'}
+
+${body.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()}
+
+${footerNote || ''}
+
+Best regards,
+FIRST Global Team Kenya
+  `.trim()
+  
+  return { subject, html, text }
+}

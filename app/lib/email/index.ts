@@ -10,15 +10,15 @@ import prisma from '@/app/lib/db'
 import type { ApplicationStatus } from '@/app/types/application'
 import { OTP_CONFIG } from '@/app/lib/auth/otp'
 import {
-  otpLoginTemplate,
-  welcomeTemplate,
-  applicationSubmittedTemplate,
-  applicationStatusTemplate,
-  adminNewApplicationTemplate,
+  createOTPLoginTemplate,
+  createWelcomeTemplate,
+  createApplicationSubmittedTemplate,
+  createApplicationStatusTemplate,
+  createAdminNewApplicationTemplate,
   type ApplicationSubmissionData,
   type ApplicationStatusData,
   type AdminNewApplicationData,
-} from './templates'
+} from './templates/index'
 
 /**
  * Email configuration from environment variables
@@ -196,15 +196,15 @@ function generateEmailContent(
 ): { subject: string; html: string; text: string } {
   switch (template) {
     case 'otp-login':
-      return otpLoginTemplate(data as unknown as { code: string; expiryMinutes: number })
+      return createOTPLoginTemplate(data as unknown as { code: string; expiryMinutes: number })
     case 'welcome':
-      return welcomeTemplate(data as unknown as { firstName: string; email: string })
+      return createWelcomeTemplate(data as unknown as { firstName: string; email: string })
     case 'application-submitted':
-      return applicationSubmittedTemplate(data as unknown as ApplicationSubmissionData)
+      return createApplicationSubmittedTemplate(data as unknown as ApplicationSubmissionData)
     case 'application-status':
-      return applicationStatusTemplate(data as unknown as ApplicationStatusData)
+      return createApplicationStatusTemplate(data as unknown as ApplicationStatusData)
     case 'admin-new-application':
-      return adminNewApplicationTemplate(data as unknown as AdminNewApplicationData)
+      return createAdminNewApplicationTemplate(data as unknown as AdminNewApplicationData)
     default:
       throw new Error(`Unknown email template: ${template}`)
   }
@@ -220,7 +220,7 @@ export async function sendOTPEmail(
   code: string,
   expiryMinutes: number = OTP_CONFIG.EXPIRY_MINUTES
 ): Promise<boolean> {
-  const { subject, html, text } = otpLoginTemplate({ code, expiryMinutes })
+  const { subject, html, text } = createOTPLoginTemplate({ code, expiryMinutes })
   return sendEmail({ to: email, subject, html, text })
 }
 
@@ -231,7 +231,7 @@ export async function sendWelcomeEmail(
   email: string,
   firstName: string
 ): Promise<boolean> {
-  const { subject, html, text } = welcomeTemplate({ firstName, email })
+  const { subject, html, text } = createWelcomeTemplate({ firstName, email })
   return sendEmail({ to: email, subject, html, text })
 }
 
@@ -250,7 +250,7 @@ export async function sendApplicationStatusEmail(
   notes?: string,
   interviewDate?: Date
 ): Promise<boolean> {
-  const { subject, html, text } = applicationStatusTemplate({
+  const { subject, html, text } = createApplicationStatusTemplate({
     firstName,
     applicationId,
     status,
@@ -276,7 +276,7 @@ export async function sendAdminNewApplicationEmail(
     return true
   }
 
-  const { subject, html, text } = adminNewApplicationTemplate({
+  const { subject, html, text } = createAdminNewApplicationTemplate({
     applicantName,
     applicantEmail,
     applicationId,
