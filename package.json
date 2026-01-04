@@ -4,7 +4,7 @@
   "description": "Official website for FIRST Global Team Kenya - inspiring young innovators through robotics and STEM education",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev-with-mail.js",
     "dev:clean": "./start-dev.sh",
     "dev:fast": "pkill -9 node 2>/dev/null; pkill -9 npm 2>/dev/null; rm -rf .next; next dev",
     "dev:next": "next dev",
@@ -78,6 +78,7 @@
     "autoprefixer": "^10.4.23",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
+    "date-fns": "^4.1.0",
     "express": "^5.2.1",
     "framer-motion": "^12.23.26",
     "jose": "^6.1.3",

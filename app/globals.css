@@ -163,6 +163,7 @@ body {
 .text-primary { color: var(--color-primary); }
 .text-secondary { color: var(--color-secondary); }
 .text-accent { color: var(--color-accent); }
+.text-accent-dark { color: var(--color-accent-dark); }
 .text-muted-foreground { color: var(--color-muted-foreground); }
 .text-card-foreground { color: var(--color-card-foreground); }
 .text-foreground { color: var(--color-foreground); }
@@ -187,12 +188,14 @@ body {
 .border-primary { border-color: var(--color-primary); }
 .border-secondary { border-color: var(--color-secondary); }
 .border-accent { border-color: var(--color-accent); }
+.border-accent-dark { border-color: var(--color-accent-dark); }
 .border-transparent { border-color: transparent; }
 .border-gray-200 { border-color: #E5E7EB; }
 .border-gray-500\/10 { border-color: rgb(107 114 128 / 0.1); }
 
 /* Opacity variations for backgrounds */
 .bg-primary\/10 { background-color: rgb(0 102 0 / 0.1); }
+.bg-primary\/5 { background-color: rgb(0 102 0 / 0.05); }
 .bg-secondary\/10 { background-color: rgb(187 0 0 / 0.1); }
 .bg-accent\/10 { background-color: rgb(255 215 0 / 0.1); }
 .bg-muted\/30 { background-color: rgb(245 245 245 / 0.3); }
@@ -202,6 +205,10 @@ body {
 .bg-kenya-red\/10 { background-color: rgb(187 0 0 / 0.1); }
 .bg-muted-foreground\/10 { background-color: rgb(115 115 115 / 0.1); }
 
+.dark .bg-primary\/10 { background-color: rgb(0 136 0 / 0.1); }
+.dark .bg-primary\/5 { background-color: rgb(0 136 0 / 0.05); }
+.dark .bg-secondary\/10 { background-color: rgb(221 0 0 / 0.1); }
+.dark .bg-accent\/10 { background-color: rgb(218 165 32 / 0.1); }
 .dark .bg-muted\/30 { background-color: rgb(38 38 38 / 0.3); }
 .dark .bg-background\/95 { background-color: rgb(10 10 10 / 0.95); }
 .dark .bg-background\/60 { background-color: rgb(10 10 10 / 0.6); }
@@ -218,14 +225,22 @@ body {
 
 /* Ring utilities */
 .ring-2 { box-shadow: 0 0 0 2px var(--color-ring); }
+.ring-4 { box-shadow: 0 0 0 4px var(--color-ring); }
 .ring-primary { --tw-ring-color: var(--color-primary); }
+.ring-primary\/5 { --tw-ring-color: rgb(0 102 0 / 0.05); }
+.ring-primary\/30 { --tw-ring-color: rgb(0 102 0 / 0.3); }
 .ring-secondary { --tw-ring-color: var(--color-secondary); }
 .ring-offset-2 { --tw-ring-offset-width: 2px; }
 .ring-offset-background { --tw-ring-offset-color: var(--color-background); }
 .focus\:ring-2:focus { box-shadow: 0 0 0 2px var(--color-ring); }
 .focus\:ring-primary:focus { --tw-ring-color: var(--color-primary); }
+.focus\:ring-primary\/30:focus { --tw-ring-color: rgb(0 102 0 / 0.3); }
 .focus\:ring-secondary:focus { --tw-ring-color: var(--color-secondary); }
 .focus\:ring-offset-2:focus { --tw-ring-offset-width: 2px; }
+
+.dark .ring-primary\/5 { --tw-ring-color: rgb(0 136 0 / 0.05); }
+.dark .ring-primary\/30 { --tw-ring-color: rgb(0 136 0 / 0.3); }
+.dark .focus\:ring-primary\/30:focus { --tw-ring-color: rgb(0 136 0 / 0.3); }
 
 /* Focus visible states */
 *:focus-visible {
