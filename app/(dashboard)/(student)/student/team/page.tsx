@@ -214,89 +214,102 @@ export default function StudentTeamPage() {
 
       {/* Team Members */}
       <h2 className="text-xl font-semibold mb-4">Team Members</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {displayTeam.members.map(member => (
-          <div 
-            key={member.id} 
-            className={`bg-card rounded-lg border p-6 hover:shadow-md transition-shadow ${
-              member.isLeader ? 'ring-2 ring-yellow-400' : ''
-            }`}
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-6 w-6" />
+      
+      {displayTeam.members && displayTeam.members.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {displayTeam.members.map((member) => (
+            <div 
+              key={member.id} 
+              className={`bg-card rounded-lg border p-6 hover:shadow-md transition-shadow ${
+                member.isLeader ? 'ring-2 ring-yellow-400' : ''
+              }`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-6 w-6" />
+                    </div>
+                    {member.isOnline && (
+                      <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-background" />
+                    )}
                   </div>
-                  {member.isOnline && (
-                    <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-background" />
+                  <div>
+                    <h3 className="font-semibold flex items-center gap-2">
+                      {member.name}
+                      {member.isLeader && <Shield className="h-4 w-4 text-yellow-600" />}
+                    </h3>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      {getRoleIcon(member.role)}
+                      {member.role}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href={`/student/team/${member.id}`}
+                  className="p-2 hover:bg-muted rounded-lg"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </Link>
+              </div>
+
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <School className="h-4 w-4" />
+                  <span>{member.school}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span>{member.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  <span>{member.phone}</span>
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div className="mb-4">
+                <p className="text-xs font-medium mb-2">Skills</p>
+                <div className="flex flex-wrap gap-1">
+                  {member.skills && member.skills.length > 0 ? (
+                    member.skills.map(skill => (
+                      <span 
+                        key={skill} 
+                        className="px-2 py-1 bg-muted rounded-md text-xs"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No skills listed</span>
                   )}
                 </div>
+              </div>
+
+              {/* Stats */}
+              <div className="pt-4 border-t flex items-center justify-between text-sm">
                 <div>
-                  <h3 className="font-semibold flex items-center gap-2">
-                    {member.name}
-                    {member.isLeader && <Shield className="h-4 w-4 text-yellow-600" />}
-                  </h3>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    {getRoleIcon(member.role)}
-                    {member.role}
-                  </p>
+                  <span className="text-muted-foreground">Contributions: </span>
+                  <span className="font-medium">{member.contributions}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Joined: </span>
+                  <span className="font-medium">
+                    {new Date(member.joinedAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
-              <Link
-                href={`/student/team/${member.id}`}
-                className="p-2 hover:bg-muted rounded-lg"
-              >
-                <MessageSquare className="h-4 w-4" />
-              </Link>
             </div>
-
-            <div className="space-y-2 text-sm mb-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <School className="h-4 w-4" />
-                <span>{member.school}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>{member.email}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>{member.phone}</span>
-              </div>
-            </div>
-
-            {/* Skills */}
-            <div className="mb-4">
-              <p className="text-xs font-medium mb-2">Skills</p>
-              <div className="flex flex-wrap gap-1">
-                {member.skills.map(skill => (
-                  <span 
-                    key={skill} 
-                    className="px-2 py-1 bg-muted rounded-md text-xs"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div className="pt-4 border-t flex items-center justify-between text-sm">
-              <div>
-                <span className="text-muted-foreground">Contributions: </span>
-                <span className="font-medium">{member.contributions}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Joined: </span>
-                <span className="font-medium">
-                  {new Date(member.joinedAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-          </div>
         ))}
       </div>
+      ) : (
+        <div className="bg-card rounded-lg border p-12 text-center">
+          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <h3 className="text-lg font-semibold text-card-foreground mb-2">No team members yet</h3>
+          <p className="text-sm text-muted-foreground">Team members will appear here once they join.</p>
+        </div>
+      )}
 
       {/* Team Actions */}
       <div className="mt-8 p-6 bg-card rounded-lg border">

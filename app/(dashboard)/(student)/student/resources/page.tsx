@@ -29,10 +29,10 @@ export default function StudentResourcesPage() {
 
   const fetchResources = async () => {
     try {
-      const response = await fetch('/api/student/resources')
+      const response = await fetch('/api/resources')
       if (response.ok) {
         const data = await response.json()
-        setResources(data.data?.resources || [])
+        setResources(data.data || [])
       }
     } finally {
       setLoading(false)
