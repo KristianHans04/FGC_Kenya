@@ -213,19 +213,11 @@ export default function EmailComposer({
 
   return (
     <div className={cn(
-      "fixed inset-0 z-50 flex items-end sm:items-center justify-center",
-      "bg-black/50 backdrop-blur-sm"
+      "h-full flex flex-col bg-card",
+      "rounded-xl shadow-2xl"
     )}>
-      <div className={cn(
-        "w-full bg-card border-t sm:border border-border",
-        "flex flex-col",
-        isFullscreen 
-          ? "h-full sm:max-w-none" 
-          : "h-[90vh] sm:h-auto sm:max-h-[85vh] sm:max-w-3xl lg:max-w-2xl sm:rounded-lg",
-        "animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95"
-      )}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-border bg-muted/30 rounded-t-xl shrink-0">
           <h2 className="text-lg font-semibold text-foreground">
             {replyTo ? 'Reply' : forwardFrom ? 'Forward' : 'New Message'}
           </h2>
@@ -256,7 +248,7 @@ export default function EmailComposer({
         )}
 
         {/* Recipients Section */}
-        <div className="px-4 py-3 space-y-3 border-b border-border shrink-0 overflow-y-auto max-h-[40vh] sm:max-h-none">
+        <div className="px-6 py-4 space-y-3 border-b border-border bg-background shrink-0">
           {/* To Field */}
           <div className="flex items-start gap-2">
             <label className="w-12 text-sm font-medium text-muted-foreground pt-2">To:</label>
@@ -368,7 +360,7 @@ export default function EmailComposer({
         </div>
 
         {/* Toolbar */}
-        <div className="px-4 py-2 border-b border-border flex items-center gap-1 flex-wrap shrink-0">
+        <div className="px-6 py-3 border-b border-border bg-muted/10 flex items-center gap-1 flex-wrap shrink-0">
           <button
             onClick={() => execCommand('bold')}
             className="p-2 hover:bg-muted rounded transition-colors"
@@ -445,11 +437,11 @@ export default function EmailComposer({
         </div>
 
         {/* Message Body */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-background">
           <div
             ref={editorRef}
             contentEditable
-            className="min-h-[200px] p-4 text-foreground focus:outline-none"
+            className="min-h-75 p-6 text-foreground focus:outline-none"
             data-placeholder="Write your message..."
             dir="ltr"
             style={{ direction: 'ltr', unicodeBidi: 'plaintext' }}
@@ -471,7 +463,7 @@ export default function EmailComposer({
                     className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-sm"
                   >
                     <Paperclip className="h-4 w-4 text-muted-foreground" />
-                    <span className="max-w-[200px] truncate">{file.name}</span>
+                    <span className="max-w-50 truncate">{file.name}</span>
                     <button
                       onClick={() => removeAttachment(index)}
                       className="hover:text-red-600 transition-colors"
@@ -486,7 +478,7 @@ export default function EmailComposer({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-4 py-3 border-t border-border flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 border-t-2 border-border bg-muted/20 flex items-center justify-between shrink-0 rounded-b-xl">
           <button
             onClick={handleSaveDraft}
             className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -515,7 +507,6 @@ export default function EmailComposer({
             </button>
           </div>
         </div>
-      </div>
     </div>
   )
 }

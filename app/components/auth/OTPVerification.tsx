@@ -211,14 +211,13 @@ export default function OTPVerification({
     >
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 ring-4 ring-primary/5">
-          <Shield className="h-8 w-8 text-primary" />
+        <h2 className="text-xl font-semibold text-card-foreground">Enter Verification Code</h2>
+        <div className="mt-4 px-4 py-3 bg-muted rounded-lg border border-border">
+          <p className="text-sm text-muted-foreground">
+            Verification code sent to your email
+          </p>
+          <p className="text-sm font-medium text-card-foreground mt-1">{email}</p>
         </div>
-        <h2 className="text-xl font-semibold text-foreground">Enter Verification Code</h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          We sent a 6-digit code to
-        </p>
-        <p className="text-sm font-medium text-foreground mt-1">{email}</p>
       </div>
 
       {/* Timer Display */}
@@ -226,34 +225,32 @@ export default function OTPVerification({
         <motion.div 
           className={cn(
             "flex items-center justify-center gap-2 px-5 py-2.5 rounded-full mx-auto w-fit",
-            "border-2 transition-colors duration-300 bg-transparent",
+            "border-2 transition-colors duration-300",
             timeLeft > 120 
-              ? "border-green-600 dark:border-green-500" 
+              ? "border-primary bg-primary/5" 
               : timeLeft > 60 
-                ? "border-amber-600 dark:border-amber-500" 
-                : "border-red-600 dark:border-red-500"
+                ? "border-accent-dark bg-accent/10" 
+                : "border-secondary bg-secondary/10"
           )}
-          animate={timeLeft <= 10 && timeLeft > 0 ? { scale: [1, 1.05, 1] } : {}}
-          transition={{ repeat: timeLeft <= 10 && timeLeft > 0 ? Infinity : 0, duration: 1 }}
         >
           <Clock className={cn(
             "h-4 w-4 transition-colors duration-300",
             timeLeft > 120 
-              ? "text-green-700 dark:text-green-400" 
+              ? "text-primary" 
               : timeLeft > 60 
-                ? "text-amber-700 dark:text-amber-400" 
-                : "text-red-700 dark:text-red-400"
+                ? "text-accent-dark" 
+                : "text-secondary"
           )} />
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-sm font-medium text-card-foreground">
             Code expires in
           </span>
           <span className={cn(
             "text-lg font-mono font-bold transition-colors duration-300",
             timeLeft > 120 
-              ? "text-green-700 dark:text-green-400" 
+              ? "text-primary" 
               : timeLeft > 60 
-                ? "text-amber-700 dark:text-amber-400" 
-                : "text-red-700 dark:text-red-400"
+                ? "text-accent-dark" 
+                : "text-secondary"
           )}>
             {formatTime(timeLeft)}
           </span>
@@ -262,7 +259,7 @@ export default function OTPVerification({
           <motion.p 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="text-center text-sm text-red-600 dark:text-red-400 mt-3 font-medium"
+            className="text-center text-sm text-secondary mt-3 font-medium"
           >
             Code expired. Please request a new one.
           </motion.p>
@@ -294,14 +291,13 @@ export default function OTPVerification({
             className={cn(
               "w-12 h-14 text-center text-2xl font-bold font-mono",
               "border-2 rounded-lg transition-all duration-200",
-              "focus:ring-2 focus:ring-primary/30 focus:border-primary",
+              "bg-muted border-border",
+              "focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-card",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              // Base state
-              !digit && !error && "bg-card text-card-foreground border-border hover:border-primary/50",
               // Filled state
-              digit && !error && "bg-primary/10 text-foreground border-primary",
+              digit && !error && "bg-primary/10 text-card-foreground border-primary",
               // Error state  
-              error && "bg-red-50 dark:bg-red-950 text-red-900 dark:text-red-100 border-red-500 dark:border-red-400"
+              error && "bg-secondary/10 text-card-foreground border-secondary"
             )}
             animate={digit ? { scale: [1, 1.05, 1] } : {}}
             transition={{ duration: 0.2 }}
@@ -320,9 +316,9 @@ export default function OTPVerification({
             transition={{ duration: 0.3 }}
             className="mb-4"
           >
-            <div className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+            <div className="flex items-center space-x-2 text-sm text-secondary bg-secondary/10 p-3 rounded-lg border border-secondary">
               <AlertCircle className="h-4 w-4 shrink-0 animate-pulse" />
-              <span className="font-medium">{error}</span>
+              <span className="font-medium text-card-foreground">{error}</span>
             </div>
           </motion.div>
         )}
@@ -335,9 +331,9 @@ export default function OTPVerification({
             transition={{ duration: 0.3 }}
             className="mb-4"
           >
-            <div className="flex items-center space-x-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="flex items-center space-x-2 text-sm text-primary bg-primary/10 p-3 rounded-lg border border-primary">
               <CheckCircle className="h-4 w-4 shrink-0" />
-              <span className="font-medium">{success}</span>
+              <span className="font-medium text-card-foreground">{success}</span>
             </div>
           </motion.div>
         )}

@@ -29,9 +29,12 @@ import {
   PenTool,
   Calendar,
   Award,
-  Send,
+  FolderOpen,
+  FormInput,
   Inbox,
-  FolderOpen
+  Send,
+  CreditCard,
+  Image
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -59,14 +62,8 @@ const sidebarItems: SidebarItem[] = [
     roles: [Role.SUPER_ADMIN]
   },
   {
-    title: 'Payments',
-    href: '/dashboard/payments',
-    icon: DollarSign,
-    roles: [Role.SUPER_ADMIN]
-  },
-  {
     title: 'Analytics',
-    href: '/dashboard/analytics',
+    href: '/admin/analytics',
     icon: BarChart,
     roles: [Role.SUPER_ADMIN, Role.ADMIN]
   },
@@ -74,32 +71,32 @@ const sidebarItems: SidebarItem[] = [
   // Admin & Super Admin
   {
     title: 'User Management',
-    href: '/dashboard/users/manage',
+    href: '/admin/users',
     icon: UserCheck,
-    roles: [Role.ADMIN]
+    roles: [Role.ADMIN, Role.SUPER_ADMIN]
   },
   {
     title: 'Applications',
-    href: '/dashboard/applications',
+    href: '/admin/applications',
     icon: FolderOpen,
     roles: [Role.SUPER_ADMIN, Role.ADMIN]
   },
   {
-    title: 'Email',
-    href: '/dashboard/email',
-    icon: Mail,
+    title: 'Email Inbox',
+    href: '/admin/emails',
+    icon: Inbox,
     roles: [Role.SUPER_ADMIN, Role.ADMIN]
   },
   {
-    title: 'Campaigns',
-    href: '/dashboard/campaigns',
-    icon: Send,
+    title: 'Media Management',
+    href: '/admin/media',
+    icon: Image,
     roles: [Role.SUPER_ADMIN, Role.ADMIN]
   },
   {
-    title: 'Media Manager',
-    href: '/dashboard/media',
-    icon: FileText,
+    title: 'Payment Tracking',
+    href: '/admin/payments',
+    icon: CreditCard,
     roles: [Role.SUPER_ADMIN, Role.ADMIN]
   },
   
