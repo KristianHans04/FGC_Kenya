@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
 import { prisma } from '@/app/lib/db'
-
-// In-memory storage for emails (in production, use a database)
-// Using Map for better performance and persistence during the session
-const emailStore = new Map<string, any[]>([
-  ['sent', []],
-  ['drafts', []],
-  ['trash', []],
-  ['archived', []]
-])
+import { sendEmail } from '@/app/lib/email'
+import { createGenericEmailTemplate } from '@/app/lib/email/templates/index'
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,205 +17,85 @@ export async function GET(req: NextRequest) {
 
     const searchParams = req.nextUrl.searchParams
     const folder = searchParams.get('folder') || 'inbox'
+    const emailId = searchParams.get('id')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const search = searchParams.get('search') || ''
 
-    // Mock email data with different folders
-    let emails: any[] = []
-    
-    if (folder === 'inbox') {
-      emails = [
-        {
-          id: '1',
-          subject: 'New Application from John Doe',
-          body: '<p>A new application has been submitted for review...</p>',
-          plainText: 'A new application has been submitted for review...',
-          toEmails: ['admin@fgckenya.org'],
-          ccEmails: [],
-          bccEmails: [],
-          senderId: 'system',
+    // Get single email by ID
+    if (emailId) {
+      const email = await prisma.email.findUnique({
+        where: { id: emailId },
+        include: {
           sender: {
-            email: 'noreply@fgckenya.org',
-            name: 'FGC Kenya System'
-          },
-          isRead: false,
-          isStarred: false,
-          isDraft: false,
-          isArchived: false,
-          sentAt: new Date(Date.now() - 3600000).toISOString(),
-          createdAt: new Date(Date.now() - 3600000).toISOString(),
-          threadId: null,
-          attachments: [],
-          labels: ['Important']
-        },
-        {
-          id: '2',
-          subject: 'Meeting Schedule for Tomorrow',
-          body: '<p>Please find attached the meeting schedule...</p>',
-          plainText: 'Please find attached the meeting schedule...',
-          toEmails: ['admin@fgckenya.org'],
-          ccEmails: ['team@fgckenya.org'],
-          bccEmails: [],
-          senderId: 'coordinator',
-          sender: {
-            email: 'coordinator@fgckenya.org',
-            name: 'Event Coordinator'
-          },
-          isRead: true,
-          isStarred: true,
-          isDraft: false,
-          isArchived: false,
-          sentAt: new Date(Date.now() - 7200000).toISOString(),
-          createdAt: new Date(Date.now() - 7200000).toISOString(),
-          threadId: null,
-          attachments: [{ name: 'schedule.pdf', size: 245000 }],
-          labels: []
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true
+            }
+          }
         }
-      ]
-    } else if (folder === 'sent') {
-      // Include both the mock sent email and any actually sent emails
-      const mockSentEmail = {
-        id: '3',
-        subject: 'Re: Application Approved',
-        body: '<p>Your application has been approved. Welcome to FGC Kenya!</p>',
-        plainText: 'Your application has been approved. Welcome to FGC Kenya!',
-        toEmails: ['student@example.com'],
-        ccEmails: [],
-        bccEmails: [],
-        senderId: authResult.user.id,
-        sender: {
-          email: authResult.user.email,
-          name: 'Admin User'
-        },
-        isRead: true,
-        isStarred: false,
-        isDraft: false,
-        isArchived: false,
-        sentAt: new Date(Date.now() - 86400000).toISOString(),
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        threadId: null,
-        attachments: [],
-        labels: []
+      })
+
+      if (!email) {
+        return NextResponse.json({ error: 'Email not found' }, { status: 404 })
       }
-      emails = [mockSentEmail, ...(emailStore.get('sent') || [])]
-    } else if (folder === 'drafts') {
-      const mockDraft = {
-        id: '4',
-        subject: 'Team Update - Draft',
-        body: '<p>This is a draft email about the team update...</p>',
-        plainText: 'This is a draft email about the team update...',
-        toEmails: ['team@fgckenya.org'],
-        ccEmails: [],
-        bccEmails: [],
-        senderId: authResult.user.id,
-        sender: {
-          email: authResult.user.email,
-          name: 'Admin User'
-        },
-        isRead: true,
-        isStarred: false,
-        isDraft: true,
-        isArchived: false,
-        sentAt: null,
-        createdAt: new Date(Date.now() - 172800000).toISOString(),
-        threadId: null,
-        attachments: [],
-        labels: []
-      }
-      emails = [mockDraft, ...(emailStore.get('drafts') || [])]
-    } else if (folder === 'starred') {
-      emails = [
-        {
-          id: '2',
-          subject: 'Meeting Schedule for Tomorrow',
-          body: '<p>Please find attached the meeting schedule...</p>',
-          plainText: 'Please find attached the meeting schedule...',
-          toEmails: ['admin@fgckenya.org'],
-          ccEmails: ['team@fgckenya.org'],
-          bccEmails: [],
-          senderId: 'coordinator',
-          sender: {
-            email: 'coordinator@fgckenya.org',
-            name: 'Event Coordinator'
-          },
-          isRead: true,
-          isStarred: true,
-          isDraft: false,
-          isArchived: false,
-          sentAt: new Date(Date.now() - 7200000).toISOString(),
-          createdAt: new Date(Date.now() - 7200000).toISOString(),
-          threadId: null,
-          attachments: [{ name: 'schedule.pdf', size: 245000 }],
-          labels: []
-        }
-      ]
-    } else if (folder === 'archived') {
-      const mockArchived = {
-        id: '5',
-        subject: 'Old Newsletter - January 2024',
-        body: '<p>This is an archived newsletter...</p>',
-        plainText: 'This is an archived newsletter...',
-        toEmails: ['all@fgckenya.org'],
-        ccEmails: [],
-        bccEmails: [],
-        senderId: 'marketing',
-        sender: {
-          email: 'marketing@fgckenya.org',
-          name: 'Marketing Team'
-        },
-        isRead: true,
-        isStarred: false,
-        isDraft: false,
-        isArchived: true,
-        sentAt: new Date('2024-01-15').toISOString(),
-        createdAt: new Date('2024-01-15').toISOString(),
-        threadId: null,
-        attachments: [],
-        labels: ['Newsletter']
-      }
-      emails = [mockArchived, ...(emailStore.get('archived') || [])]
-    } else if (folder === 'trash') {
-      const mockTrash = {
-        id: '6',
-        subject: 'Spam Message',
-        body: '<p>This message was marked as spam...</p>',
-        plainText: 'This message was marked as spam...',
-        toEmails: ['admin@fgckenya.org'],
-        ccEmails: [],
-        bccEmails: [],
-        senderId: 'unknown',
-        sender: {
-          email: 'spam@example.com',
-          name: 'Unknown Sender'
-        },
-        isRead: true,
-        isStarred: false,
-        isDraft: false,
-        isArchived: false,
-        sentAt: new Date(Date.now() - 604800000).toISOString(),
-        createdAt: new Date(Date.now() - 604800000).toISOString(),
-        threadId: null,
-        attachments: [],
-        labels: ['Spam']
-      }
-      emails = [mockTrash, ...(emailStore.get('trash') || [])]
+
+      return NextResponse.json({
+        success: true,
+        data: { email }
+      })
     }
 
-    // Apply search filter if provided
-    if (search) {
-      emails = emails.filter(email => 
-        email.subject.toLowerCase().includes(search.toLowerCase()) ||
-        email.plainText.toLowerCase().includes(search.toLowerCase()) ||
-        email.sender.email.toLowerCase().includes(search.toLowerCase())
-      )
+    // Build where clause based on folder
+    let whereClause: any = {}
+    
+    if (folder === 'sent') {
+      whereClause = { senderId: authResult.user.id, isDraft: false }
+    } else if (folder === 'drafts') {
+      whereClause = { senderId: authResult.user.id, isDraft: true }
+    } else if (folder === 'archived') {
+      whereClause = { senderId: authResult.user.id, isArchived: true, isDraft: false }
+    } else if (folder === 'trash') {
+      whereClause = { senderId: authResult.user.id, isDeleted: true }
+    } else if (folder === 'starred') {
+      whereClause = { senderId: authResult.user.id, isStarred: true, isDraft: false }
+    } else {
+      // Inbox - show emails where user is recipient
+      whereClause = { recipientId: authResult.user.id, isDraft: false, isArchived: false, isDeleted: false }
     }
+
+    // Apply search filter
+    if (search) {
+      whereClause.OR = [
+        { subject: { contains: search, mode: 'insensitive' } },
+        { plainText: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
+    const emails = await prisma.email.findMany({
+      where: whereClause,
+      include: {
+        sender: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      },
+      orderBy: { sentAt: 'desc' },
+      take: limit,
+      skip: (page - 1) * limit
+    })
+
+    const totalCount = await prisma.email.count({ where: whereClause })
 
     return NextResponse.json({
       success: true,
       data: {
         emails,
-        totalPages: 1,
+        totalPages: Math.ceil(totalCount / limit),
         currentPage: page
       }
     })
@@ -230,6 +103,51 @@ export async function GET(req: NextRequest) {
     console.error('Email fetch error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch emails' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const authResult = await authenticateRequest(req)
+    if (!authResult.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(authResult.user.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const body = await req.json()
+    const { emailId, isRead, isStarred, isArchived, isDeleted } = body
+    
+    if (!emailId) {
+      return NextResponse.json({ error: 'Email ID required' }, { status: 400 })
+    }
+    
+    const updateData: any = {}
+    if (typeof isRead === 'boolean') updateData.isRead = isRead
+    if (typeof isStarred === 'boolean') updateData.isStarred = isStarred
+    if (typeof isArchived === 'boolean') updateData.isArchived = isArchived
+    if (typeof isDeleted === 'boolean') updateData.isDeleted = isDeleted
+    
+    const updatedEmail = await prisma.email.update({
+      where: { id: emailId },
+      data: updateData
+    })
+    
+    return NextResponse.json({
+      success: true,
+      data: { 
+        message: 'Email status updated',
+        email: updatedEmail
+      }
+    })
+  } catch (error) {
+    console.error('Email update error:', error)
+    return NextResponse.json(
+      { error: 'Failed to update email' },
       { status: 500 }
     )
   }
@@ -248,35 +166,71 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     
-    // Create a sent email record
-    const sentEmail = {
-      id: `sent-${Date.now()}`,
+    // Send actual email(s)
+    const toEmails = Array.isArray(body.to) ? body.to : [body.to].filter(Boolean)
+    const ccEmails = Array.isArray(body.cc) ? body.cc : [body.cc].filter(Boolean)
+    const bccEmails = Array.isArray(body.bcc) ? body.bcc : [body.bcc].filter(Boolean)
+    
+    const allRecipients = [...toEmails, ...ccEmails, ...bccEmails]
+    const plainText = body.body ? body.body.replace(/<[^>]*>/g, '') : ''
+    
+    // Create professional email template
+    const emailTemplate = createGenericEmailTemplate({
       subject: body.subject || '(no subject)',
-      body: body.body || '',
-      plainText: body.body ? body.body.replace(/<[^>]*>/g, '') : '',
-      toEmails: body.to || [],
-      ccEmails: body.cc || [],
-      bccEmails: body.bcc || [],
-      senderId: authResult.user.id,
-      sender: {
-        email: authResult.user.email,
-        name: 'Admin User'
-      },
-      isRead: true,
-      isStarred: false,
-      isDraft: false,
-      isArchived: false,
-      sentAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      threadId: null,
-      attachments: body.attachments || [],
-      labels: []
+      body: body.body || '<p>No content provided.</p>'
+    })
+    
+    // Send to all recipients
+    const sendResults = await Promise.all(
+      allRecipients.map(email => 
+        sendEmail({
+          to: email,
+          subject: emailTemplate.subject,
+          html: emailTemplate.html,
+          text: emailTemplate.text
+        })
+      )
+    )
+    
+    // Check if at least one email was sent successfully
+    const anySent = sendResults.some(result => result === true)
+    
+    if (!anySent) {
+      return NextResponse.json(
+        { error: 'Failed to send email to any recipient' },
+        { status: 500 }
+      )
     }
     
-    // Add to sent emails
-    const sentEmails = emailStore.get('sent') || []
-    sentEmails.unshift(sentEmail)
-    emailStore.set('sent', sentEmails)
+    // Save to database
+    const sentEmail = await prisma.email.create({
+      data: {
+        subject: body.subject || '(no subject)',
+        body: emailTemplate.html,
+        plainText: emailTemplate.text,
+        toEmails: toEmails,
+        ccEmails: ccEmails,
+        bccEmails: bccEmails,
+        senderId: authResult.user.id,
+        isRead: true,
+        isStarred: false,
+        isDraft: false,
+        isArchived: false,
+        isDeleted: false,
+        sentAt: new Date(),
+        threadId: null,
+        attachments: body.attachments || []
+      },
+      include: {
+        sender: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    })
     
     return NextResponse.json({
       success: true,
