@@ -26,10 +26,17 @@ import {
   ToggleRight,
   Archive,
   RefreshCw,
-  Settings
+  Settings,
+  Hammer
 } from 'lucide-react'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
+
+const ApplicationFormBuilder = dynamic(
+  () => import('@/app/components/admin/ApplicationFormBuilder'),
+  { ssr: false }
+)
 
 interface ApplicationCall {
   id: string
@@ -87,6 +94,8 @@ export default function ApplicationsManagementPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingCall, setEditingCall] = useState<ApplicationCall | null>(null)
   const [activeCallId, setActiveCallId] = useState<string | null>(null)
+  const [showFormBuilder, setShowFormBuilder] = useState(false)
+  const [editingForm, setEditingForm] = useState<any>(null)
 
   // Check authentication
   useEffect(() => {
@@ -299,16 +308,29 @@ export default function ApplicationsManagementPage() {
           <p className="text-muted-foreground text-sm sm:text-base">Manage application calls and review applicants</p>
         </div>
         
-        <button
-          onClick={() => {
-            setEditingCall(null)
-            setShowCreateModal(true)
-          }}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" />
-          New Application Call
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setEditingForm(null)
+              setShowFormBuilder(true)
+            }}
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
+          >
+            <Hammer className="h-4 w-4" />
+            Form Builder
+          </button>
+          
+          <button
+            onClick={() => {
+              setEditingCall(null)
+              setShowCreateModal(true)
+            }}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" />
+            New Application Call
+          </button>
+        </div>
       </div>
 
       {/* Active Call Alert */}
@@ -568,6 +590,52 @@ export default function ApplicationsManagementPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Form Builder Modal */}
+      {showFormBuilder && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <ApplicationFormBuilder
+            initialData={editingForm}
+            onSave={async (formData) => {
+              try {
+                const url = editingForm 
+                  ? `/api/applications/forms/${editingForm.id}`
+                  : '/api/applications/forms'
+                
+                const response = await fetch(url, {
+                  method: editingForm ? 'PUT' : 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify(formData)
+                })
+                
+                if (response.ok) {
+                  setShowFormBuilder(false)
+                  setEditingForm(null)
+                  fetchApplicationCalls()
+                  
+                  // Show success message
+                  const message = editingForm 
+                    ? 'Application form updated successfully'
+                    : 'Application form created successfully'
+                  
+                  // You can add a toast notification here
+                  console.log(message)
+                } else {
+                  throw new Error('Failed to save form')
+                }
+              } catch (error) {
+                console.error('Error saving form:', error)
+                // You can add error handling/toast here
+              }
+            }}
+            onCancel={() => {
+              setShowFormBuilder(false)
+              setEditingForm(null)
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

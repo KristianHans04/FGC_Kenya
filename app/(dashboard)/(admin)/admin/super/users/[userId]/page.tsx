@@ -658,26 +658,6 @@ export default function UserDetailPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Statistics */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                <div className="bg-card p-3 sm:p-4 rounded-lg border border-border">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Applications</p>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">{user.applications.length}</p>
-                </div>
-                <div className="bg-card p-3 sm:p-4 rounded-lg border border-border">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Articles</p>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">{user.articles.length}</p>
-                </div>
-                <div className="bg-card p-3 sm:p-4 rounded-lg border border-border">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Payments</p>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">{user.payments.length}</p>
-                </div>
-                <div className="bg-card p-3 sm:p-4 rounded-lg border border-border">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Activities</p>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">{user.activityLogs.length}</p>
-                </div>
-              </div>
             </div>
 
             {/* Account Information */}
