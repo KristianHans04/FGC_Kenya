@@ -70,6 +70,13 @@ model User {
   sentEmails    Email[]       @relation("SentEmails")
   receivedEmails Email[]      @relation("ReceivedEmails")
   emailDrafts   EmailDraft[]
+  
+  // Calendar & Tasks relations
+  createdEvents     CalendarEvent[]  @relation("CreatedEvents")
+  eventAttendances  EventAttendee[]  @relation("EventAttendees")
+  assignedTasks     Task[]          @relation("AssignedTasks")
+  createdTasks      Task[]          @relation("CreatedTasks")
+  uploadedResources TeamResource[]  @relation("UploadedResources")
   emailCampaigns EmailCampaign[] @relation("CreatedCampaigns")
   
   // Media relationships
@@ -859,4 +866,161 @@ model SiteStat {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// =============================================================================
+// CALENDAR & TASK MANAGEMENT MODELS
+// =============================================================================
+
+model CalendarEvent {
+  id          String   @id @default(uuid())
+  slug        String   @unique @default(cuid())
+  title       String
+  description String?
+  type        EventType @default(MEETING)
+  
+  startDate   DateTime
+  endDate     DateTime
+  allDay      Boolean  @default(false)
+  
+  location    String?
+  isVirtual   Boolean  @default(false)
+  meetingLink String?
+  
+  isPublic    Boolean  @default(false)
+  
+  createdById String
+  createdBy   User     @relation("CreatedEvents", fields: [createdById], references: [id])
+  
+  attendees   EventAttendee[]
+  reminders   EventReminder[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([startDate])
+  @@index([createdById])
+  @@index([type])
+}
+
+enum EventType {
+  MEETING
+  WORKSHOP
+  COMPETITION
+  PRACTICE
+  DEADLINE
+  TEAM_BUILD
+  OTHER
+}
+
+model EventAttendee {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation("EventAttendees", fields: [userId], references: [id], onDelete: Cascade)
+  status    AttendeeStatus @default(PENDING)
+  respondedAt DateTime?
+  
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+enum AttendeeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  MAYBE
+}
+
+model EventReminder {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  reminderAt DateTime
+  sent      Boolean  @default(false)
+  sentAt    DateTime?
+  
+  @@index([reminderAt, sent])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  slug        String   @unique @default(cuid())
+  title       String
+  description String?
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus @default(TODO)
+  
+  dueDate     DateTime?
+  completedAt DateTime?
+  
+  assignedToId String?
+  assignedTo   User? @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  
+  createdById String
+  createdBy   User @relation("CreatedTasks", fields: [createdById], references: [id])
+  
+  tags        String[]
+  attachments Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+  @@index([assignedToId])
+  @@index([dueDate])
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+model TeamResource {
+  id          String   @id @default(uuid())
+  slug        String   @unique @default(cuid())
+  title       String
+  description String?
+  category    ResourceCategory
+  
+  fileUrl     String?
+  linkUrl     String?
+  content     String?
+  
+  tags        String[]
+  isPinned    Boolean  @default(false)
+  
+  uploadedById String
+  uploadedBy   User @relation("UploadedResources", fields: [uploadedById], references: [id])
+  
+  views       Int      @default(0)
+  downloads   Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([category])
+  @@index([isPinned])
+}
+
+enum ResourceCategory {
+  TUTORIAL
+  DOCUMENTATION
+  CODE_SAMPLE
+  DESIGN_FILE
+  COMPETITION_INFO
+  RESEARCH
+  OTHER
 }
