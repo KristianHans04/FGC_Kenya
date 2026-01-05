@@ -4,7 +4,7 @@ const siteConfig = {
   name: 'FIRST Global Team Kenya',
   shortName: 'FGC Kenya',
   description: 'Inspiring young innovators through robotics and STEM education in Kenya',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://fgckenya.org',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://fgckenya.com',
   keywords: [
     'FIRST Global',
     'Team Kenya',
