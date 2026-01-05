@@ -112,12 +112,16 @@ export async function POST(request: NextRequest) {
         title: data.title,
         description: data.description,
         tabs: data.tabs,
+        themeColor: data.themeColor || '#006600',
+        accentColor: data.accentColor || '#008800',
+        coverImage: data.coverImage,
         allowSaveDraft: data.allowSaveDraft,
         requireDocumentLinks: data.requireDocumentLinks,
         enableAutoFill: data.enableAutoFill,
         openDate: new Date(data.openDate),
         closeDate: new Date(data.closeDate),
         isActive: data.isActive,
+        isDraft: data.isDraft !== undefined ? data.isDraft : false,
         createdById: authResult.user?.id
       },
       include: {

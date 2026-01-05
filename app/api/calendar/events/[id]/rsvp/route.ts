@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/db'
-import { getCurrentUser } from '@/app/lib/auth'
+import { authenticateRequest } from '@/app/lib/auth/api'
 import { AttendeeStatus } from '@prisma/client'
 import { z } from 'zod'
 
@@ -14,17 +14,25 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Authenticate request
+    const authResult = await authenticateRequest(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const body = await request.json()
     const { status } = RSVPSchema.parse(body)
 
-    // Check if event exists
-    const event = await prisma.calendarEvent.findUnique({
-      where: { id: id },
+    // Check if event exists (support both id and slug)
+    const event = await prisma.calendarEvent.findFirst({
+      where: {
+        OR: [
+          { id: id },
+          { slug: id }
+        ]
+      },
       select: { 
         id: true,
         isPublic: true,
@@ -40,7 +48,7 @@ export async function POST(
     const existingRSVP = await prisma.eventAttendee.findUnique({
       where: {
         eventId_userId: {
-          eventId: id,
+          eventId: event.id,
           userId: user.id
         }
       }
@@ -53,7 +61,7 @@ export async function POST(
       attendee = await prisma.eventAttendee.update({
         where: {
           eventId_userId: {
-            eventId: id,
+            eventId: event.id,
             userId: user.id
           }
         },
@@ -76,7 +84,7 @@ export async function POST(
       // Create new RSVP
       attendee = await prisma.eventAttendee.create({
         data: {
-          eventId: id,
+          eventId: event.id,
           userId: user.id,
           status,
           respondedAt: new Date()
@@ -120,10 +128,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Authenticate request
+    const authResult = await authenticateRequest(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     // Get user's RSVP status for this event
     const attendee = await prisma.eventAttendee.findUnique({
@@ -157,10 +168,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Authenticate request
+    const authResult = await authenticateRequest(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     // Check if RSVP exists
     const attendee = await prisma.eventAttendee.findUnique({

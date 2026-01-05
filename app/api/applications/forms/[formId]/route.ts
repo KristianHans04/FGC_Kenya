@@ -124,19 +124,33 @@ export async function PUT(
     }
 
     // Update form
+    const updateData: any = {
+      title: data.title,
+      description: data.description,
+      tabs: data.tabs,
+      themeColor: data.themeColor,
+      accentColor: data.accentColor,
+      coverImage: data.coverImage,
+      allowSaveDraft: data.allowSaveDraft,
+      requireDocumentLinks: data.requireDocumentLinks,
+      enableAutoFill: data.enableAutoFill,
+      openDate: data.openDate ? new Date(data.openDate) : undefined,
+      closeDate: data.closeDate ? new Date(data.closeDate) : undefined,
+      isActive: data.isActive,
+      isDraft: data.isDraft,
+      lastAutoSave: data.isAutoSave ? new Date() : undefined
+    }
+    
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key]
+      }
+    })
+    
     const updatedForm = await prisma.applicationForm.update({
       where: { id: formId },
-      data: {
-        title: data.title,
-        description: data.description,
-        tabs: data.tabs,
-        allowSaveDraft: data.allowSaveDraft,
-        requireDocumentLinks: data.requireDocumentLinks,
-        enableAutoFill: data.enableAutoFill,
-        openDate: data.openDate ? new Date(data.openDate) : undefined,
-        closeDate: data.closeDate ? new Date(data.closeDate) : undefined,
-        isActive: data.isActive
-      },
+      data: updateData,
       include: {
         createdBy: {
           select: {

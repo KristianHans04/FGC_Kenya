@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/db'
-import { getCurrentUser } from '@/app/lib/auth'
+import { authenticateRequest } from '@/app/lib/auth/api'
 import { EventType } from '@prisma/client'
 import { z } from 'zod'
 
@@ -25,14 +25,26 @@ const BulkCreateEventSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate request with detailed error handling
+    const authResult = await authenticateRequest(request)
+    
+    if (authResult instanceof NextResponse) {
+      console.error('[Bulk Events POST] Authentication failed')
+      return authResult // This contains the detailed error
     }
+
+    const { user } = authResult
+    console.log('[Bulk Events POST] Authenticated user:', user.email, user.role)
 
     // Only admins can bulk create events
     if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json(
+        { 
+          error: 'Forbidden',
+          details: `Role ${user.role} cannot bulk create events. Only ADMIN and SUPER_ADMIN roles are allowed.`
+        },
+        { status: 403 }
+      )
     }
 
     const body = await request.json()

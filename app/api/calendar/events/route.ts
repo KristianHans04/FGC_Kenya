@@ -2,23 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/db'
 import { authenticateRequest } from '@/app/lib/auth/api'
 import { EventType } from '@prisma/client'
+import NotificationService from '@/app/lib/notifications/notification-service'
 import { z } from 'zod'
 
 const CreateEventSchema = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   type: z.nativeEnum(EventType).default(EventType.MEETING),
   startDate: z.string().transform(str => new Date(str)),
-  endDate: z.string().transform(str => new Date(str)).optional(), // Made optional
+  endDate: z.string().transform(str => new Date(str)).optional().nullable(), // Made optional and nullable
   allDay: z.boolean().default(false),
-  location: z.string().optional(),
+  location: z.string().optional().nullable(),
   isVirtual: z.boolean().default(false),
-  meetingLink: z.string().url().optional().nullable(),
+  meetingLink: z.string().optional().nullable(), // Removed .url() validation as it might be empty
   audience: z.string().default('ALL'),
-  specificEmails: z.array(z.string()).optional(),
-  targetRoles: z.array(z.string()).optional(),
+  specificEmails: z.array(z.string()).optional().default([]),
+  targetRoles: z.array(z.string()).optional().default([]),
   isPublic: z.boolean().default(false),
-  attendeeIds: z.array(z.string()).optional()
+  attendeeIds: z.array(z.string()).optional().default([])
 })
 
 export async function GET(request: NextRequest) {
@@ -147,6 +148,21 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = CreateEventSchema.parse(body)
+    
+    // Validate meetingLink if provided
+    if (validatedData.meetingLink && validatedData.meetingLink.trim() !== '') {
+      try {
+        new URL(validatedData.meetingLink)
+      } catch {
+        return NextResponse.json(
+          { 
+            error: 'Invalid meeting link',
+            details: 'Please provide a valid URL for the meeting link'
+          },
+          { status: 400 }
+        )
+      }
+    }
 
     // If no end date provided, use start date
     const eventEndDate = validatedData.endDate || validatedData.startDate
@@ -254,6 +270,17 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('[Calendar POST] Event created successfully:', event.id)
+
+    // Send notifications to attendees
+    if (attendeeIds.length > 0) {
+      await NotificationService.sendBulkNotification(
+        attendeeIds,
+        'EVENT_INVITATION',
+        `New Event: ${validatedData.title}`,
+        `You've been invited to ${validatedData.title} on ${validatedData.startDate.toLocaleDateString()}`,
+        `/dashboard/calendar/events/${slug}`
+      )
+    }
 
     return NextResponse.json({
       success: true,

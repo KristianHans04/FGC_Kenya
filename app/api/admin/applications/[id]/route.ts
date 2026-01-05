@@ -9,6 +9,7 @@ import { requireAdminOrSuper, createAuditLog } from '@/app/lib/middleware/auth'
 import { rateLimit, addSecurityHeaders } from '@/app/lib/middleware/security'
 import { reviewApplicationSchema } from '@/app/lib/validations/application'
 import { sendApplicationStatusEmail } from '@/app/lib/email'
+import NotificationService from '@/app/lib/notifications/notification-service'
 import prisma from '@/app/lib/db'
 import type { ApiResponse, ErrorCode } from '@/app/types/api'
 import type { Application, ApplicationStatus } from '@/app/types/application'
@@ -248,6 +249,25 @@ export async function PUT(
         reviewData.notes,
         reviewData.interviewDate ? new Date(reviewData.interviewDate) : undefined
       )
+      
+      // Send push notification
+      const notificationTypeMap = {
+        REVIEWED: 'APPLICATION_REVIEWED',
+        ACCEPTED: 'APPLICATION_ACCEPTED',
+        REJECTED: 'APPLICATION_REJECTED',
+        SHORTLISTED: 'APPLICATION_SHORTLISTED',
+        INTERVIEW_SCHEDULED: 'APPLICATION_INTERVIEW'
+      }
+      
+      const notificationType = notificationTypeMap[reviewData.status as keyof typeof notificationTypeMap] || 'APPLICATION_UPDATE'
+      
+      await NotificationService.sendNotification({
+        userId: application.userId,
+        type: notificationType as any,
+        title: `Application ${reviewData.status.toLowerCase()}`,
+        message: `Your application has been ${reviewData.status.toLowerCase()}. ${reviewData.notes || 'Check your email for more details.'}`,
+        actionUrl: `/dashboard/applications/${application.id}`
+      })
     }
 
     // Create audit log

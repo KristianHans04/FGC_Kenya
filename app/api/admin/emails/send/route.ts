@@ -9,6 +9,7 @@ import { authenticateRequest } from '@/app/lib/middleware/auth'
 import { addSecurityHeaders } from '@/app/lib/middleware/security'
 import { sendEmail } from '@/app/lib/email'
 import prisma from '@/app/lib/db'
+import NotificationService from '@/app/lib/notifications/notification-service'
 import type { ApiResponse, ErrorCode } from '@/app/types/api'
 
 /**
@@ -123,6 +124,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       subject,
       html: htmlContent,
     })
+
+    // Send notification if userId is provided
+    if (targetUser) {
+      await NotificationService.sendNotification({
+        userId: targetUser.id,
+        type: 'NEW_EMAIL',
+        title: subject,
+        message: `You have received a new email from admin`,
+        actionUrl: '/dashboard/emails'
+      })
+    }
 
     // Create audit log
     await prisma.auditLog.create({

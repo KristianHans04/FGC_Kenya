@@ -74,7 +74,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         details: {
           bannedAt: userDetails.bannedAt,
           bannedBy: bannerDetails || {
-            email: 'system@fgckenya.org',
+            email: 'system@fgckenya.com',
             firstName: 'System',
             lastName: 'Administrator',
           },

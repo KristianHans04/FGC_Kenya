@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/db'
-import { getCurrentUser } from '@/app/lib/auth'
+import { authenticateRequest } from '@/app/lib/auth/api'
 import { z } from 'zod'
 import { EventType } from '@prisma/client'
 
@@ -23,10 +23,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Authenticate request
+    const authResult = await authenticateRequest(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const event = await prisma.calendarEvent.findFirst({
       where: {
@@ -100,10 +103,13 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Authenticate request
+    const authResult = await authenticateRequest(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const event = await prisma.calendarEvent.findFirst({
       where: {
@@ -189,10 +195,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Authenticate request
+    const authResult = await authenticateRequest(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const event = await prisma.calendarEvent.findFirst({
       where: {
