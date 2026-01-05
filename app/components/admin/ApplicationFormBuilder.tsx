@@ -18,23 +18,48 @@ import {
   Eye,
   AlertCircle,
   Menu,
+  RefreshCw,
   Layout,
   Type,
-  EyeOff
+  EyeOff,
+  Palette,
+  Image as ImageIcon,
+  Check,
+  Upload
 } from 'lucide-react'
+
+// Theme colors available for forms (inspired by Google Forms)
+const THEME_COLORS = [
+  { name: 'Kenya Green', value: '#006600', accent: '#008800' },
+  { name: 'Kenya Red', value: '#CE1126', accent: '#FF1744' },
+  { name: 'Kenya Black', value: '#000000', accent: '#333333' },
+  { name: 'Ocean Blue', value: '#1976D2', accent: '#42A5F5' },
+  { name: 'Royal Purple', value: '#6A1B9A', accent: '#9C27B0' },
+  { name: 'Sunset Orange', value: '#E65100', accent: '#FF9800' },
+  { name: 'Forest Green', value: '#1B5E20', accent: '#4CAF50' },
+  { name: 'Berry Red', value: '#C62828', accent: '#EF5350' }
+]
+
+// Predefined cover image suggestions (can still use custom URL)
+const COVER_IMAGE_SUGGESTIONS = [
+  'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600', // Team working
+  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1600', // Technology
+  'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=1600', // Robotics
+  'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600', // Collaboration
+]
 
 // Field types available in the form builder
 const FIELD_TYPES = [
-  { value: 'text', label: 'Text Input' },
-  { value: 'email', label: 'Email' },
-  { value: 'tel', label: 'Phone Number' },
-  { value: 'date', label: 'Date' },
-  { value: 'select', label: 'Dropdown' },
-  { value: 'textarea', label: 'Text Area' },
-  { value: 'radio', label: 'Radio Buttons' },
-  { value: 'checkbox', label: 'Checkbox' },
-  { value: 'url', label: 'URL/Link' },
-  { value: 'multiselect', label: 'Multiple Select' }
+  { value: 'text', label: 'Text Input', icon: Type },
+  { value: 'email', label: 'Email', icon: Type },
+  { value: 'tel', label: 'Phone Number', icon: Type },
+  { value: 'date', label: 'Date', icon: Calendar },
+  { value: 'select', label: 'Dropdown', icon: ChevronDown },
+  { value: 'textarea', label: 'Text Area', icon: Type },
+  { value: 'radio', label: 'Radio Buttons', icon: Type },
+  { value: 'checkbox', label: 'Checkbox', icon: Check },
+  { value: 'url', label: 'URL/Link', icon: Type },
+  { value: 'multiselect', label: 'Multiple Select', icon: ChevronDown }
 ]
 
 // Auto-fill field mappings
@@ -44,18 +69,9 @@ const AUTO_FILL_FIELDS = [
   { value: 'email', label: 'Email' },
   { value: 'phone', label: 'Phone' },
   { value: 'dateOfBirth', label: 'Date of Birth' },
-  { value: 'gender', label: 'Gender' },
-  { value: 'nationality', label: 'Nationality' },
   { value: 'school', label: 'School' },
   { value: 'grade', label: 'Grade' },
-  { value: 'county', label: 'County' },
-  { value: 'homeAddress', label: 'Home Address' },
-  { value: 'parentName', label: 'Parent Name' },
-  { value: 'parentPhone', label: 'Parent Phone' },
-  { value: 'parentEmail', label: 'Parent Email' },
-  { value: 'linkedinUrl', label: 'LinkedIn URL' },
-  { value: 'githubUrl', label: 'GitHub URL' },
-  { value: 'portfolioUrl', label: 'Portfolio URL' }
+  { value: 'county', label: 'County' }
 ]
 
 interface FormField {
@@ -66,7 +82,6 @@ interface FormField {
   required?: boolean
   options?: { value: string; label: string }[]
   validation?: {
-    pattern?: string
     minLength?: number
     maxLength?: number
     min?: string
@@ -97,6 +112,9 @@ interface ApplicationFormData {
   openDate: string
   closeDate: string
   isActive: boolean
+  themeColor?: string
+  accentColor?: string
+  coverImage?: string
 }
 
 interface ApplicationFormBuilderProps {
@@ -106,6 +124,40 @@ interface ApplicationFormBuilderProps {
 }
 
 type ViewMode = 'settings' | 'builder' | 'properties'
+
+// Flash message component
+const FlashMessage = ({ message, type, onClose }: { message: string; type: 'error' | 'success' | 'warning'; onClose: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  const bgColor = type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
+  const icon = type === 'error' ? <AlertCircle /> : type === 'warning' ? <AlertCircle /> : <Check />
+
+  return (
+    <motion.div
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -100, opacity: 0 }}
+      className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md`}
+    >
+      <span className="h-5 w-5">{icon}</span>
+      <span className="flex-1">{message}</span>
+      <button onClick={onClose} className="hover:opacity-70 transition-opacity">
+        <X className="h-4 w-4" />
+      </button>
+    </motion.div>
+  )
+}
+
+// Field error animation
+const fieldErrorAnimation = {
+  animate: {
+    x: [0, -10, 10, -10, 10, 0],
+    transition: { duration: 0.4 }
+  }
+}
 
 export default function ApplicationFormBuilder({
   initialData,
@@ -123,7 +175,10 @@ export default function ApplicationFormBuilder({
       enableAutoFill: true,
       openDate: '',
       closeDate: '',
-      isActive: false
+      isActive: false,
+      themeColor: THEME_COLORS[0].value,
+      accentColor: THEME_COLORS[0].accent,
+      coverImage: ''
     }
   )
 
@@ -132,6 +187,12 @@ export default function ApplicationFormBuilder({
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showPreview, setShowPreview] = useState(false)
+  const [flashMessage, setFlashMessage] = useState<{ message: string; type: 'error' | 'success' | 'warning' } | null>(null)
+  const [showThemeSelector, setShowThemeSelector] = useState(false)
+  const [customCoverUrl, setCustomCoverUrl] = useState('')
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
   
   // Mobile view state
   const [activeView, setActiveView] = useState<ViewMode>('builder')
@@ -143,6 +204,80 @@ export default function ApplicationFormBuilder({
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Autosave functionality
+  useEffect(() => {
+    // Clear existing timer
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+
+    // Don't autosave if no changes or if form is invalid
+    if (!formData.title || !formData.season) {
+      return
+    }
+
+    // Set new timer for autosave (5 seconds after last change)
+    const timer = setTimeout(() => {
+      handleAutoSave()
+    }, 5000)
+
+    setAutoSaveTimer(timer)
+
+    // Cleanup
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
+  }, [formData])
+
+  // Autosave function
+  const handleAutoSave = async () => {
+    if (isSaving || saving) return
+    
+    setIsSaving(true)
+    try {
+      const autoSaveData = {
+        ...formData,
+        isDraft: true,
+        isAutoSave: true
+      }
+      
+      if (initialData?.id) {
+        // Update existing form
+        const response = await fetch(`/api/applications/forms/${initialData.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(autoSaveData)
+        })
+        
+        if (response.ok) {
+          setLastSaved(new Date())
+        }
+      } else if (formData.season && formData.title) {
+        // Create new draft form
+        const response = await fetch('/api/applications/forms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(autoSaveData)
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          // Update initialData so subsequent saves are updates
+          if (onSave) {
+            onSave({ ...formData, id: data.data.form.id })
+          }
+          setLastSaved(new Date())
+        }
+      }
+    } catch (error) {
+      console.error('Autosave failed:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   // Auto-switch views on selection
   useEffect(() => {
@@ -156,7 +291,7 @@ export default function ApplicationFormBuilder({
   const addTab = () => {
     const newTab: FormTab = {
       id: `tab-${Date.now()}`,
-      title: 'New Tab',
+      title: `Section ${formData.tabs.length + 1}`,
       description: '',
       fields: [],
       order: formData.tabs.length
@@ -201,7 +336,6 @@ export default function ApplicationFormBuilder({
       [tabs[index], tabs[index + 1]] = [tabs[index + 1], tabs[index]]
     }
     
-    // Update order
     tabs.forEach((tab, i) => {
       tab.order = i
     })
@@ -271,7 +405,7 @@ export default function ApplicationFormBuilder({
     if (field) {
       const newOption = {
         value: `option-${Date.now()}`,
-        label: 'New Option'
+        label: `Option ${(field.options?.length || 0) + 1}`
       }
       
       updateField(tabId, fieldId, {
@@ -333,15 +467,15 @@ export default function ApplicationFormBuilder({
     }
     
     if (formData.tabs.length === 0) {
-      newErrors.tabs = 'At least one tab is required'
+      newErrors.tabs = 'At least one section is required'
     }
     
     formData.tabs.forEach(tab => {
       if (!tab.title) {
-        newErrors[`tab-${tab.id}`] = 'Tab title is required'
+        newErrors[`tab-${tab.id}`] = 'Section title is required'
       }
       if (tab.fields.length === 0) {
-        newErrors[`tab-${tab.id}-fields`] = 'Tab must have at least one field'
+        newErrors[`tab-${tab.id}-fields`] = 'Section must have at least one field'
       }
       
       tab.fields.forEach(field => {
@@ -356,6 +490,16 @@ export default function ApplicationFormBuilder({
     })
     
     setErrors(newErrors)
+    
+    // Show flash message for errors
+    if (Object.keys(newErrors).length > 0) {
+      const errorCount = Object.keys(newErrors).length
+      setFlashMessage({
+        message: `Please fix ${errorCount} error${errorCount > 1 ? 's' : ''} before saving`,
+        type: 'error'
+      })
+    }
+    
     return Object.keys(newErrors).length === 0
   }
 
@@ -368,32 +512,236 @@ export default function ApplicationFormBuilder({
     setSaving(true)
     try {
       await onSave(formData)
+      setFlashMessage({ message: 'Form saved successfully!', type: 'success' })
+    } catch (error) {
+      setFlashMessage({ message: 'Failed to save form. Please try again.', type: 'error' })
     } finally {
       setSaving(false)
     }
   }
 
+  const handleThemeSelect = (color: typeof THEME_COLORS[0]) => {
+    setFormData(prev => ({
+      ...prev,
+      themeColor: color.value,
+      accentColor: color.accent
+    }))
+    setShowThemeSelector(false)
+  }
+
+  const handleCoverImageChange = (url: string) => {
+    setFormData(prev => ({ ...prev, coverImage: url }))
+    setCustomCoverUrl(url)
+  }
+
   const currentTab = formData.tabs.find(t => t.id === selectedTab)
   const currentField = currentTab?.fields.find(f => f.id === selectedField)
 
+  // Preview Component
+  const FormPreview = () => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="fixed inset-0 z-50 bg-background overflow-y-auto"
+    >
+      <div className="min-h-screen p-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Preview Header with Cover Image */}
+          <div 
+            className="relative h-48 rounded-t-xl overflow-hidden"
+            style={{ 
+              background: formData.coverImage 
+                ? `url(${formData.coverImage}) center/cover` 
+                : `linear-gradient(135deg, ${formData.themeColor} 0%, ${formData.accentColor} 100%)`
+            }}
+          >
+            <div className="absolute inset-0 bg-black/30"></div>
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <h1 className="text-3xl font-bold">{formData.title || 'Untitled Form'}</h1>
+              <p className="mt-1">{formData.description}</p>
+            </div>
+          </div>
+
+          {/* Preview Form Content */}
+          <div className="bg-card rounded-b-xl shadow-xl p-6 space-y-6">
+            {formData.tabs.map((tab, tabIndex) => (
+              <div key={tab.id} className="space-y-4">
+                <div className="border-b border-border pb-2">
+                  <h2 className="text-xl font-semibold" style={{ color: formData.themeColor }}>
+                    {tab.title}
+                  </h2>
+                  {tab.description && <p className="text-sm text-muted-foreground mt-1">{tab.description}</p>}
+                </div>
+                
+                {tab.fields.map(field => (
+                  <div key={field.id} className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </label>
+                    
+                    {/* Render field based on type */}
+                    {field.type === 'textarea' ? (
+                      <textarea 
+                        className="w-full px-3 py-2 border border-input rounded-lg bg-background"
+                        placeholder={field.placeholder}
+                        rows={field.rows || 3}
+                      />
+                    ) : field.type === 'select' ? (
+                      <select className="w-full px-3 py-2 border border-input rounded-lg bg-background">
+                        <option value="">Select an option</option>
+                        {field.options?.map((opt, i) => (
+                          <option key={i} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    ) : field.type === 'radio' ? (
+                      <div className="space-y-2">
+                        {field.options?.map((opt, i) => (
+                          <label key={i} className="flex items-center gap-2">
+                            <input type="radio" name={field.id} value={opt.value} />
+                            <span>{opt.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : field.type === 'checkbox' ? (
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" />
+                        <span>Check to confirm</span>
+                      </label>
+                    ) : (
+                      <input 
+                        type={field.type}
+                        className="w-full px-3 py-2 border border-input rounded-lg bg-background"
+                        placeholder={field.placeholder}
+                      />
+                    )}
+                    
+                    {field.helpText && (
+                      <p className="text-xs text-muted-foreground">{field.helpText}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {/* Close Preview Button - More Visible */}
+          <button
+            onClick={() => setShowPreview(false)}
+            className="fixed top-4 right-4 z-50 bg-red-600 text-white shadow-lg rounded-full p-3 hover:bg-red-700 transition-all hover:scale-110"
+            title="Close Preview"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          
+          {/* Alternative close button at bottom */}
+          <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 flex justify-center z-50">
+            <button
+              onClick={() => setShowPreview(false)}
+              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+            >
+              <X className="h-4 w-4" />
+              Exit Preview
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+
   return (
-    <div className="h-screen bg-muted/20 text-foreground flex flex-col overflow-hidden">
+    <div className="h-full bg-muted/20 text-foreground flex flex-col overflow-hidden">
+      {/* Flash Messages */}
+      <AnimatePresence>
+        {flashMessage && (
+          <FlashMessage
+            message={flashMessage.message}
+            type={flashMessage.type}
+            onClose={() => setFlashMessage(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-card border-b border-border p-4 shadow-sm">
+      <div className="bg-card border-b border-border p-4 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <FileText className="h-6 w-6 text-primary" />
+            <div className="p-2 rounded-lg" style={{ backgroundColor: `${formData.themeColor}20` }}>
+              <FileText className="h-6 w-6" style={{ color: formData.themeColor }} />
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">Form Builder</h1>
-              <p className="text-sm text-muted-foreground hidden sm:block">
-                {initialData ? 'Edit' : 'Create'} application form for {formData.season}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-muted-foreground hidden sm:block">
+                  {initialData ? 'Edit' : 'Create'} application form for {formData.season}
+                </p>
+                {/* Autosave indicator */}
+                {isSaving && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    Saving...
+                  </span>
+                )}
+                {!isSaving && lastSaved && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Check className="h-3 w-3 text-green-600" />
+                    Saved {new Date(lastSaved).toLocaleTimeString()}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
+            <div className="relative">
+              <button
+                onClick={() => setShowThemeSelector(!showThemeSelector)}
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                title="Theme Color"
+              >
+                <Palette className="h-5 w-5" style={{ color: formData.themeColor }} />
+              </button>
+              {showThemeSelector && (
+                <>
+                  {/* Backdrop to close on click outside */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowThemeSelector(false)}
+                  />
+                  <div className="absolute top-12 right-0 bg-card border border-border rounded-lg shadow-xl p-4 z-50 min-w-[280px]">
+                    <p className="text-sm font-medium mb-3">Choose Theme Color</p>
+                    <div className="grid grid-cols-4 gap-3">
+                      {THEME_COLORS.map(color => (
+                        <button
+                          key={color.value}
+                          onClick={() => {
+                            handleThemeSelect(color)
+                            setShowThemeSelector(false)
+                          }}
+                          className="group relative"
+                          title={color.name}
+                        >
+                          <div 
+                            className="w-12 h-12 rounded-lg border-2 hover:scale-110 transition-all"
+                            style={{ 
+                              backgroundColor: color.value, 
+                              borderColor: formData.themeColor === color.value ? color.accent : 'transparent' 
+                            }}
+                          />
+                          {formData.themeColor === color.value && (
+                            <Check className="absolute inset-0 m-auto h-6 w-6 text-white drop-shadow-md" />
+                          )}
+                          <p className="text-[10px] mt-1 text-center text-muted-foreground group-hover:text-foreground">
+                            {color.name.split(' ')[0]}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            
             <button
               onClick={() => setShowPreview(!showPreview)}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all border ${
@@ -403,7 +751,7 @@ export default function ApplicationFormBuilder({
               }`}
             >
               {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              <span className="hidden sm:inline">{showPreview ? 'Hide' : 'Show'} Preview</span>
+              <span className="hidden sm:inline">Preview</span>
             </button>
             
             <button
@@ -416,7 +764,8 @@ export default function ApplicationFormBuilder({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="flex items-center gap-2 px-4 py-2 text-white rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              style={{ backgroundColor: formData.themeColor }}
             >
               {saving ? (
                 <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
@@ -430,6 +779,11 @@ export default function ApplicationFormBuilder({
         </div>
       </div>
 
+      {/* Show Preview Modal */}
+      <AnimatePresence>
+        {showPreview && <FormPreview />}
+      </AnimatePresence>
+
       {/* Mobile Navigation */}
       {isMobile && (
         <div className="flex-none bg-card border-b border-border px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar shadow-sm">
@@ -437,9 +791,10 @@ export default function ApplicationFormBuilder({
             onClick={() => setActiveView('settings')}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               activeView === 'settings' 
-                ? 'bg-primary text-white shadow-md' 
+                ? 'text-white shadow-md' 
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             }`}
+            style={activeView === 'settings' ? { backgroundColor: formData.themeColor } : {}}
           >
             <Settings className="h-4 w-4" />
             Settings
@@ -448,9 +803,10 @@ export default function ApplicationFormBuilder({
             onClick={() => setActiveView('builder')}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               activeView === 'builder' 
-                ? 'bg-primary text-white shadow-md' 
+                ? 'text-white shadow-md' 
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             }`}
+            style={activeView === 'builder' ? { backgroundColor: formData.themeColor } : {}}
           >
             <Layout className="h-4 w-4" />
             Builder
@@ -460,9 +816,10 @@ export default function ApplicationFormBuilder({
             disabled={!selectedField}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               activeView === 'properties' 
-                ? 'bg-primary text-white shadow-md' 
+                ? 'text-white shadow-md' 
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted disabled:opacity-50'
             }`}
+            style={activeView === 'properties' ? { backgroundColor: formData.themeColor } : {}}
           >
             <Type className="h-4 w-4" />
             Properties
@@ -479,12 +836,64 @@ export default function ApplicationFormBuilder({
           {/* Form Settings Section */}
           <div className="p-5 border-b border-border">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-foreground">
-              <Settings className="h-4 w-4 text-primary" />
+              <Settings className="h-4 w-4" style={{ color: formData.themeColor }} />
               Form Settings
             </h3>
             
             <div className="space-y-4">
+              {/* Cover Image URL */}
               <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Cover Image URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.coverImage || ''}
+                  onChange={(e) => handleCoverImageChange(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  placeholder="https://example.com/image.jpg"
+                />
+                {formData.coverImage && (
+                  <div className="mt-2 relative h-24 bg-muted rounded-md overflow-hidden">
+                    <img 
+                      src={formData.coverImage} 
+                      alt="Cover preview" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                      }}
+                    />
+                    <div className="hidden absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
+                      Failed to load image
+                    </div>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  Enter a URL to an image for the form header
+                </p>
+                
+                {/* Suggestions */}
+                <div className="mt-2">
+                  <p className="text-[10px] text-muted-foreground mb-1">Quick suggestions:</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    {COVER_IMAGE_SUGGESTIONS.map((url, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleCoverImageChange(url)}
+                        className="h-12 bg-muted rounded overflow-hidden hover:ring-1 hover:ring-primary transition-all"
+                      >
+                        <img src={url} alt={`Suggestion ${i + 1}`} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <motion.div 
+                className="space-y-1.5"
+                animate={errors.season ? fieldErrorAnimation.animate : {}}
+              >
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Season <span className="text-red-500">*</span>
                 </label>
@@ -500,9 +909,12 @@ export default function ApplicationFormBuilder({
                 {errors.season && (
                   <p className="text-xs text-red-500">{errors.season}</p>
                 )}
-              </div>
+              </motion.div>
               
-              <div className="space-y-1.5">
+              <motion.div 
+                className="space-y-1.5"
+                animate={errors.title ? fieldErrorAnimation.animate : {}}
+              >
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Title <span className="text-red-500">*</span>
                 </label>
@@ -518,7 +930,7 @@ export default function ApplicationFormBuilder({
                 {errors.title && (
                   <p className="text-xs text-red-500">{errors.title}</p>
                 )}
-              </div>
+              </motion.div>
               
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</label>
@@ -532,7 +944,10 @@ export default function ApplicationFormBuilder({
               </div>
               
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
+                <motion.div 
+                  className="space-y-1.5"
+                  animate={errors.openDate ? fieldErrorAnimation.animate : {}}
+                >
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Open <span className="text-red-500">*</span>
                   </label>
@@ -544,9 +959,12 @@ export default function ApplicationFormBuilder({
                       errors.openDate ? 'border-red-500' : 'border-input'
                     }`}
                   />
-                </div>
+                </motion.div>
                 
-                <div className="space-y-1.5">
+                <motion.div 
+                  className="space-y-1.5"
+                  animate={errors.closeDate ? fieldErrorAnimation.animate : {}}
+                >
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Close <span className="text-red-500">*</span>
                   </label>
@@ -558,7 +976,7 @@ export default function ApplicationFormBuilder({
                       errors.closeDate ? 'border-red-500' : 'border-input'
                     }`}
                   />
-                </div>
+                </motion.div>
               </div>
               {errors.closeDate && (
                 <p className="text-xs text-red-500">{errors.closeDate}</p>
@@ -612,26 +1030,30 @@ export default function ApplicationFormBuilder({
           <div className="p-5 flex-1">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold flex items-center gap-2 text-foreground">
-                <FileText className="h-4 w-4 text-primary" />
-                Form Tabs
+                <FileText className="h-4 w-4" style={{ color: formData.themeColor }} />
+                Form Sections
               </h3>
               
               <button
                 onClick={addTab}
-                className="p-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-md transition-all"
-                title="Add Tab"
+                className="p-1.5 text-white rounded-md transition-all hover:opacity-90"
+                style={{ backgroundColor: formData.themeColor }}
+                title="Add Section"
               >
                 <Plus className="h-4 w-4" />
               </button>
             </div>
             
             {errors.tabs && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <motion.div 
+                className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                animate={fieldErrorAnimation.animate}
+              >
                 <p className="text-xs text-red-500 flex items-center gap-2">
                   <AlertCircle className="h-3 w-3" />
                   {errors.tabs}
                 </p>
-              </div>
+              </motion.div>
             )}
             
             <div className="space-y-2">
@@ -654,11 +1076,14 @@ export default function ApplicationFormBuilder({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`p-1.5 rounded-md ${selectedTab === tab.id ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
+                        <div 
+                          className={`p-1.5 rounded-md text-white`}
+                          style={{ backgroundColor: selectedTab === tab.id ? formData.themeColor : '#9CA3AF' }}
+                        >
                           <span className="text-xs font-bold">{tab.order + 1}</span>
                         </div>
                         <div>
-                          <p className="font-medium text-sm truncate max-w-[120px]">{tab.title || 'Untitled Tab'}</p>
+                          <p className="font-medium text-sm truncate max-w-[120px]">{tab.title || 'Untitled Section'}</p>
                           <p className="text-xs text-muted-foreground">
                             {tab.fields.length} fields
                           </p>
@@ -702,12 +1127,15 @@ export default function ApplicationFormBuilder({
                     </div>
                     
                     {(errors[`tab-${tab.id}`] || errors[`tab-${tab.id}-fields`]) && (
-                      <div className="absolute -right-1 -top-1">
+                      <motion.div 
+                        className="absolute -right-1 -top-1"
+                        animate={fieldErrorAnimation.animate}
+                      >
                         <span className="flex h-3 w-3">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                         </span>
-                      </div>
+                      </motion.div>
                     )}
                   </motion.div>
                 ))}
@@ -715,12 +1143,13 @@ export default function ApplicationFormBuilder({
               
               {formData.tabs.length === 0 && (
                 <div className="text-center py-8 px-4 border-2 border-dashed border-border rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">No tabs yet</p>
+                  <p className="text-sm text-muted-foreground mb-2">No sections yet</p>
                   <button
                     onClick={addTab}
-                    className="text-sm text-primary hover:underline font-medium"
+                    className="text-sm font-medium"
+                    style={{ color: formData.themeColor }}
                   >
-                    Add your first tab
+                    Add your first section
                   </button>
                 </div>
               )}
@@ -741,7 +1170,7 @@ export default function ApplicationFormBuilder({
                   value={currentTab.title}
                   onChange={(e) => updateTab(currentTab.id, { title: e.target.value })}
                   className="w-full text-2xl font-bold bg-transparent border-none focus:ring-0 p-0 placeholder:text-muted-foreground/50"
-                  placeholder="Tab Title"
+                  placeholder="Section Title"
                 />
                 
                 <textarea
@@ -758,7 +1187,8 @@ export default function ApplicationFormBuilder({
                 
                 <button
                   onClick={() => addField(currentTab.id)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 text-white rounded-md text-sm font-medium hover:opacity-90 transition-colors shadow-sm"
+                  style={{ backgroundColor: formData.themeColor }}
                 >
                   <Plus className="h-4 w-4" />
                   Add Field
@@ -775,16 +1205,20 @@ export default function ApplicationFormBuilder({
                       exit={{ opacity: 0, scale: 0.95 }}
                       className={`group relative bg-card border rounded-xl p-4 transition-all duration-200 ${
                         selectedField === field.id
-                          ? 'border-primary ring-1 ring-primary shadow-md'
+                          ? 'ring-1 shadow-md'
                           : 'border-border hover:border-primary/50 hover:shadow-sm'
                       }`}
+                      style={selectedField === field.id ? { borderColor: formData.themeColor } : {}}
                       onClick={() => {
                         setSelectedField(field.id)
                         if (isMobile) setActiveView('properties')
                       }}
                     >
                       <div className="flex items-start gap-4">
-                        <div className="mt-1 text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        <div 
+                          className="mt-1 text-xs font-mono text-white px-1.5 py-0.5 rounded"
+                          style={{ backgroundColor: formData.accentColor }}
+                        >
                           {index + 1}
                         </div>
                         
@@ -798,21 +1232,12 @@ export default function ApplicationFormBuilder({
                             )}
                           </div>
                           
-                          <div className="flex flex-wrap items-center gap-2 text-xs">
-                            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
-                              {FIELD_TYPES.find(t => t.value === field.type)?.label || field.type}
-                            </span>
-                            
-                            {field.autoFillFrom && (
-                              <span className="px-2 py-0.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full flex items-center gap-1">
-                                <span className="w-1 h-1 rounded-full bg-green-500"></span>
-                                Auto-fill: {AUTO_FILL_FIELDS.find(f => f.value === field.autoFillFrom)?.label}
-                              </span>
-                            )}
-                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {FIELD_TYPES.find(t => t.value === field.type)?.label || field.type}
+                          </p>
                           
                           {field.helpText && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{field.helpText}</p>
+                            <p className="text-xs text-muted-foreground italic">{field.helpText}</p>
                           )}
                         </div>
                         
@@ -821,32 +1246,32 @@ export default function ApplicationFormBuilder({
                             e.stopPropagation()
                             deleteField(currentTab.id, field.id)
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-md transition-all"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                       
-                      {(errors[`field-${field.id}`] || errors[`field-${field.id}-options`]) && (
-                        <div className="mt-3 p-2 bg-red-500/10 rounded text-xs text-red-500 flex items-center gap-2">
-                          <AlertCircle className="h-3 w-3" />
-                          {errors[`field-${field.id}`] || errors[`field-${field.id}-options`]}
-                        </div>
+                      {errors[`field-${field.id}`] && (
+                        <motion.div 
+                          className="mt-2 text-xs text-red-500"
+                          animate={fieldErrorAnimation.animate}
+                        >
+                          {errors[`field-${field.id}`]}
+                        </motion.div>
                       )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
                 
                 {currentTab.fields.length === 0 && (
-                  <div className="text-center py-12 border-2 border-dashed border-border rounded-xl bg-card/50">
-                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Plus className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-muted-foreground font-medium">No fields in this tab</p>
-                    <p className="text-sm text-muted-foreground/70 mb-4">Add fields to collect information</p>
+                  <div className="text-center py-12 px-4 border-2 border-dashed border-border rounded-lg">
+                    <Type className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground mb-2">No fields in this section</p>
                     <button
                       onClick={() => addField(currentTab.id)}
-                      className="text-primary hover:underline text-sm font-medium"
+                      className="text-sm font-medium"
+                      style={{ color: formData.themeColor }}
                     >
                       Add your first field
                     </button>
@@ -855,44 +1280,29 @@ export default function ApplicationFormBuilder({
               </div>
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                <Layout className="h-8 w-8 opacity-50" />
-              </div>
-              <h3 className="text-lg font-medium text-foreground mb-1">No Tab Selected</h3>
-              <p className="text-center max-w-xs">Select a tab from the left sidebar or create a new one to start building your form.</p>
-              <button
-                onClick={addTab}
-                className="mt-6 btn-primary text-white"
-              >
-                Create New Tab
-              </button>
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
+              <Layout className="h-12 w-12 mb-3 opacity-20" />
+              <p className="text-sm mb-1">No section selected</p>
+              <p className="text-xs">Select a section from the left or create a new one</p>
             </div>
           )}
         </div>
 
-        {/* Right Panel - Field Settings */}
+        {/* Right Panel - Field Properties */}
         <div className={`
-          ${isMobile ? (activeView === 'properties' ? 'w-full' : 'hidden') : 'w-80 border-l border-border'} 
+          ${isMobile ? (activeView === 'properties' ? 'w-full' : 'hidden') : 'w-64 lg:w-80 shrink-0 border-l border-border'} 
           bg-card overflow-y-auto
         `}>
           {currentField && currentTab ? (
             <div className="p-5">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Type className="h-4 w-4 text-primary" />
-                  Field Properties
-                </h3>
-                {isMobile && (
-                  <button onClick={() => setActiveView('builder')} className="p-1 hover:bg-muted rounded">
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-foreground">
+                <Edit2 className="h-4 w-4" style={{ color: formData.themeColor }} />
+                Field Properties
+              </h3>
               
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</label>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Field Type</label>
                   <select
                     value={currentField.type}
                     onChange={(e) => updateField(currentTab.id, currentField.id, { type: e.target.value })}
@@ -939,24 +1349,26 @@ export default function ApplicationFormBuilder({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Auto-fill Source</label>
-                  <select
-                    value={currentField.autoFillFrom || ''}
-                    onChange={(e) => updateField(currentTab.id, currentField.id, { autoFillFrom: e.target.value || undefined })}
-                    className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  >
-                    <option value="">None</option>
-                    {AUTO_FILL_FIELDS.map(field => (
-                      <option key={field.value} value={field.value}>
-                        {field.label}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-muted-foreground">
-                    Automatically populate this field from user profile data
-                  </p>
-                </div>
+                {formData.enableAutoFill && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Auto-fill Source</label>
+                    <select
+                      value={currentField.autoFillFrom || ''}
+                      onChange={(e) => updateField(currentTab.id, currentField.id, { autoFillFrom: e.target.value || undefined })}
+                      className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    >
+                      <option value="">None</option>
+                      {AUTO_FILL_FIELDS.map(field => (
+                        <option key={field.value} value={field.value}>
+                          {field.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-muted-foreground">
+                      Auto-fill from user profile
+                    </p>
+                  </div>
+                )}
                 
                 <div className="pt-2 border-t border-border">
                   <label className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors">
@@ -977,7 +1389,8 @@ export default function ApplicationFormBuilder({
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Options</label>
                       <button
                         onClick={() => addOption(currentTab.id, currentField.id)}
-                        className="text-xs text-primary hover:underline font-medium"
+                        className="text-xs font-medium"
+                        style={{ color: formData.themeColor }}
                       >
                         + Add Option
                       </button>
@@ -1010,54 +1423,37 @@ export default function ApplicationFormBuilder({
                   </div>
                 )}
 
-                {/* Validation Settings */}
-                <div className="pt-4 border-t border-border">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Validation</h4>
-                  
-                  <div className="space-y-3">
-                    {['text', 'email', 'tel', 'url', 'textarea'].includes(currentField.type) && (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[10px] text-muted-foreground mb-1 block">Min Length</label>
-                          <input
-                            type="number"
-                            value={currentField.validation?.minLength || ''}
-                            onChange={(e) => updateField(currentTab.id, currentField.id, {
-                              validation: { ...currentField.validation, minLength: e.target.value ? parseInt(e.target.value) : undefined }
-                            })}
-                            className="w-full px-2 py-1.5 text-sm bg-background border border-input rounded focus:border-primary outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] text-muted-foreground mb-1 block">Max Length</label>
-                          <input
-                            type="number"
-                            value={currentField.validation?.maxLength || ''}
-                            onChange={(e) => updateField(currentTab.id, currentField.id, {
-                              validation: { ...currentField.validation, maxLength: e.target.value ? parseInt(e.target.value) : undefined }
-                            })}
-                            className="w-full px-2 py-1.5 text-sm bg-background border border-input rounded focus:border-primary outline-none"
-                          />
-                        </div>
-                      </div>
-                    )}
+                {/* Simple Validation Settings (removed regex) */}
+                {['text', 'email', 'tel', 'url', 'textarea'].includes(currentField.type) && (
+                  <div className="pt-4 border-t border-border">
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Validation</h4>
                     
-                    {currentField.type === 'text' && (
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[10px] text-muted-foreground mb-1 block">Regex Pattern</label>
+                        <label className="text-[10px] text-muted-foreground mb-1 block">Min Length</label>
                         <input
-                          type="text"
-                          value={currentField.validation?.pattern || ''}
+                          type="number"
+                          value={currentField.validation?.minLength || ''}
                           onChange={(e) => updateField(currentTab.id, currentField.id, {
-                            validation: { ...currentField.validation, pattern: e.target.value || undefined }
+                            validation: { ...currentField.validation, minLength: e.target.value ? parseInt(e.target.value) : undefined }
                           })}
-                          className="w-full px-2 py-1.5 text-sm bg-background border border-input rounded focus:border-primary outline-none font-mono"
-                          placeholder="e.g. ^[A-Z0-9._%+-]+@"
+                          className="w-full px-2 py-1.5 text-sm bg-background border border-input rounded focus:border-primary outline-none"
                         />
                       </div>
-                    )}
+                      <div>
+                        <label className="text-[10px] text-muted-foreground mb-1 block">Max Length</label>
+                        <input
+                          type="number"
+                          value={currentField.validation?.maxLength || ''}
+                          onChange={(e) => updateField(currentTab.id, currentField.id, {
+                            validation: { ...currentField.validation, maxLength: e.target.value ? parseInt(e.target.value) : undefined }
+                          })}
+                          className="w-full px-2 py-1.5 text-sm bg-background border border-input rounded focus:border-primary outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           ) : (

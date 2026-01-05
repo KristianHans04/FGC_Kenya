@@ -72,9 +72,9 @@ export default function EnhancedEventForm({ onSubmit, onCancel, initialData, isA
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-card rounded-lg border-2 border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header with Kenyan flag colors - no gradient */}
+        {/* Header with Kenyan flag gradient - black to red to green */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-red-600 to-green-600 opacity-10"></div>
           <div className="relative flex items-center justify-between p-4 border-b-2 border-red-600/20">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-green-600" />
@@ -210,24 +210,24 @@ export default function EnhancedEventForm({ onSubmit, onCancel, initialData, isA
                 onClick={() => setFormData({ ...formData, isVirtual: false })}
                 className={`p-3 rounded-lg border-2 transition-all ${
                   !formData.isVirtual 
-                    ? 'border-green-600 bg-green-600/10' 
-                    : 'border-border hover:border-muted-foreground'
+                    ? 'border-green-600 bg-gradient-to-r from-black/5 via-red-600/5 to-green-600/10 shadow-lg' 
+                    : 'border-border hover:border-muted-foreground hover:bg-muted/50'
                 }`}
               >
-                <MapPin className="h-5 w-5 mb-1 mx-auto" />
-                <span className="text-sm">Physical</span>
+                <MapPin className={`h-5 w-5 mb-1 mx-auto ${!formData.isVirtual ? 'text-green-600' : ''}`} />
+                <span className={`text-sm ${!formData.isVirtual ? 'font-semibold text-green-600' : ''}`}>Physical</span>
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, isVirtual: true })}
                 className={`p-3 rounded-lg border-2 transition-all ${
                   formData.isVirtual 
-                    ? 'border-green-600 bg-green-600/10' 
-                    : 'border-border hover:border-muted-foreground'
+                    ? 'border-green-600 bg-gradient-to-r from-black/5 via-red-600/5 to-green-600/10 shadow-lg' 
+                    : 'border-border hover:border-muted-foreground hover:bg-muted/50'
                 }`}
               >
-                <Video className="h-5 w-5 mb-1 mx-auto" />
-                <span className="text-sm">Virtual</span>
+                <Video className={`h-5 w-5 mb-1 mx-auto ${formData.isVirtual ? 'text-green-600' : ''}`} />
+                <span className={`text-sm ${formData.isVirtual ? 'font-semibold text-green-600' : ''}`}>Virtual</span>
               </button>
             </div>
 
@@ -311,7 +311,7 @@ export default function EnhancedEventForm({ onSubmit, onCancel, initialData, isA
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 px-4 py-2 bg-muted text-card-foreground rounded-lg hover:bg-muted/80 transition-colors"
+              className="flex-1 px-4 py-2 bg-muted text-card-foreground rounded-lg hover:bg-muted/80 transition-colors border border-border"
             >
               Cancel
             </button>

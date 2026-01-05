@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/app/lib/contexts/AuthContext'
+import NotificationBell from './notifications/NotificationBell'
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -96,6 +97,8 @@ export default function Header() {
 
           <div className="flex flex-1 items-center justify-end gap-4">
             <ThemeToggle />
+            
+            {isAuthenticated && <NotificationBell />}
 
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
@@ -114,7 +117,13 @@ export default function Header() {
                   <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50">
                     <div className="py-1">
                       <Link
-                        href="/dashboard"
+                        href={
+                          user?.currentRole === 'STUDENT' ? '/student' :
+                          user?.currentRole === 'MENTOR' ? '/mentor' :
+                          user?.currentRole === 'ALUMNI' ? '/alumni' :
+                          user?.currentRole === 'ADMIN' || user?.currentRole === 'SUPER_ADMIN' ? '/admin' :
+                          '/dashboard'
+                        }
                         className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted"
                         onClick={() => setUserMenuOpen(false)}
                       >
@@ -224,7 +233,13 @@ export default function Header() {
               {isAuthenticated && (
                 <>
                   <Link
-                    href="/dashboard"
+                    href={
+                      user?.currentRole === 'STUDENT' ? '/student' :
+                      user?.currentRole === 'MENTOR' ? '/mentor' :
+                      user?.currentRole === 'ALUMNI' ? '/alumni' :
+                      user?.currentRole === 'ADMIN' || user?.currentRole === 'SUPER_ADMIN' ? '/admin' :
+                      '/dashboard'
+                    }
                     className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-muted"
                     onClick={() => setMobileMenuOpen(false)}
                   >

@@ -638,7 +638,7 @@ export default function EnhancedBulkEventForm({ onSubmit, onCancel }: EnhancedBu
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-2 bg-muted text-card-foreground rounded-lg hover:bg-muted/80 transition-colors"
+            className="flex-1 px-4 py-2 bg-muted text-card-foreground rounded-lg hover:bg-muted/80 transition-colors border border-border"
           >
             Cancel
           </button>
