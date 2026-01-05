@@ -88,7 +88,7 @@ export default function MentorProfilePage() {
     id: 'mentor1',
     firstName: 'John',
     lastName: 'Doe',
-    email: 'john.doe@fgckenya.org',
+    email: 'john.doe@fgckenya.com',
     phone: '+254 700 123456',
     school: 'Nairobi Technical Institute',
     expertise: ['Robotics', 'Programming', 'Team Building', 'Project Management'],
