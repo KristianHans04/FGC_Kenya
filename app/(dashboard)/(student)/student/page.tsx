@@ -2,23 +2,77 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Calendar, CheckSquare, FileText, Users } from 'lucide-react'
+import { Calendar, CheckSquare, FileText, Users, CheckCircle, XCircle, HelpCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function StudentDashboard() {
+  const router = useRouter()
   const [upcomingEvents, setUpcomingEvents] = useState([])
   const [myTasks, setMyTasks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [rsvpLoading, setRsvpLoading] = useState<string | null>(null)
+  const [showFeedback, setShowFeedback] = useState<{ eventId: string, type: 'success' | 'error', message: string } | null>(null)
 
   useEffect(() => {
     document.title = 'Dashboard | FIRST Global Team Kenya'
     fetchDashboardData()
   }, [])
 
+  const handleRSVP = async (eventId: string, status: string) => {
+    setRsvpLoading(eventId)
+    setShowFeedback(null)
+    
+    try {
+      const response = await fetch(`/api/calendar/events/${eventId}/rsvp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        // Refresh events to show updated RSVP status
+        await fetchDashboardData()
+        
+        const messages = {
+          ACCEPTED: 'You\'re attending!',
+          MAYBE: 'Marked as maybe',
+          DECLINED: 'Not attending'
+        }
+        
+        setShowFeedback({ 
+          eventId,
+          type: 'success', 
+          message: messages[status as keyof typeof messages] || 'Updated!'
+        })
+        
+        setTimeout(() => setShowFeedback(null), 2000)
+      } else {
+        setShowFeedback({ eventId, type: 'error', message: 'Failed' })
+        setTimeout(() => setShowFeedback(null), 2000)
+      }
+    } catch (error) {
+      console.error('RSVP error:', error)
+      setShowFeedback({ eventId, type: 'error', message: 'Failed' })
+      setTimeout(() => setShowFeedback(null), 2000)
+    } finally {
+      setRsvpLoading(null)
+    }
+  }
+
   const fetchDashboardData = async () => {
     try {
+      // Get current user info
+      const meRes = await fetch('/api/auth/me', { credentials: 'include' })
+      if (meRes.ok) {
+        const userData = await meRes.json()
+        setCurrentUserId(userData.data?.id || userData.id)
+      }
+
       const [eventsRes, tasksRes] = await Promise.all([
-        fetch('/api/calendar/events'),
-        fetch('/api/tasks')
+        fetch('/api/calendar/events', { credentials: 'include' }),
+        fetch('/api/tasks', { credentials: 'include' })
       ])
 
       if (eventsRes.ok) {
@@ -106,17 +160,83 @@ export default function StudentDashboard() {
               </div>
             ) : upcomingEvents.length > 0 ? (
               <div className="space-y-3">
-                {upcomingEvents.map((event: any) => (
-                  <div
-                    key={event.id}
-                    className="p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                  >
-                    <h4 className="font-medium text-card-foreground mb-1">{event.title}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(event.startDate).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
+                {upcomingEvents.map((event: any) => {
+                  const userAttendance = event.attendees?.find((a: any) => a.userId === currentUserId)
+                  return (
+                    <div key={event.id} className="bg-muted rounded-lg overflow-hidden">
+                      <Link
+                        href={`/student/calendar/events/${event.slug || event.id}`}
+                        className="block p-3 hover:bg-muted/80 transition-colors"
+                      >
+                        <h4 className="font-medium text-card-foreground mb-1">{event.title}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(event.startDate).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </Link>
+                      
+                      {/* RSVP Feedback */}
+                      {showFeedback?.eventId === event.id && (
+                        <div className={`p-1.5 mx-2 rounded text-xs flex items-center gap-1 ${
+                          showFeedback?.type === 'success' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {showFeedback?.type === 'success' ? (
+                            <CheckCircle className="h-3 w-3" />
+                          ) : (
+                            <XCircle className="h-3 w-3" />
+                          )}
+                          {showFeedback?.message}
+                        </div>
+                      )}
+                      
+                      {/* RSVP Buttons */}
+                      <div className="flex gap-1 p-2 pt-0">
+                        <button
+                          onClick={() => handleRSVP(event.id, 'ACCEPTED')}
+                          disabled={rsvpLoading === event.id}
+                          className={`flex-1 px-2 py-1 text-xs rounded transition-all flex items-center justify-center gap-1 ${
+                            userAttendance?.status === 'ACCEPTED'
+                              ? 'bg-green-600 text-white hover:bg-green-700'
+                              : 'bg-card hover:bg-green-600/20 hover:text-green-600'
+                          } ${rsvpLoading === event.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          Attending
+                        </button>
+                        <button
+                          onClick={() => handleRSVP(event.id, 'MAYBE')}
+                          disabled={rsvpLoading === event.id}
+                          className={`flex-1 px-2 py-1 text-xs rounded transition-all flex items-center justify-center gap-1 ${
+                            userAttendance?.status === 'MAYBE'
+                              ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                              : 'bg-card hover:bg-yellow-600/20 hover:text-yellow-600'
+                          } ${rsvpLoading === event.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <HelpCircle className="h-3 w-3" />
+                          Maybe
+                        </button>
+                        <button
+                          onClick={() => handleRSVP(event.id, 'DECLINED')}
+                          disabled={rsvpLoading === event.id}
+                          className={`flex-1 px-2 py-1 text-xs rounded transition-all flex items-center justify-center gap-1 ${
+                            userAttendance?.status === 'DECLINED'
+                              ? 'bg-red-600 text-white hover:bg-red-700'
+                              : 'bg-card hover:bg-red-600/20 hover:text-red-600'
+                          } ${rsvpLoading === event.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <XCircle className="h-3 w-3" />
+                          Not Going
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">No upcoming events</p>
