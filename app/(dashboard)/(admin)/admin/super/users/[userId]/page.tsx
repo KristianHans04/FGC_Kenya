@@ -143,6 +143,8 @@ export default function UserDetailPage() {
   const [sendingEmail, setSendingEmail] = useState(false)
   const [savingChanges, setSavingChanges] = useState(false)
   const [impersonating, setImpersonating] = useState(false)
+  const [showEditWarning, setShowEditWarning] = useState(false)
+  const [pendingTab, setPendingTab] = useState<TabType | null>(null)
 
   useEffect(() => {
     document.title = 'User Details | FIRST Global Team Kenya'
@@ -267,6 +269,34 @@ export default function UserDetailPage() {
     }
   }
 
+  const handleTabChange = (newTab: TabType) => {
+    if (isEditing && newTab !== activeTab) {
+      setPendingTab(newTab)
+      setShowEditWarning(true)
+    } else {
+      setActiveTab(newTab)
+    }
+  }
+  
+  const handleContinueWithoutSaving = () => {
+    setIsEditing(false)
+    setEditedUser({})
+    if (pendingTab) {
+      setActiveTab(pendingTab)
+      setPendingTab(null)
+    }
+    setShowEditWarning(false)
+  }
+  
+  const handleSaveAndContinue = async () => {
+    await handleSaveChanges()
+    if (pendingTab) {
+      setActiveTab(pendingTab)
+      setPendingTab(null)
+    }
+    setShowEditWarning(false)
+  }
+  
   const handleSaveChanges = async () => {
     setSavingChanges(true)
     try {
@@ -295,12 +325,21 @@ export default function UserDetailPage() {
       const endpoint = ban ? `/api/admin/users/${userId}/ban` : `/api/admin/users/${userId}/unban`
       const response = await fetch(endpoint, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          reason: ban ? 'Violation of community guidelines' : undefined
+        })
       })
       
       if (response.ok) {
         fetchUserDetails()
         setShowBanModal(false)
+      } else {
+        const error = await response.json()
+        console.error('Ban/unban error:', error)
       }
     } catch (error) {
       console.error('Failed to ban/unban user:', error)
@@ -470,6 +509,7 @@ export default function UserDetailPage() {
             {!isEditing ? (
               <button
                 onClick={() => {
+                  setActiveTab('profile')
                   setIsEditing(true)
                   setEditedUser(user)
                 }}
@@ -592,27 +632,35 @@ export default function UserDetailPage() {
       <div className="border-b border-border">
         <div className="flex gap-1 sm:gap-4 overflow-x-auto pb-px">
           {[
-            { id: 'overview', label: 'Overview', icon: User },
-            { id: 'profile', label: 'Profile', icon: Settings },
-            { id: 'roles', label: 'Role History', icon: History },
-            { id: 'applications', label: 'Applications', icon: FileText },
-            { id: 'articles', label: 'Articles', icon: BookOpen },
-            { id: 'payments', label: 'Payments', icon: CreditCard },
-            { id: 'activity', label: 'Activity Logs', icon: Activity }
+            { id: 'overview', label: 'Overview', icon: User, editable: false },
+            { id: 'profile', label: 'Profile', icon: Settings, editable: true },
+            { id: 'roles', label: 'Role History', icon: History, editable: false },
+            { id: 'applications', label: 'Applications', icon: FileText, editable: false },
+            { id: 'articles', label: 'Articles', icon: BookOpen, editable: false },
+            { id: 'payments', label: 'Payments', icon: CreditCard, editable: false },
+            { id: 'activity', label: 'Activity Logs', icon: Activity, editable: false }
           ].map(tab => {
             const Icon = tab.icon
+            const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'border-primary text-primary'
+                onClick={() => handleTabChange(tab.id as TabType)}
+                className={`relative flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-sm sm:text-base border-b-2 transition-all whitespace-nowrap ${
+                  isActive
+                    ? 'border-primary text-primary font-medium'
+                    : tab.editable && canEdit
+                    ? 'border-transparent text-foreground hover:text-primary hover:border-primary/50'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
+                {tab.editable && canEdit && (
+                  <span className="ml-1 text-xs text-primary opacity-70">
+                    <Edit className="h-3 w-3" />
+                  </span>
+                )}
               </button>
             )
           })}
@@ -805,7 +853,7 @@ export default function UserDetailPage() {
         {activeTab === 'roles' && (
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Role History & Organization Relationship</h3>
-            {user.cohortMemberships.length > 0 ? (
+            {user.cohortMemberships && user.cohortMemberships.length > 0 ? (
               <div className="space-y-3">
                 {user.cohortMemberships.map((membership) => (
                   <div key={membership.id} className="bg-card p-4 rounded-lg border border-border">
@@ -847,8 +895,8 @@ export default function UserDetailPage() {
 
         {activeTab === 'applications' && (
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Applications ({user.applications.length})</h3>
-            {user.applications.length > 0 ? (
+            <h3 className="font-semibold text-foreground">Applications ({user.applications?.length || 0})</h3>
+            {user.applications && user.applications.length > 0 ? (
               <div className="space-y-3">
                 {user.applications.map((app) => (
                   <div key={app.id} className="bg-card p-4 rounded-lg border border-border">
@@ -917,8 +965,8 @@ export default function UserDetailPage() {
 
         {activeTab === 'articles' && (
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Articles ({user.articles.length})</h3>
-            {user.articles.length > 0 ? (
+            <h3 className="font-semibold text-foreground">Articles ({user.articles?.length || 0})</h3>
+            {user.articles && user.articles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {user.articles.map((article) => (
                   <div key={article.id} className="bg-card p-4 rounded-lg border border-border">
@@ -967,8 +1015,8 @@ export default function UserDetailPage() {
 
         {activeTab === 'payments' && (
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Payment History ({user.payments.length})</h3>
-            {user.payments.length > 0 ? (
+            <h3 className="font-semibold text-foreground">Payment History ({user.payments?.length || 0})</h3>
+            {user.payments && user.payments.length > 0 ? (
               <div className="bg-card rounded-lg border border-border overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-muted/50 border-b border-border">
@@ -1016,7 +1064,7 @@ export default function UserDetailPage() {
         {activeTab === 'activity' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-foreground">Activity Logs ({user.activityLogs.length})</h3>
+              <h3 className="font-semibold text-foreground">Activity Logs ({user.activityLogs?.length || 0})</h3>
               <button
                 onClick={fetchUserDetails}
                 className="px-3 py-1 border border-border rounded-lg hover:bg-muted text-sm flex items-center gap-2"
@@ -1025,7 +1073,7 @@ export default function UserDetailPage() {
                 Refresh
               </button>
             </div>
-            {user.activityLogs.length > 0 ? (
+            {user.activityLogs && user.activityLogs.length > 0 ? (
               <div className="space-y-2">
                 {user.activityLogs.map((log) => (
                   <div key={log.id} className="bg-card p-3 rounded-lg border border-border">
@@ -1234,6 +1282,70 @@ export default function UserDetailPage() {
                   className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90"
                 >
                   Delete Permanently
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Edit Warning Modal */}
+      <AnimatePresence>
+        {showEditWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowEditWarning(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-card border border-border rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg">
+                  <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <h2 className="text-xl font-bold text-foreground">Unsaved Changes</h2>
+              </div>
+              
+              <p className="text-muted-foreground mb-6">
+                You have unsaved changes in the profile. What would you like to do?
+              </p>
+              
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleSaveAndContinue}
+                  disabled={savingChanges}
+                  className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {savingChanges ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save and Continue
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleContinueWithoutSaving}
+                  className="w-full px-4 py-2 border border-border rounded-lg hover:bg-muted text-foreground transition-colors"
+                >
+                  Continue Without Saving
+                </button>
+                <button
+                  onClick={() => setShowEditWarning(false)}
+                  className="w-full px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Continue Editing
                 </button>
               </div>
             </motion.div>

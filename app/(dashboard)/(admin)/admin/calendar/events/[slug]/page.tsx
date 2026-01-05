@@ -86,13 +86,13 @@ export default function EventDetailPage() {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'MEETING': return 'bg-blue-500 text-white'
-      case 'WORKSHOP': return 'bg-purple-500 text-white'
-      case 'COMPETITION': return 'bg-red-500 text-white'
-      case 'PRACTICE': return 'bg-green-500 text-white'
-      case 'DEADLINE': return 'bg-orange-500 text-white'
-      case 'TEAM_BUILD': return 'bg-yellow-500 text-black'
-      default: return 'bg-gray-500 text-white'
+      case 'MEETING': return 'bg-blue-600'
+      case 'WORKSHOP': return 'bg-purple-600'
+      case 'COMPETITION': return 'bg-red-600'
+      case 'PRACTICE': return 'bg-green-600'
+      case 'DEADLINE': return 'bg-orange-600'
+      case 'TEAM_BUILD': return 'bg-yellow-600'
+      default: return 'bg-gray-600'
     }
   }
 
@@ -122,42 +122,39 @@ export default function EventDetailPage() {
         </div>
 
         {/* Main Event Card */}
-        <div className="bg-card rounded-lg border-2 border-green-500/20 overflow-hidden">
-          {/* Event Header with Kenyan Flag Colors */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-red-600 to-green-600 opacity-10"></div>
-            <div className="relative p-6 border-b border-border">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getEventTypeColor(event.type)}`}>
-                      {event.type}
+        <div className="bg-card rounded-lg border border-border overflow-hidden">
+          {/* Event Header with Event Type Color */}
+          <div className={`${getEventTypeColor(event.type)} p-6`}>
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-3 mb-3">
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white backdrop-blur">
+                    {event.type.replace('_', ' ')}
+                  </span>
+                  {event.isPublic && (
+                    <span className="px-3 py-1 rounded-full text-xs bg-white/10 text-white backdrop-blur">
+                      Public Event
                     </span>
-                    {event.isPublic && (
-                      <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                        Public Event
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="text-3xl font-bold text-card-foreground mb-2">{event.title}</h1>
-                  <p className="text-muted-foreground">
-                    Created by {event.createdBy?.firstName} {event.createdBy?.lastName}
-                  </p>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => router.push(`/admin/calendar/events/${params.slug}/edit`)}
-                    className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-                  >
-                    <Edit2 className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{event.title}</h1>
+                <p className="text-white/80 text-sm">
+                  Created by {event.createdBy?.firstName} {event.createdBy?.lastName}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => router.push(`/admin/calendar/events/${params.slug}/edit`)}
+                  className="p-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors backdrop-blur"
+                >
+                  <Edit2 className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 bg-white/20 hover:bg-red-600 text-white rounded-lg transition-colors backdrop-blur"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
               </div>
             </div>
           </div>
@@ -232,29 +229,33 @@ export default function EventDetailPage() {
             <div>
               <h3 className="font-medium text-card-foreground mb-3 flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Attendance ({event.attendees?.length || 0})
+                Attendance
               </h3>
               
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                <div className="bg-green-100 rounded-lg p-3 text-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-green-900">{stats.accepted}</p>
-                  <p className="text-xs text-green-700">Accepted</p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-card-foreground">
+                    <strong>{stats.accepted}</strong> Attending
+                  </span>
                 </div>
-                <div className="bg-yellow-100 rounded-lg p-3 text-center">
-                  <AlertCircle className="h-5 w-5 text-yellow-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-yellow-900">{stats.maybe || 0}</p>
-                  <p className="text-xs text-yellow-700">Maybe</p>
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  <span className="text-card-foreground">
+                    <strong>{stats.maybe || 0}</strong> Maybe
+                  </span>
                 </div>
-                <div className="bg-red-100 rounded-lg p-3 text-center">
-                  <XCircle className="h-5 w-5 text-red-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-red-900">{stats.declined}</p>
-                  <p className="text-xs text-red-700">Declined</p>
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-card-foreground">
+                    <strong>{stats.declined}</strong> Not Going
+                  </span>
                 </div>
-                <div className="bg-gray-100 rounded-lg p-3 text-center">
-                  <Clock className="h-5 w-5 text-gray-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
-                  <p className="text-xs text-gray-700">Pending</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-600" />
+                  <span className="text-card-foreground">
+                    <strong>{stats.pending}</strong> No Response
+                  </span>
                 </div>
               </div>
 
