@@ -46,6 +46,7 @@
   "author": "FIRST Global Team Kenya Dev Team",
   "license": "ISC",
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^5.22.0",
@@ -73,6 +74,7 @@
     "@types/nodemailer": "^7.0.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/web-push": "^3.6.4",
     "@upstash/ratelimit": "^2.0.7",
     "@vercel/kv": "^3.0.0",
     "autoprefixer": "^10.4.23",
@@ -94,6 +96,7 @@
     "recharts": "^3.6.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
+    "web-push": "^3.6.7",
     "zod": "^4.2.1"
   },
   "devDependencies": {

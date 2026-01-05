@@ -307,3 +307,91 @@ body {
 /* Font family utilities */
 .font-sans { font-family: var(--font-sans); }
 .font-heading { font-family: var(--font-heading); }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Offline mode indication */
+body.offline-mode::before {
+  content: 'Offline Mode - Limited Functionality';
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 9999;
+  animation: slide-down 0.3s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Service Worker debug styles */
+.sw-debug {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  max-width: 20rem;
+}
+
+.sw-status {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.sw-status.active {
+  background: #10b981;
+}
+
+.sw-status.error {
+  background: #ef4444;
+}
+
+.sw-status.initializing {
+  background: #f59e0b;
+}
+
+/* PWA Installation styles */
+.pwa-install-prompt {
+  animation: slideUpFromBottom 0.3s ease-out;
+}
+
+@keyframes slideUpFromBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
