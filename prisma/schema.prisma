@@ -91,6 +91,11 @@ model User {
   
   // Application forms created (for admins)
   createdForms  ApplicationForm[]
+  
+  // Notification preferences
+  notificationPreferences NotificationPreference?
+  pushSubscriptions PushSubscription[]
+  notifications Notification[]
 
   @@index([email])
 }
@@ -358,6 +363,11 @@ model ApplicationForm {
   // Tab structure: { id, title, description, fields: [...], order }
   // Field structure: { id, type, label, required, options, validation, autoFillFrom }
   
+  // Theme and Appearance
+  themeColor  String?     @default("#006600") // Primary theme color
+  accentColor String?     @default("#008800") // Accent color
+  coverImage  String?     // URL to cover image
+  
   // Settings
   allowSaveDraft Boolean   @default(true)
   requireDocumentLinks Boolean @default(true)
@@ -365,6 +375,8 @@ model ApplicationForm {
   
   // Status
   isActive    Boolean     @default(false)
+  isDraft     Boolean     @default(true) // For draft support
+  lastAutoSave DateTime?  // Track last autosave time
   isDuplicate Boolean     @default(false) // If duplicated from another form
   duplicatedFrom String?  // ID of original form
   
@@ -1023,4 +1035,154 @@ enum ResourceCategory {
   COMPETITION_INFO
   RESEARCH
   OTHER
+}
+
+// =============================================================================
+// NOTIFICATION SYSTEM
+// =============================================================================
+
+/// User notification preferences
+model NotificationPreference {
+  id          String   @id @default(uuid())
+  
+  // Email notifications
+  emailEnabled        Boolean @default(true)
+  emailOnMessage      Boolean @default(true)
+  emailOnCalendarEvent Boolean @default(true)
+  emailOnTaskAssigned Boolean @default(true)
+  emailOnApplicationUpdate Boolean @default(true)
+  emailOnAnnouncement Boolean @default(true)
+  
+  // Push notifications
+  pushEnabled         Boolean @default(false)
+  pushOnMessage       Boolean @default(true)
+  pushOnCalendarEvent Boolean @default(true)
+  pushOnTaskAssigned  Boolean @default(true)
+  pushOnApplicationUpdate Boolean @default(true)
+  pushOnAnnouncement  Boolean @default(true)
+  pushOnCalendarReminder Boolean @default(true)
+  
+  // Notification schedule
+  quietHoursEnabled   Boolean @default(false)
+  quietHoursStart     String? // e.g., "22:00"
+  quietHoursEnd       String? // e.g., "08:00"
+  weekendNotifications Boolean @default(true)
+  
+  // Digest preferences
+  digestEnabled       Boolean @default(false)
+  digestFrequency     DigestFrequency @default(DAILY)
+  digestTime          String? // e.g., "09:00"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum DigestFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+/// Push notification subscriptions
+model PushSubscription {
+  id          String   @id @default(uuid())
+  endpoint    String   @unique
+  p256dh      String   // Public key for encryption
+  auth        String   // Authentication secret
+  
+  // Device info
+  deviceType  String?  // e.g., "mobile", "desktop"
+  browser     String?  // e.g., "chrome", "firefox", "safari"
+  os          String?  // e.g., "android", "ios", "windows"
+  
+  isActive    Boolean  @default(true)
+  lastUsed    DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([isActive])
+}
+
+/// Notification records
+model Notification {
+  id          String   @id @default(uuid())
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?    // Additional data for the notification
+  
+  // Delivery status
+  read        Boolean  @default(false)
+  readAt      DateTime?
+  delivered   Boolean  @default(false)
+  deliveredAt DateTime?
+  
+  // Delivery channels
+  sentViaEmail Boolean @default(false)
+  sentViaPush  Boolean @default(false)
+  
+  // Action URL
+  actionUrl   String?
+  
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, read])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  // Communication
+  NEW_MESSAGE
+  NEW_EMAIL
+  
+  // Calendar & Events
+  EVENT_CREATED
+  EVENT_UPDATED
+  EVENT_CANCELLED
+  EVENT_REMINDER
+  EVENT_INVITATION
+  EVENT_RSVP
+  
+  // Tasks
+  TASK_ASSIGNED
+  TASK_UPDATED
+  TASK_DUE_SOON
+  TASK_OVERDUE
+  TASK_COMPLETED
+  
+  // Applications
+  APPLICATION_SUBMITTED
+  APPLICATION_REVIEWED
+  APPLICATION_ACCEPTED
+  APPLICATION_REJECTED
+  APPLICATION_SHORTLISTED
+  APPLICATION_INTERVIEW
+  
+  // System
+  ANNOUNCEMENT
+  MAINTENANCE
+  SECURITY_ALERT
+  ACCOUNT_UPDATE
+  ROLE_CHANGED
+  
+  // Content
+  ARTICLE_PUBLISHED
+  RESOURCE_SHARED
+  COMMENT_RECEIVED
 }

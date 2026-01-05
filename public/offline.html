@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - FIRST Global Team Kenya</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #006600 0%, #008800 25%, #BB0000 50%, #000000 75%, #006600 100%);
+      background-size: 400% 400%;
+      animation: kenyaGradient 8s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    @keyframes kenyaGradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .logo-section {
+      margin-bottom: 30px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 15px;
+      background: linear-gradient(45deg, #006600, #008800);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0, 102, 0, 0.3);
+    }
+    
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      fill: white;
+    }
+    
+    .brand {
+      color: #006600;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .tagline {
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .flag-accent {
+      height: 4px;
+      background: linear-gradient(to right, #000000 33%, #BB0000 33% 66%, #006600 66%);
+      margin: 20px 0;
+      border-radius: 2px;
+    }
+    
+    h1 {
+      color: #1f2937;
+      font-size: 32px;
+      margin-bottom: 15px;
+      font-weight: 800;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    p {
+      color: #6b7280;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(45deg, #006600, #008800);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 102, 0, 0.3);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(45deg, #005500, #007700);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 102, 0, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.9);
+      color: #1f2937;
+      border: 2px solid rgba(0, 102, 0, 0.2);
+      backdrop-filter: blur(5px);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 1);
+      border-color: rgba(0, 102, 0, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    
+    .indicator.online {
+      background: #10b981;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      p {
+        font-size: 14px;
+      }
+      
+      button {
+        font-size: 14px;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-section">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="m2 17 10 5 10-5"/>
+          <path d="m2 12 10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand">FIRST Global Team Kenya</div>
+      <div class="tagline">Inspiring Innovation • Building Future Leaders</div>
+    </div>
+    
+    <div class="flag-accent"></div>
+    
+    <h1>You're Currently Offline</h1>
+    <p>Your connection to the FGC Kenya platform has been interrupted. Some features may be limited until connectivity is restored.</p>
+    
+    <div class="actions">
+      <button class="btn-primary" onclick="retryConnection()">Try Again</button>
+      <button class="btn-secondary" onclick="goBack()">Go Back</button>
+    </div>
+    
+    <div class="status">
+      <div class="status-item">
+        <span class="indicator" id="connection-indicator"></span>
+        <span id="connection-text">Checking connection...</span>
+      </div>
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 102, 0, 0.1);">
+        <p style="font-size: 14px; color: #888; margin: 0;">
+          In the meantime, you can review cached content or return when connectivity is restored.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function retryConnection() {
+      window.location.reload();
+    }
+    
+    function goBack() {
+      window.history.back();
+    }
+    
+    function checkConnection() {
+      const indicator = document.getElementById('connection-indicator');
+      const text = document.getElementById('connection-text');
+      
+      if (navigator.onLine) {
+        indicator.classList.add('online');
+        text.textContent = 'Connected to FGC Kenya! Redirecting...';
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
+      } else {
+        indicator.classList.remove('online');
+        text.textContent = 'Disconnected from FGC Kenya platform';
+      }
+    }
+    
+    // Check connection status
+    checkConnection();
+    
+    // Listen for connection changes
+    window.addEventListener('online', checkConnection);
+    window.addEventListener('offline', checkConnection);
+    
+    // Periodic check
+    setInterval(checkConnection, 5000);
+  </script>
+</body>
+</html>
