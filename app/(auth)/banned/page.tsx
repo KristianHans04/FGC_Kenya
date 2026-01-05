@@ -73,7 +73,7 @@ export default function BannedPage() {
       setBanDetails({
         bannedAt: new Date().toISOString(),
         bannedBy: {
-          email: 'admin@fgckenya.org',
+          email: 'admin@fgckenya.com',
           firstName: 'System',
           lastName: 'Administrator'
         },
@@ -230,7 +230,7 @@ export default function BannedPage() {
                     was applied incorrectly, please reach out to our support team. We're here to help!
                   </p>
                   <Link
-                    href="mailto:support@fgckenya.org?subject=Account Restriction Appeal"
+                    href="mailto:support@fgckenya.com?subject=Account Restriction Appeal"
                     className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
                   >
                     <MessageCircle className="h-4 w-4" />
