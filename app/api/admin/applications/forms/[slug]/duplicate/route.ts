@@ -3,7 +3,7 @@ import { authenticateRequest } from '@/app/lib/middleware/auth'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(req)
@@ -11,12 +11,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await params
+    const { slug } = await params
     return NextResponse.json({
       success: true,
       data: { 
         message: 'Form duplicated successfully',
-        originalId: id,
+        originalId: slug,
         newFormId: `form-${Date.now()}`
       }
     })

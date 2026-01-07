@@ -3,7 +3,7 @@ import { authenticateRequest } from '@/app/lib/middleware/auth'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(req)
@@ -11,12 +11,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await params
+    const { slug } = await params
 
     return NextResponse.json({
       success: true,
       data: { 
-        id,
+        id: slug,
         name: 'Application Form',
         fields: [],
         active: false
@@ -29,7 +29,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(req)
@@ -37,14 +37,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await params
+    const { slug } = await params
     const body = await req.json()
 
     return NextResponse.json({
       success: true,
       data: { 
         message: 'Form updated successfully',
-        formId: id,
+        formId: slug,
         ...body
       }
     })
@@ -55,7 +55,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(req)
@@ -63,13 +63,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await params
+    const { slug } = await params
 
     return NextResponse.json({
       success: true,
       data: { 
         message: 'Form deleted successfully',
-        formId: id
+        formId: slug
       }
     })
   } catch (error) {
