@@ -24,30 +24,25 @@ export async function GET(req: NextRequest) {
     // Build query based on user role
     let whereClause: any = { isActive: true }
 
-    if (authResult.user.role === 'MENTOR') {
-      // Mentors can only see resources for their cohorts
-      const mentorCohorts = await prisma.cohortMember.findMany({
+    // Check if user is admin
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(authResult.user.role)
+    
+    if (!isAdmin) {
+      // For non-admins, check their cohort memberships
+      const userCohorts = await prisma.cohortMember.findMany({
         where: {
-          userId: authResult.user.id,
-          role: 'MENTOR'
+          userId: authResult.user.id
         },
         select: { cohort: true }
       })
       
-      const cohortNames = mentorCohorts.map(c => c.cohort)
-      whereClause.cohort = { in: cohortNames }
-    } else if (authResult.user.role === 'STUDENT') {
-      // Students can only see resources for their cohorts
-      const studentCohorts = await prisma.cohortMember.findMany({
-        where: {
-          userId: authResult.user.id,
-          role: 'STUDENT'
-        },
-        select: { cohort: true }
-      })
-      
-      const cohortNames = studentCohorts.map(c => c.cohort)
-      whereClause.cohort = { in: cohortNames }
+      if (userCohorts.length > 0) {
+        const cohortNames = userCohorts.map(c => c.cohort)
+        whereClause.cohort = { in: cohortNames }
+      } else {
+        // User has no cohorts, return empty
+        whereClause.cohort = { in: [] }
+      }
     }
 
     // Apply cohort filter if provided
@@ -90,9 +85,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Only admins and mentors can create resources
-    if (!['ADMIN', 'SUPER_ADMIN', 'MENTOR'].includes(authResult.user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    // Check if user can create resources
+    // Since UserRole enum doesn't include MENTOR, we need to check differently
+    // For now, only admins can create through this endpoint
+    // Mentors should be given access through a different mechanism
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(authResult.user.role)) {
+      // Check if user is a mentor for any cohort
+      const isMentor = await prisma.cohortMember.findFirst({
+        where: {
+          userId: authResult.user.id,
+          role: 'MENTOR'
+        }
+      })
+      
+      if (!isMentor) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
     }
 
     const body = await req.json()
@@ -100,15 +108,16 @@ export async function POST(req: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validation.error.errors },
+        { error: 'Invalid input', details: validation.error.issues },
         { status: 400 }
       )
     }
 
     const { title, description, link, cohort } = validation.data
 
-    // Check if mentor has access to this cohort
-    if (authResult.user.role === 'MENTOR') {
+    // Check if non-admin has access to this cohort
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(authResult.user.role)
+    if (!isAdmin) {
       const mentorCohort = await prisma.cohortMember.findFirst({
         where: {
           userId: authResult.user.id,
@@ -167,6 +176,12 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    // Get creator's full details for email
+    const creator = await prisma.user.findUnique({
+      where: { id: authResult.user.id },
+      select: { firstName: true, lastName: true }
+    })
+    
     // Queue email notifications (we'll implement this later)
     const emailsToSend = cohortMembers
       .filter(m => 
@@ -183,7 +198,7 @@ export async function POST(req: NextRequest) {
           resourceDescription: description,
           cohort: cohort,
           link: link,
-          createdBy: `${authResult.user.firstName} ${authResult.user.lastName}`
+          createdBy: creator ? `${creator.firstName} ${creator.lastName}` : 'Unknown'
         }
       }))
 

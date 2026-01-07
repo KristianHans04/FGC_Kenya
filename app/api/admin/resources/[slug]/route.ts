@@ -39,8 +39,9 @@ export async function GET(
       return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
     }
 
-    // Check access based on role
-    if (authResult.user.role === 'STUDENT' || authResult.user.role === 'MENTOR') {
+    // Admins have full access, others need to check cohort membership
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(authResult.user.role)) {
+      // For non-admin users, check if they're part of the cohort
       const cohortMember = await prisma.cohortMember.findFirst({
         where: {
           userId: authResult.user.id,
@@ -78,10 +79,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Only admins and the creator can update
-    if (!['ADMIN', 'SUPER_ADMIN', 'MENTOR'].includes(authResult.user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    // Check basic authorization - admins can always update
+    // For non-admins, we'll check ownership later
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(authResult.user.role)
 
     const resource = await prisma.learningResource.findUnique({
       where: { slug: params.slug }
@@ -92,7 +92,8 @@ export async function PATCH(
     }
 
     // Check if user can update this resource
-    if (authResult.user.role === 'MENTOR' && resource.createdById !== authResult.user.id) {
+    // Mentors can only update their own resources, admins can update any
+    if (!isAdmin && resource.createdById !== authResult.user.id) {
       return NextResponse.json(
         { error: 'You can only update resources you created' },
         { status: 403 }
@@ -104,7 +105,7 @@ export async function PATCH(
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validation.error.errors },
+        { error: 'Invalid input', details: validation.error.issues },
         { status: 400 }
       )
     }
