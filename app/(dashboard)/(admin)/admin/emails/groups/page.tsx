@@ -87,7 +87,7 @@ export default function EmailGroups() {
   const [filters, setFilters] = useState<FilterOptions>({})
   const [availableFilters, setAvailableFilters] = useState({
     roles: ['STUDENT', 'ALUMNI', 'MENTOR', 'ADMIN'],
-    cohorts: ['FGC 2025', 'FGC 2024', 'FGC 2023', 'FGC 2022'],
+    cohorts: [] as string[],
     years: ['Form 1', 'Form 2', 'Form 3', 'Form 4', 'Alumni'],
     schools: [] as string[],
     genders: ['Male', 'Female', 'Other']
@@ -108,7 +108,48 @@ export default function EmailGroups() {
       meta.content = 'Send targeted emails to user groups'
       document.head.appendChild(meta)
     }
+    
+    // Fetch available cohorts
+    fetchCohorts()
   }, [])
+
+  const fetchCohorts = async () => {
+    try {
+      const response = await fetch('/api/cohorts')
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        setAvailableFilters(prev => ({
+          ...prev,
+          cohorts: data.data || []
+        }))
+      } else {
+        console.error('[EMAIL_GROUPS] Failed to fetch cohorts:', data)
+        // Fallback cohorts
+        const currentYear = new Date().getFullYear()
+        const cohorts: string[] = []
+        for (let year = currentYear + 1; year >= currentYear - 3; year--) {
+          cohorts.push(`FGC ${year}`)
+        }
+        setAvailableFilters(prev => ({
+          ...prev,
+          cohorts
+        }))
+      }
+    } catch (error) {
+      console.error('[EMAIL_GROUPS] Error fetching cohorts:', error)
+      // Fallback cohorts
+      const currentYear = new Date().getFullYear()
+      const cohorts: string[] = []
+      for (let year = currentYear + 1; year >= currentYear - 3; year--) {
+        cohorts.push(`FGC ${year}`)
+      }
+      setAvailableFilters(prev => ({
+        ...prev,
+        cohorts
+      }))
+    }
+  }
   
   useEffect(() => {
     if (!authLoading && (currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN')) {

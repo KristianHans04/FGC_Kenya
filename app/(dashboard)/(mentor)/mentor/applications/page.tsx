@@ -70,15 +70,20 @@ export default function MentorApplicationsPage() {
           )
         }
       } else {
-        addNotification(
-          'Failed to check application access',
-          'error'
-        )
+        // Handle error response with detailed message
+        console.error('[MENTOR_APPLICATIONS] Error response:', data)
+        const errorMessage = data?.message || data?.error || 'Failed to check application access'
+        addNotification(errorMessage, 'error')
+        
+        // If it's a 403, show more context
+        if (response.status === 403 && data?.details) {
+          console.log('[MENTOR_APPLICATIONS] Access denied details:', data.details)
+        }
       }
     } catch (error) {
-      console.error('Error checking application access:', error)
+      console.error('[MENTOR_APPLICATIONS] Error checking application access:', error)
       addNotification(
-        'Failed to check application access',
+        'An unexpected error occurred while checking application access. Please try again.',
         'error'
       )
     } finally {

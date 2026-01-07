@@ -11,8 +11,10 @@ import {
   Video,
   Save,
   Plus,
-  X
+  X,
+  AlertCircle
 } from 'lucide-react'
+import { useFlashNotification } from '@/app/lib/hooks/useFlashNotification'
 
 interface SessionForm {
   title: string
@@ -27,6 +29,13 @@ interface SessionForm {
   cohorts: string[]
   materials: string[]
   reminders: boolean
+}
+
+interface MentorCohort {
+  cohort: string
+  year: string
+  isActive: boolean
+  studentCount: number
 }
 
 export default function ScheduleSessionPage() {
@@ -46,7 +55,10 @@ export default function ScheduleSessionPage() {
 
 
   const router = useRouter()
+  const { addNotification } = useFlashNotification()
   const [loading, setLoading] = useState(false)
+  const [loadingCohorts, setLoadingCohorts] = useState(true)
+  const [availableCohorts, setAvailableCohorts] = useState<MentorCohort[]>([])
   const [formData, setFormData] = useState<SessionForm>({
     title: '',
     description: '',
@@ -62,12 +74,46 @@ export default function ScheduleSessionPage() {
     reminders: true
   })
 
-  const availableCohorts = [
-    'FGC 2025',
-    'FGC 2026',
-    'FGC 2027',
-    'Alumni'
-  ]
+  // Fetch mentor's assigned cohorts
+  useEffect(() => {
+    fetchMentorCohorts()
+  }, [])
+
+  const fetchMentorCohorts = async () => {
+    try {
+      setLoadingCohorts(true)
+      const response = await fetch('/api/mentor/cohorts')
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('[SCHEDULE_SESSION] Error response:', data)
+        addNotification(
+          data.message || 'Failed to fetch your assigned cohorts',
+          'error'
+        )
+        if (response.status === 403) {
+          // No mentor cohorts assigned
+          router.push('/mentor')
+        }
+        return
+      }
+
+      if (data.success && data.data) {
+        setAvailableCohorts(data.data)
+        if (data.data.length === 0) {
+          addNotification(
+            'You are not assigned to any cohorts. Please contact an administrator.',
+            'warning'
+          )
+        }
+      }
+    } catch (error) {
+      console.error('[SCHEDULE_SESSION] Failed to fetch cohorts:', error)
+      addNotification('Failed to load cohorts. Please try again.', 'error')
+    } finally {
+      setLoadingCohorts(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -271,22 +317,53 @@ export default function ScheduleSessionPage() {
 
         <div className="bg-card rounded-lg border p-6">
           <h2 className="font-semibold mb-4">Target Cohorts</h2>
-          <div className="flex flex-wrap gap-2">
-            {availableCohorts.map(cohort => (
-              <button
-                key={cohort}
-                type="button"
-                onClick={() => toggleCohort(cohort)}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  formData.cohorts.includes(cohort)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-muted/80'
-                }`}
-              >
-                {cohort}
-              </button>
-            ))}
-          </div>
+          {loadingCohorts ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+              <span className="ml-2 text-sm text-muted-foreground">Loading cohorts...</span>
+            </div>
+          ) : availableCohorts.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {availableCohorts.map(cohortData => (
+                  <button
+                    key={cohortData.cohort}
+                    type="button"
+                    onClick={() => toggleCohort(cohortData.cohort)}
+                    className={`px-4 py-2 rounded-lg transition-all ${
+                      formData.cohorts.includes(cohortData.cohort)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                  >
+                    <span className="font-medium">{cohortData.cohort}</span>
+                    {cohortData.studentCount > 0 && (
+                      <span className="ml-2 text-xs opacity-80">
+                        ({cohortData.studentCount} students)
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              {formData.cohorts.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Please select at least one cohort for this session
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <div>
+                  <p className="text-sm text-yellow-900 font-medium">No Cohorts Available</p>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    You are not currently assigned to any cohorts. Please contact an administrator to be assigned as a mentor.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="bg-card rounded-lg border p-6">
@@ -337,8 +414,9 @@ export default function ScheduleSessionPage() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={loading || formData.cohorts.length === 0}
-            className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+            disabled={loading || formData.cohorts.length === 0 || availableCohorts.length === 0}
+            className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            title={availableCohorts.length === 0 ? "No cohorts available" : formData.cohorts.length === 0 ? "Please select at least one cohort" : undefined}
           >
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
