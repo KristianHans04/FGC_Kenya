@@ -172,12 +172,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Determine redirect URL based on role using centralized navigation helper
+    const redirectUrl = getDashboardRoute(user.role || 'USER')
+    console.log('[VERIFY-OTP] User role:', user.role, 'Redirect URL:', redirectUrl)
+    
     const authResponse: AuthResponse = {
       user: safeUser,
       token: accessToken,
       refreshToken,
       expiresAt: session.expiresAt.toISOString(),
-      redirectUrl: getDashboardRoute(user.role || 'USER'),
+      redirectUrl,
     }
 
     const response = addSecurityHeaders(

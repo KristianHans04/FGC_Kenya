@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/app/lib/prisma'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
 
-// PUT /api/applications/[applicationId]/status - Update application status
+// PUT /api/applications/[slug]/status - Update application status
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ applicationId: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(request)
@@ -37,9 +37,9 @@ export async function PUT(
     }
 
     // Check if application exists
-    const { applicationId } = await params
+    const { slug } = await params
     const application = await prisma.application.findUnique({
-      where: { id: applicationId },
+      where: { id: slug },
       include: {
         user: {
           select: {
@@ -60,7 +60,7 @@ export async function PUT(
 
     // Update application
     const updatedApplication = await prisma.application.update({
-      where: { id: applicationId },
+      where: { id: slug },
       data: {
         status,
         reviewNotes,
@@ -74,7 +74,7 @@ export async function PUT(
       data: {
         action: 'APPLICATION_STATUS_CHANGED',
         entityType: 'Application',
-        entityId: applicationId,
+        entityId: slug,
         details: {
           previousStatus: application.status,
           newStatus: status,

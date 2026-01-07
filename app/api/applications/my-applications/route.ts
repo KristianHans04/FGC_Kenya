@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/app/lib/prisma'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
 
-// GET /api/applications/my-applications - Get user's applications
+// GET /api/applications/my-applications - Get current user's applications
 export async function GET(request: NextRequest) {
   try {
     const authResult = await authenticateRequest(request)
     if (!authResult.success) {
       return NextResponse.json(
-        { error: { message: authResult.error } },
+        { error: { message: 'Authentication required' } },
         { status: 401 }
       )
     }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
             id: true,
             season: true,
             title: true,
-            closeDate: true
+            description: true
           }
         }
       },
@@ -37,14 +37,15 @@ export async function GET(request: NextRequest) {
       data: {
         applications: applications.map(app => ({
           id: app.id,
+          formId: app.formId,
+          status: app.status,
           season: app.form.season,
           title: app.form.title,
-          status: app.status,
-          progress: app.progress,
-          submittedAt: app.submittedAt,
+          description: app.form.description,
           createdAt: app.createdAt,
-          closeDate: app.form.closeDate,
-          canEdit: app.status === 'DRAFT' && new Date() < app.form.closeDate
+          submittedAt: app.submittedAt,
+          reviewedAt: app.reviewedAt,
+          updatedAt: app.updatedAt
         }))
       }
     })

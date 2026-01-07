@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/app/lib/prisma'
 import { authenticateRequest } from '@/app/lib/middleware/auth'
 
-// GET /api/applications/[applicationId] - Get specific application
+// GET /api/applications/[slug] - Get specific application
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ applicationId: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(request)
@@ -16,10 +16,10 @@ export async function GET(
       )
     }
 
-    const { applicationId } = await params
+    const { slug } = await params
     const application = await prisma.application.findUnique({
       where: {
-        id: applicationId
+        id: slug
       },
       include: {
         form: true,
@@ -66,10 +66,10 @@ export async function GET(
   }
 }
 
-// DELETE /api/applications/[applicationId] - Delete draft application
+// DELETE /api/applications/[slug] - Delete draft application
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ applicationId: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const authResult = await authenticateRequest(request)
@@ -80,10 +80,10 @@ export async function DELETE(
       )
     }
 
-    const { applicationId } = await params
+    const { slug } = await params
     const application = await prisma.application.findUnique({
       where: {
-        id: applicationId
+        id: slug
       }
     })
 
@@ -111,7 +111,7 @@ export async function DELETE(
     }
 
     await prisma.application.delete({
-      where: { id: applicationId }
+      where: { id: slug }
     })
 
     // Log the action
@@ -119,7 +119,7 @@ export async function DELETE(
       data: {
         action: 'APPLICATION_WITHDRAWN',
         entityType: 'Application',
-        entityId: applicationId,
+        entityId: slug,
         userId: authResult.user?.id || ''
       }
     })

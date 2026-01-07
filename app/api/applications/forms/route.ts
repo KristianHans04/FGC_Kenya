@@ -81,17 +81,60 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
 
     // Check if season already exists
-    const existingForm = await prisma.applicationForm.findUnique({
-      where: {
-        season: data.season
-      }
-    })
+    if (data.season) {
+      const existingForm = await prisma.applicationForm.findUnique({
+        where: {
+          season: data.season
+        }
+      })
 
-    if (existingForm) {
-      return NextResponse.json(
-        { error: { message: 'An application form for this season already exists' } },
-        { status: 400 }
-      )
+      if (existingForm) {
+        // If it's an autosave and the form is a draft, return the existing form
+        if (data.isAutoSave && existingForm.isDraft) {
+          // Update the existing draft instead of creating a new one
+          const updatedForm = await prisma.applicationForm.update({
+            where: { id: existingForm.id },
+            data: {
+              title: data.title || existingForm.title,
+              description: data.description || existingForm.description,
+              tabs: data.tabs || existingForm.tabs,
+              themeColor: data.themeColor || existingForm.themeColor,
+              accentColor: data.accentColor || existingForm.accentColor,
+              lastAutoSave: new Date()
+            },
+            include: {
+              createdBy: {
+                select: {
+                  email: true,
+                  firstName: true,
+                  lastName: true
+                }
+              }
+            }
+          })
+          
+          return NextResponse.json({
+            success: true,
+            data: {
+              form: updatedForm
+            }
+          })
+        }
+        
+        // If manually saving and season exists
+        if (!data.isAutoSave && !data.isDraft) {
+          return NextResponse.json(
+            { 
+              error: { 
+                message: `An application form for season ${data.season} already exists. Please use a different season identifier.`,
+                code: 'SEASON_EXISTS',
+                existingFormId: existingForm.id 
+              } 
+            },
+            { status: 400 }
+          )
+        }
+      }
     }
 
     // If making this form active, deactivate other forms
@@ -118,8 +161,8 @@ export async function POST(request: NextRequest) {
         allowSaveDraft: data.allowSaveDraft,
         requireDocumentLinks: data.requireDocumentLinks,
         enableAutoFill: data.enableAutoFill,
-        openDate: new Date(data.openDate),
-        closeDate: new Date(data.closeDate),
+        openDate: data.openDate ? new Date(data.openDate) : new Date(),
+        closeDate: data.closeDate ? new Date(data.closeDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         isActive: data.isActive,
         isDraft: data.isDraft !== undefined ? data.isDraft : false,
         createdById: authResult.user?.id
