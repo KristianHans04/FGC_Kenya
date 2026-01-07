@@ -6,7 +6,12 @@ export async function GET(req: NextRequest) {
   try {
     const authResult = await authenticateRequest(req)
     if (!authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ 
+        success: false,
+        error: 'Authentication required',
+        message: 'You must be logged in to check application access permissions',
+        location: 'mentor/applications/access'
+      }, { status: 401 })
     }
     
     // Check if user is a mentor by looking at their cohort membership
@@ -19,7 +24,17 @@ export async function GET(req: NextRequest) {
     })
     
     if (!mentorCheck) {
-      return NextResponse.json({ error: 'Unauthorized - Mentor access required' }, { status: 403 })
+      console.log('[MENTOR_ACCESS] User is not an active mentor:', authResult.user.id)
+      return NextResponse.json({ 
+        success: false,
+        error: 'Mentor role required',
+        message: 'You must be an active mentor to access this feature. If you believe this is an error, please contact an administrator.',
+        location: 'mentor/applications/access',
+        details: {
+          userId: authResult.user.id,
+          hasMentorRole: false
+        }
+      }, { status: 403 })
     }
 
     const user = authResult.user
@@ -41,10 +56,18 @@ export async function GET(req: NextRequest) {
     })
 
     if (!cohortMembership) {
-      return NextResponse.json(
-        { error: 'No active mentor cohort found' },
-        { status: 404 }
-      )
+      console.log('[MENTOR_ACCESS] No active cohort membership found for mentor:', user.id)
+      return NextResponse.json({
+        success: false,
+        error: 'No active cohort assignment',
+        message: 'You are not currently assigned to any cohorts. Please contact an administrator to be assigned to a cohort.',
+        location: 'mentor/applications/access',
+        details: {
+          userId: user.id,
+          hasMentorRole: true,
+          hasActiveCohort: false
+        }
+      }, { status: 403 })
     }
 
     // Check mentor permissions
@@ -66,14 +89,30 @@ export async function GET(req: NextRequest) {
       (!permissions.reviewAccessExpiresAt || permissions.reviewAccessExpiresAt > now)
 
     if (!hasAccess) {
+      console.log('[MENTOR_ACCESS] Mentor lacks application review permissions:', {
+        userId: user.id,
+        cohort: cohortMembership.cohort,
+        hasPermissions: !!permissions,
+        canReview: permissions?.canReviewApplications || false,
+        validUntil: permissions?.validUntil,
+        reviewExpiresAt: permissions?.reviewAccessExpiresAt
+      })
+      
       return NextResponse.json({
         success: false,
+        error: 'Application review access denied',
+        message: permissions 
+          ? 'Your application review access has expired or is not enabled. Please contact an administrator to renew your access.'
+          : 'You do not have permission to review applications. Please contact an administrator to grant you access.',
+        location: 'mentor/applications/access',
         data: {
           hasAccess: false,
-          message: 'You do not have permission to review applications. Please contact an administrator for access.',
-          cohort: cohortMembership.cohort
+          cohort: cohortMembership.cohort,
+          permissionsExist: !!permissions,
+          canReviewApplications: permissions?.canReviewApplications || false,
+          expired: permissions?.reviewAccessExpiresAt ? permissions.reviewAccessExpiresAt < now : false
         }
-      })
+      }, { status: 403 })
     }
 
     // Calculate remaining time if there's an expiry
