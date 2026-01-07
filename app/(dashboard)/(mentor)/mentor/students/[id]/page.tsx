@@ -25,8 +25,18 @@ interface StudentDetail {
   email: string
   phone: string
   school: string
+  grade?: string
+  county?: string
   cohort: string
   joinedAt: string
+  lastLoginAt?: string | null
+  parentInfo?: {
+    name: string
+    email: string
+    phone: string
+  }
+  articlesCount: number
+  publishedArticles: number
   progress: {
     modulesCompleted: number
     totalModules: number
@@ -86,65 +96,6 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  // Fallback data for display when API returns null
-  const mockStudent: StudentDetail = {
-    id: id,
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@school.ac.ke',
-    phone: '+254 700 123456',
-    school: 'Nairobi High School',
-    cohort: 'FGC 2026',
-    joinedAt: '2024-01-15',
-    progress: {
-      modulesCompleted: 8,
-      totalModules: 12,
-      assignmentsSubmitted: 15,
-      totalAssignments: 20,
-      averageScore: 85
-    },
-    achievements: [
-      {
-        id: '1',
-        title: 'Fast Learner',
-        description: 'Completed 5 modules in first month',
-        earnedAt: '2024-02-15',
-        icon: 'rocket'
-      },
-      {
-        id: '2',
-        title: 'Problem Solver',
-        description: 'Solved complex robotics challenge',
-        earnedAt: '2024-03-01',
-        icon: '🧩'
-      }
-    ],
-    recentActivity: [
-      {
-        id: '1',
-        type: 'submission',
-        title: 'Module 8 Assignment',
-        timestamp: '2 hours ago',
-        status: 'completed'
-      },
-      {
-        id: '2',
-        type: 'achievement',
-        title: 'Earned Problem Solver Badge',
-        timestamp: '1 day ago',
-        status: 'completed'
-      },
-      {
-        id: '3',
-        type: 'module',
-        title: 'Started Module 9',
-        timestamp: '3 days ago',
-        status: 'pending'
-      }
-    ]
-  }
-
-  const displayStudent = student || mockStudent
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -167,7 +118,7 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     )
   }
 
-  if (!displayStudent) {
+  if (!student) {
     return (
       <div className="p-8 text-center">
         <p className="text-muted-foreground">Student not found</p>
@@ -189,9 +140,9 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          {displayStudent.firstName} {displayStudent.lastName}
+          {student.firstName} {student.lastName}
         </h1>
-        <p className="text-muted-foreground">{displayStudent.cohort} Student</p>
+        <p className="text-muted-foreground">{student.cohort} Student</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -204,84 +155,177 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
               </div>
               <div>
                 <h2 className="font-semibold">
-                  {displayStudent.firstName} {displayStudent.lastName}
+                  {student.firstName} {student.lastName}
                 </h2>
-                <p className="text-sm text-muted-foreground">{displayStudent.cohort}</p>
+                <p className="text-sm text-muted-foreground">{student.cohort}</p>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{displayStudent.email}</span>
+                <span>{student.email}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{displayStudent.phone}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <School className="h-4 w-4 text-muted-foreground" />
-                <span>{displayStudent.school}</span>
-              </div>
+              {student.phone && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span>{student.phone}</span>
+                </div>
+              )}
+              {student.school && (
+                <div className="flex items-center gap-2 text-sm">
+                  <School className="h-4 w-4 text-muted-foreground" />
+                  <span>{student.school}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>Joined {new Date(displayStudent.joinedAt).toLocaleDateString()}</span>
+                <span>Joined {new Date(student.joinedAt).toLocaleDateString()}</span>
+              </div>
+              {student.lastLoginAt && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>Last active {new Date(student.lastLoginAt).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Articles Stats */}
+            <div className="mt-6 pt-6 border-t space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Articles Written</span>
+                <span className="font-medium">{student.articlesCount}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Published</span>
+                <span className="font-medium">{student.publishedArticles}</span>
               </div>
             </div>
+
+            {/* Parent Info */}
+            {student.parentInfo && (student.parentInfo.name || student.parentInfo.email || student.parentInfo.phone) && (
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="text-sm font-semibold mb-3">Parent/Guardian</h4>
+                <div className="space-y-2 text-sm">
+                  {student.parentInfo.name && (
+                    <div>
+                      <span className="text-muted-foreground">Name: </span>
+                      <span>{student.parentInfo.name}</span>
+                    </div>
+                  )}
+                  {student.parentInfo.email && (
+                    <div>
+                      <span className="text-muted-foreground">Email: </span>
+                      <span>{student.parentInfo.email}</span>
+                    </div>
+                  )}
+                  {student.parentInfo.phone && (
+                    <div>
+                      <span className="text-muted-foreground">Phone: </span>
+                      <span>{student.parentInfo.phone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Achievements */}
-          <div className="bg-card rounded-lg border p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-yellow-600" />
-              Achievements
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {displayStudent.achievements.map(achievement => (
-                <div key={achievement.id} className="flex items-start gap-3">
-                  <div className="text-2xl">{achievement.icon}</div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-sm">{achievement.title}</h4>
-                    <p className="text-xs text-muted-foreground">{achievement.description}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(achievement.earnedAt).toLocaleDateString()}
-                    </p>
+          {/* Progress */}
+          {student.progress && (
+            <div className="bg-card rounded-lg border p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Progress Overview
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Modules</p>
+                  <p className="text-2xl font-bold">
+                    {student.progress.modulesCompleted}/{student.progress.totalModules}
+                  </p>
+                  <div className="w-full bg-muted rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full"
+                      style={{ width: `${(student.progress.modulesCompleted / student.progress.totalModules) * 100}%` }}
+                    />
                   </div>
                 </div>
-              ))}
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Assignments</p>
+                  <p className="text-2xl font-bold">
+                    {student.progress.assignmentsSubmitted}/{student.progress.totalAssignments}
+                  </p>
+                  <div className="w-full bg-muted rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full"
+                      style={{ width: `${(student.progress.assignmentsSubmitted / student.progress.totalAssignments) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">Average Score</p>
+                <p className="text-2xl font-bold">{student.progress.averageScore}%</p>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Recent Activity */}
-          <div className="bg-card rounded-lg border p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Recent Activity
-            </h3>
-            <div className="space-y-3">
-              {displayStudent.recentActivity.map(activity => (
-                <div key={activity.id} className="flex items-center justify-between py-3 border-b last:border-0">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon(activity.status)}
-                    <div>
-                      <p className="text-sm font-medium">{activity.title}</p>
-                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+          {/* Achievements */}
+          {student.achievements && student.achievements.length > 0 && (
+            <div className="bg-card rounded-lg border p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-600" />
+                Achievements
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {student.achievements.map(achievement => (
+                  <div key={achievement.id} className="flex items-start gap-3">
+                    <div className="text-2xl">{achievement.icon}</div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-sm">{achievement.title}</h4>
+                      <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(achievement.earnedAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    activity.status === 'completed' ? 'bg-green-100 text-green-700' :
-                    activity.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {activity.status}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Recent Activity */}
+          {student.recentActivity && student.recentActivity.length > 0 && (
+            <div className="bg-card rounded-lg border p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Recent Activity
+              </h3>
+              <div className="space-y-3">
+                {student.recentActivity.map(activity => (
+                  <div key={activity.id} className="flex items-center justify-between py-3 border-b last:border-0">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(activity.status)}
+                      <div>
+                        <p className="text-sm font-medium">{activity.title}</p>
+                        <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      activity.status === 'completed' ? 'bg-green-100 text-green-700' :
+                      activity.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {activity.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -19,19 +19,24 @@ import {
 
 interface Session {
   id: string
+  slug?: string
   title: string
   description: string
-  type: 'online' | 'in-person' | 'hybrid'
+  type: string
   date: string
-  startTime: string
-  endTime: string
+  endDate?: string
+  startTime?: string
+  endTime?: string
+  duration?: string
   location?: string
   meetingLink?: string
-  cohorts: string[]
-  registeredCount: number
-  maxCapacity: number
+  isVirtual?: boolean
+  cohorts?: string[]
+  registeredCount?: number
+  attendees?: number
+  maxCapacity?: number
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
-  materials: Array<{
+  materials?: Array<{
     name: string
     url: string
   }>
@@ -76,66 +81,8 @@ export default function MentorSessionsPage() {
     }
   }
 
-  // Mock data
-  const mockSessions: Session[] = [
-    {
-      id: '1',
-      title: 'Advanced Programming Techniques',
-      description: 'Deep dive into advanced programming patterns for robotics',
-      type: 'online',
-      date: '2024-03-15',
-      startTime: '14:00',
-      endTime: '16:00',
-      meetingLink: 'https://meet.google.com/abc-defg-hij',
-      cohorts: ['2024'],
-      registeredCount: 18,
-      maxCapacity: 25,
-      status: 'upcoming',
-      materials: [
-        { name: 'Presentation Slides', url: '/materials/advanced-prog.pdf' },
-        { name: 'Code Examples', url: '/materials/code-examples.zip' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Mechanical Design Workshop',
-      description: 'Hands-on workshop for robot mechanical design',
-      type: 'in-person',
-      date: '2024-03-20',
-      startTime: '10:00',
-      endTime: '13:00',
-      location: 'Nairobi Tech Hub, Room 301',
-      cohorts: ['2024', '2025'],
-      registeredCount: 22,
-      maxCapacity: 20,
-      status: 'upcoming',
-      materials: [
-        { name: 'Design Templates', url: '/materials/design-templates.pdf' }
-      ]
-    },
-    {
-      id: '3',
-      title: 'Team Building & Communication',
-      description: 'Developing soft skills for effective teamwork',
-      type: 'hybrid',
-      date: '2024-03-10',
-      startTime: '15:00',
-      endTime: '17:00',
-      location: 'Main Campus Hall',
-      meetingLink: 'https://meet.google.com/xyz-abcd-efg',
-      cohorts: ['2024'],
-      registeredCount: 30,
-      maxCapacity: 30,
-      status: 'completed',
-      materials: [
-        { name: 'Workshop Materials', url: '/materials/team-building.pdf' }
-      ]
-    }
-  ]
 
-  const displaySessions = sessions.length > 0 ? sessions : mockSessions
-
-  const filteredSessions = displaySessions.filter(session => {
+  const filteredSessions = sessions.filter(session => {
     const matchesStatus = filterStatus === 'all' || session.status === filterStatus
     const matchesType = filterType === 'all' || session.type === filterType
     return matchesStatus && matchesType
@@ -185,45 +132,6 @@ export default function MentorSessionsPage() {
           <Plus className="h-4 w-4" />
           Schedule Session
         </Link>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-card rounded-lg border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Total Sessions</span>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">{displaySessions.length}</div>
-        </div>
-
-        <div className="bg-card rounded-lg border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Upcoming</span>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">
-            {displaySessions.filter(s => s.status === 'upcoming').length}
-          </div>
-        </div>
-
-        <div className="bg-card rounded-lg border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Total Students</span>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">
-            {displaySessions.reduce((acc, s) => acc + s.registeredCount, 0)}
-          </div>
-        </div>
-
-        <div className="bg-card rounded-lg border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Completion Rate</span>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">92%</div>
-        </div>
       </div>
 
       {/* Filters */}
@@ -302,7 +210,7 @@ export default function MentorSessionsPage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{session.startTime} - {session.endTime}</span>
+                  <span>{session.duration || (session.startTime && session.endTime ? `${session.startTime} - ${session.endTime}` : 'Time TBD')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   {getTypeIcon(session.type)}
@@ -328,18 +236,23 @@ export default function MentorSessionsPage() {
 
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Registered: </span>
-                    <span className="font-medium">
-                      {session.registeredCount}/{session.maxCapacity}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Cohorts: </span>
-                    <span className="font-medium">{session.cohorts.join(', ')}</span>
-                  </div>
+                  {(session.attendees !== undefined || session.registeredCount !== undefined) && (
+                    <div>
+                      <span className="text-muted-foreground">Registered: </span>
+                      <span className="font-medium">
+                        {session.attendees || session.registeredCount || 0}
+                        {session.maxCapacity ? `/${session.maxCapacity}` : ''}
+                      </span>
+                    </div>
+                  )}
+                  {session.cohorts && session.cohorts.length > 0 && (
+                    <div>
+                      <span className="text-muted-foreground">Cohorts: </span>
+                      <span className="font-medium">{session.cohorts.join(', ')}</span>
+                    </div>
+                  )}
                 </div>
-                {session.materials.length > 0 && (
+                {session.materials && session.materials.length > 0 && (
                   <Link
                     href={`/mentor/sessions/${session.id}`}
                     className="text-sm text-primary hover:underline flex items-center gap-1"

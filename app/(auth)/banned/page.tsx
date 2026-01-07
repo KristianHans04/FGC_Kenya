@@ -28,16 +28,8 @@ interface BanDetails {
 }
 
 const inspirationalQuotes = [
-  "Every setback is a setup for a comeback.",
   "Sometimes you win, sometimes you learn.",
-  "The road to success is always under construction.",
-  "Mistakes are proof that you're trying.",
   "A smooth sea never made a skilled sailor.",
-  "Fall seven times, stand up eight.",
-  "Your current situation is not your final destination.",
-  "Every expert was once a beginner.",
-  "The comeback is always stronger than the setback.",
-  "Growth begins at the end of your comfort zone."
 ]
 
 export default function BannedPage() {

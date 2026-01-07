@@ -73,55 +73,8 @@ export default function MentorResourcesPage() {
     }
   }
 
-  // Mock data
-  const mockResources: Resource[] = [
-    {
-      id: '1',
-      title: 'Introduction to Robotics - Module 1',
-      description: 'Comprehensive guide covering basic robotics concepts',
-      type: 'document',
-      category: 'Fundamentals',
-      fileUrl: '/resources/intro-robotics.pdf',
-      fileSize: '12.5 MB',
-      uploadedAt: '2024-01-15',
-      lastModified: '2024-02-01',
-      downloads: 145,
-      assignedCohorts: ['2024', '2025'],
-      tags: ['robotics', 'basics', 'introduction']
-    },
-    {
-      id: '2',
-      title: 'Programming Workshop Video',
-      description: 'Recording of the advanced programming workshop',
-      type: 'video',
-      category: 'Programming',
-      fileUrl: '/resources/programming-workshop.mp4',
-      fileSize: '256 MB',
-      uploadedAt: '2024-02-10',
-      lastModified: '2024-02-10',
-      downloads: 89,
-      assignedCohorts: ['2024'],
-      tags: ['programming', 'workshop', 'advanced']
-    },
-    {
-      id: '3',
-      title: 'Team Building Exercises',
-      description: 'Collection of team building activities and exercises',
-      type: 'exercise',
-      category: 'Soft Skills',
-      fileUrl: '/resources/team-exercises.pdf',
-      fileSize: '3.2 MB',
-      uploadedAt: '2024-01-20',
-      lastModified: '2024-01-25',
-      downloads: 67,
-      assignedCohorts: ['2024', '2023'],
-      tags: ['team', 'collaboration', 'exercises']
-    }
-  ]
 
-  const displayResources = resources.length > 0 ? resources : mockResources
-
-  const filteredResources = displayResources.filter(resource => {
+  const filteredResources = resources.filter(resource => {
     const matchesSearch = searchTerm === '' ||
       resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -173,7 +126,7 @@ export default function MentorResourcesPage() {
             <span className="text-sm text-muted-foreground">Total Resources</span>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div className="text-2xl font-bold">{displayResources.length}</div>
+          <div className="text-2xl font-bold">{resources.length}</div>
         </div>
 
         <div className="bg-card rounded-lg border p-6">
@@ -182,7 +135,7 @@ export default function MentorResourcesPage() {
             <Download className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="text-2xl font-bold">
-            {displayResources.reduce((acc, r) => acc + r.downloads, 0)}
+            {resources.reduce((acc, r) => acc + r.downloads, 0)}
           </div>
         </div>
 
