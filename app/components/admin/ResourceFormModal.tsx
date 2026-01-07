@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, AlertCircle } from 'lucide-react'
 
 interface ResourceFormModalProps {
   resource?: {
@@ -19,11 +19,16 @@ export default function ResourceFormModal({ resource, onClose }: ResourceFormMod
     title: '',
     description: '',
     link: '',
-    cohort: 'FGC2025'
+    cohort: ''
   })
   const [loading, setLoading] = useState(false)
+  const [loadingCohorts, setLoadingCohorts] = useState(true)
   const [error, setError] = useState('')
   const [availableCohorts, setAvailableCohorts] = useState<string[]>([])
+
+  useEffect(() => {
+    fetchCohorts()
+  }, [])
 
   useEffect(() => {
     if (resource) {
@@ -33,16 +38,47 @@ export default function ResourceFormModal({ resource, onClose }: ResourceFormMod
         link: resource.link,
         cohort: resource.cohort
       })
+    } else if (availableCohorts.length > 0 && !formData.cohort) {
+      // Set default cohort for new resources
+      setFormData(prev => ({ ...prev, cohort: availableCohorts[0] }))
     }
-    
-    // Generate cohort options (current year and past 5 years)
-    const currentYear = new Date().getFullYear()
-    const cohorts = []
-    for (let year = currentYear + 1; year >= currentYear - 5; year--) {
-      cohorts.push(`FGC${year}`)
+  }, [resource, availableCohorts])
+
+  const fetchCohorts = async () => {
+    try {
+      setLoadingCohorts(true)
+      const response = await fetch('/api/cohorts')
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setAvailableCohorts(data.data || [])
+        if (!resource && data.data && data.data.length > 0) {
+          setFormData(prev => ({ ...prev, cohort: data.data[0] }))
+        }
+      } else {
+        console.error('[RESOURCE_FORM] Failed to fetch cohorts:', data)
+        setError('Failed to load cohorts. Using defaults.')
+        // Fallback to generated cohorts
+        const currentYear = new Date().getFullYear()
+        const cohorts = []
+        for (let year = currentYear + 1; year >= currentYear - 3; year--) {
+          cohorts.push(`FGC ${year}`)
+        }
+        setAvailableCohorts(cohorts)
+      }
+    } catch (error) {
+      console.error('[RESOURCE_FORM] Error fetching cohorts:', error)
+      // Fallback to generated cohorts
+      const currentYear = new Date().getFullYear()
+      const cohorts = []
+      for (let year = currentYear + 1; year >= currentYear - 3; year--) {
+        cohorts.push(`FGC ${year}`)
+      }
+      setAvailableCohorts(cohorts)
+    } finally {
+      setLoadingCohorts(false)
     }
-    setAvailableCohorts(cohorts)
-  }, [resource])
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -144,21 +180,43 @@ export default function ResourceFormModal({ resource, onClose }: ResourceFormMod
             <label className="block text-sm font-medium mb-2">
               Cohort *
             </label>
-            <select
-              value={formData.cohort}
-              onChange={(e) => setFormData({ ...formData, cohort: e.target.value })}
-              className="w-full px-3 py-2 bg-background border rounded-lg"
-              required
-            >
-              {availableCohorts.map(cohort => (
-                <option key={cohort} value={cohort}>
-                  {cohort}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-muted-foreground mt-1">
-              Select which cohort can access this resource
-            </p>
+            {loadingCohorts ? (
+              <div className="w-full px-3 py-2 bg-background border rounded-lg flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm text-muted-foreground">Loading cohorts...</span>
+              </div>
+            ) : availableCohorts.length > 0 ? (
+              <>
+                <select
+                  value={formData.cohort}
+                  onChange={(e) => setFormData({ ...formData, cohort: e.target.value })}
+                  className="w-full px-3 py-2 bg-background border rounded-lg"
+                  required
+                >
+                  <option value="">Select a cohort</option>
+                  {availableCohorts.map(cohort => (
+                    <option key={cohort} value={cohort}>
+                      {cohort}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select which cohort can access this resource
+                </p>
+              </>
+            ) : (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-yellow-900 font-medium">No cohorts available</p>
+                    <p className="text-xs text-yellow-700 mt-1">
+                      Unable to load cohorts. Please refresh the page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">

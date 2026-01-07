@@ -21,7 +21,7 @@ export default function ResourceForm({ resource, cohorts, onClose, onSuccess }: 
     title: resource?.title || '',
     description: resource?.description || '',
     link: resource?.link || '',
-    cohort: resource?.cohort || cohorts[0] || 'FGC2025'
+    cohort: resource?.cohort || cohorts[0] || ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
