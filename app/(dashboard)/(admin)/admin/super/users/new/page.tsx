@@ -143,8 +143,8 @@ export default function AddUserPage() {
     if (!authLoading) {
       if (!isAuthenticated) {
         router.push('/auth/login')
-      } else if (currentUser?.role !== 'SUPER_ADMIN' && currentUser?.role !== 'ADMIN') {
-        router.push('/dashboard')
+      } else if (currentUser?.role !== 'SUPER_ADMIN') {
+        router.push('/admin')
       }
     }
   }, [authLoading, isAuthenticated, currentUser, router])

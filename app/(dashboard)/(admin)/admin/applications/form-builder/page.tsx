@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { showSuccess, showError } from '@/app/lib/hooks/useFlashNotification'
 
 const ApplicationFormBuilder = dynamic(
   () => import('@/app/components/admin/ApplicationFormBuilder'),
@@ -57,10 +58,19 @@ export default function FormBuilderPage() {
   }
 
   const handleSave = async (data: any) => {
+    console.log('[Form Save] Starting save process', {
+      formId,
+      hasTitle: !!data.title,
+      hasSeason: !!data.season,
+      method: formId ? 'UPDATE' : 'CREATE'
+    })
+    
     try {
       const url = formId 
         ? `/api/applications/forms/${formId}`
         : '/api/applications/forms'
+      
+      console.log('[Form Save] Making request to:', url)
       
       const response = await fetch(url, {
         method: formId ? 'PUT' : 'POST',
@@ -72,30 +82,59 @@ export default function FormBuilderPage() {
         })
       })
       
+      console.log('[Form Save] Response status:', response.status)
+      
       if (response.ok) {
         const result = await response.json()
+        console.log('[Form Save] Success:', result)
         
         // Show success message
         const message = formId 
           ? 'Application form updated successfully'
           : 'Application form created successfully'
         
+        showSuccess(message)
+        
         // If it's a new form and was created successfully, update the URL
         if (!formId && result.data?.form?.id) {
+          console.log('[Form Save] Updating URL with new form ID:', result.data.form.id)
           router.replace(`/admin/applications/form-builder?id=${result.data.form.id}`)
         }
         
         // Navigate back to applications page after a short delay
         setTimeout(() => {
           router.push('/admin/applications')
-        }, 1500)
+        }, 2000)
       } else {
-        const error = await response.json()
-        throw new Error(error.error?.message || 'Failed to save form')
+        const errorData = await response.json()
+        console.error('[Form Save] Error response:', errorData)
+        
+        // Extract specific error message
+        let errorMessage = 'Failed to save form'
+        if (errorData.error?.code === 'SEASON_EXISTS') {
+          errorMessage = errorData.error.message
+        } else if (errorData.error?.message) {
+          errorMessage = errorData.error.message
+        }
+        
+        showError(errorMessage)
+        throw new Error(errorMessage)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving form:', error)
-      throw error // Let the component handle the error display
+      // Don't throw the error object, just the message string
+      if (typeof error === 'object' && error.message) {
+        if (!error.message.includes('Failed to save form')) {
+          showError(error.message)
+        }
+        throw new Error(error.message)
+      } else if (typeof error === 'string') {
+        showError(error)
+        throw new Error(error)
+      } else {
+        showError('An unexpected error occurred')
+        throw new Error('An unexpected error occurred')
+      }
     }
   }
 

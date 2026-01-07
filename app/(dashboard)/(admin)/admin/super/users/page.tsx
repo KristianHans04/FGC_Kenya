@@ -87,8 +87,8 @@ export default function UserManagementPage() {
     if (!isLoading) {
       if (!isAuthenticated) {
         router.push('/auth/login')
-      } else if (currentUser?.role !== 'SUPER_ADMIN' && currentUser?.role !== 'ADMIN') {
-        router.push('/dashboard')
+      } else if (currentUser?.role !== 'SUPER_ADMIN') {
+        router.push('/admin')
       }
     }
   }, [currentUser, isAuthenticated, isLoading, router])
