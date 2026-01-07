@@ -253,9 +253,13 @@ export default function ApplicationFormBuilder({
         
         if (response.ok) {
           setLastSaved(new Date())
+        } else if (response.status === 401) {
+          // Session expired - don't show error, just skip autosave
+          console.debug('Session expired, skipping autosave')
         }
-      } else if (formData.season && formData.title) {
-        // Create new draft form
+      } else if (formData.season && formData.title && !initialData?.id) {
+        // Only create if we don't have an ID yet
+        // This prevents duplicate creation attempts
         const response = await fetch('/api/applications/forms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -265,15 +269,25 @@ export default function ApplicationFormBuilder({
         
         if (response.ok) {
           const data = await response.json()
-          // Update initialData so subsequent saves are updates
-          if (onSave) {
-            onSave({ ...formData, id: data.data.form.id })
-          }
+          // Store the ID to prevent duplicate creation
+          setFormData(prev => ({ ...prev, id: data.data.form.id }))
           setLastSaved(new Date())
+        } else if (response.status === 400) {
+          // Form already exists, likely from a previous autosave
+          // Try to fetch existing form
+          const errorData = await response.json()
+          if (errorData.error?.message?.includes('season already exists')) {
+            // Don't show error for duplicate season during autosave
+            console.debug('Form for season already exists')
+          }
+        } else if (response.status === 401) {
+          // Session expired - don't show error, just skip autosave
+          console.debug('Session expired, skipping autosave')
         }
       }
     } catch (error) {
-      console.error('Autosave failed:', error)
+      // Silent fail for autosave - don't disturb user
+      console.debug('Autosave failed silently:', error)
     } finally {
       setIsSaving(false)
     }
@@ -513,8 +527,15 @@ export default function ApplicationFormBuilder({
     try {
       await onSave(formData)
       setFlashMessage({ message: 'Form saved successfully!', type: 'success' })
-    } catch (error) {
-      setFlashMessage({ message: 'Failed to save form. Please try again.', type: 'error' })
+    } catch (error: any) {
+      // Extract error message properly
+      let errorMessage = 'Failed to save form. Please try again.'
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      }
+      setFlashMessage({ message: errorMessage, type: 'error' })
     } finally {
       setSaving(false)
     }

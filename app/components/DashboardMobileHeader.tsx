@@ -20,8 +20,8 @@ export default function DashboardMobileHeader({ onMenuClick }: DashboardMobileHe
 
         {/* FGC Logo - Center */}
         <div className="flex-1 flex justify-center">
-          <Link href="/" className="flex items-center space-x-2 py-1">
-            <div className="relative w-16 h-16 shrink-0">
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="relative w-28 h-14 shrink-0">
                <Image
                 src="/images/Logo/FGC_KExFGC-logo.svg"
                 alt="FIRST Global Team Kenya Logo"
