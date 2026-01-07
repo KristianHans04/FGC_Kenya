@@ -26,7 +26,7 @@ export const APPLICATION_TIMELINE = [
   { date: '20-30 March', title: 'Interviews', status: 'completed' as const },
   { date: '5 April', title: 'Team Announcement', status: 'completed' as const },
   { date: 'April - October', title: 'Training & Preparation', status: 'completed' as const },
-  { date: 'October 29, 2025', title: 'Panama Competition - Silver Medal 🥈', status: 'completed' as const },
+  { date: 'October 7-10th, 2026', title: 'FIRST Global Challenge Competition', status: 'completed' as const },
 ] as const
 
 /**

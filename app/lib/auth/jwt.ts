@@ -12,12 +12,12 @@ import type { JWTPayload, UserRole } from '@/app/types/auth'
  * JWT configuration constants
  */
 export const JWT_CONFIG = {
-  /** Access token expiry (15 minutes) */
-  ACCESS_TOKEN_EXPIRY: '15m',
+  /** Access token expiry (2 hours) */
+  ACCESS_TOKEN_EXPIRY: '2h',
   /** Refresh token expiry (7 days) */
   REFRESH_TOKEN_EXPIRY: '7d',
   /** Access token expiry in seconds */
-  ACCESS_TOKEN_EXPIRY_SECONDS: 15 * 60,
+  ACCESS_TOKEN_EXPIRY_SECONDS: 2 * 60 * 60,
   /** Refresh token expiry in seconds */
   REFRESH_TOKEN_EXPIRY_SECONDS: 7 * 24 * 60 * 60,
   /** Algorithm for signing */
@@ -86,7 +86,7 @@ export async function generateTokens(
   const accessToken = await new SignJWT(payload)
     .setProtectedHeader({ alg: JWT_CONFIG.ALGORITHM })
     .setIssuedAt()
-    .setExpirationTime('15m')
+    .setExpirationTime('2h')
     .sign(secret)
 
   const refreshToken = generateRefreshToken()

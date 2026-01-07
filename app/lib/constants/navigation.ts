@@ -135,6 +135,11 @@ export const MENTOR_NAVIGATION = {
     href: '/mentor/students',
     icon: GraduationCap,
   },
+  APPLICATIONS: {
+    label: 'Application Review',
+    href: '/mentor/applications',
+    icon: FileText,
+  },
   RESOURCES: {
     label: 'Teaching Resources',
     href: '/mentor/resources',
@@ -148,7 +153,7 @@ export const MENTOR_NAVIGATION = {
   MEDIA_APPROVALS: {
     label: 'Review Articles',
     href: '/mentor/media',
-    icon: FileText,
+    icon: Edit,
   },
   MESSAGES: {
     label: 'Messages',
@@ -300,19 +305,36 @@ export function getNavigationByRole(role: string) {
 
 // Get dashboard route by role
 export function getDashboardRoute(role: string) {
+  console.log('[NAVIGATION] getDashboardRoute called with role:', role)
+  
+  let route: string
   switch (role) {
     case 'SUPER_ADMIN':
-      return '/admin/super/users'
+      route = '/admin/super/users'
+      console.log('[NAVIGATION] SUPER_ADMIN detected, routing to:', route)
+      break
     case 'ADMIN':
-      return '/admin'
+      route = '/admin'
+      console.log('[NAVIGATION] ADMIN detected, routing to:', route)
+      break
     case 'MENTOR':
-      return '/mentor'
+      route = '/mentor'
+      console.log('[NAVIGATION] MENTOR detected, routing to:', route)
+      break
     case 'STUDENT':
-      return '/student'
+      route = '/student'
+      console.log('[NAVIGATION] STUDENT detected, routing to:', route)
+      break
     case 'ALUMNI':
-      return '/alumni'
+      route = '/alumni'
+      console.log('[NAVIGATION] ALUMNI detected, routing to:', route)
+      break
     case 'USER':
     default:
-      return '/dashboard'
+      route = '/dashboard'
+      console.log('[NAVIGATION] USER/default detected, routing to:', route)
+      break
   }
+  
+  return route
 }
