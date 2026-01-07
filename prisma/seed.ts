@@ -65,6 +65,7 @@ async function main() {
         firstName: userData.firstName,
         lastName: userData.lastName,
         school: userData.school,
+        role: userData.role as any,
         emailVerified: true,
         isActive: true
       },
@@ -73,6 +74,7 @@ async function main() {
         firstName: userData.firstName,
         lastName: userData.lastName,
         school: userData.school,
+        role: userData.role as any,
         emailVerified: true,
         isActive: true
       }

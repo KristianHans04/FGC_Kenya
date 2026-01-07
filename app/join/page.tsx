@@ -130,7 +130,9 @@ export default function JoinPage() {
   const [aiQuestions, setAiQuestions] = useState<string[]>([])
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>({})
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false)
-  const [applicationsClosed] = useState(true) // Applications are closed as of October 3rd
+  const [applicationsClosed, setApplicationsClosed] = useState(true)
+  const [activeForm, setActiveForm] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   
   const {
     register,
@@ -142,6 +144,33 @@ export default function JoinPage() {
     resolver: zodResolver(applicationSchema),
     mode: 'onBlur', // Validate on blur for better UX
   })
+
+  // Check for active application form
+  useEffect(() => {
+    checkActiveForm()
+  }, [])
+
+  const checkActiveForm = async () => {
+    try {
+      const response = await fetch('/api/applications/forms/active')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.data?.form) {
+          setActiveForm(data.data.form)
+          setApplicationsClosed(false)
+        } else {
+          setApplicationsClosed(true)
+        }
+      } else {
+        setApplicationsClosed(true)
+      }
+    } catch (error) {
+      console.error('Failed to check active form:', error)
+      setApplicationsClosed(true)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   /**
    * Handle form submission with security measures
@@ -226,28 +255,6 @@ export default function JoinPage() {
       </div>
 
       <div className="relative z-10">
-        {/* Navigation Bar */}
-        <nav className="border-b border-border/40 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <Image
-                src="/images/FGC_Logo.svg"
-                alt="FIRST Global Team Kenya"
-                width={120}
-                height={40}
-                className="h-10 w-auto"
-                priority
-              />
-            </Link>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground hidden sm:inline-block">Already a member?</span>
-              <Link href="/login" className="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
-                Sign In
-              </Link>
-            </div>
-          </div>
-        </nav>
-
         {/* Hero Section */}
         <section className="relative py-20 overflow-hidden">
           <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
@@ -294,7 +301,7 @@ export default function JoinPage() {
                       viewport={{ once: true }}
                       className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-card"
                     >
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4 ring-4 ring-primary/5">
+                      <div className="inline-flex items-center justify-center w-12 h-12 mb-4">
                         <IconComponent className="h-6 w-6 text-primary" aria-hidden="true" />
                       </div>
                       <h3 className="font-semibold mb-2 text-lg">{item.title}</h3>
@@ -331,7 +338,7 @@ export default function JoinPage() {
                     viewport={{ once: true }}
                     className="flex items-center space-x-4 p-4 rounded-xl bg-card/50 border border-border/50 hover:bg-card transition-colors"
                   >
-                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-primary/20 ring-2 ring-primary" aria-hidden="true"></div>
+                    <div className="w-3 h-3 rounded-full flex-shrink-0 bg-primary/20" aria-hidden="true"></div>
                     <div className="flex-grow">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <h3 className="font-semibold text-foreground">{item.title}</h3>
@@ -360,24 +367,55 @@ export default function JoinPage() {
               </h2>
 
               <div className="relative">
-                {applicationsClosed && (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+                    <p className="text-muted-foreground">Loading application form...</p>
+                  </div>
+                ) : applicationsClosed && (
                   <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-20 rounded-2xl border border-border/50">
-                    <div className="text-center p-8 max-w-md">
-                      <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Calendar className="h-10 w-10 text-muted-foreground" />
+                    <div className="text-center p-4 sm:p-8 max-w-md">
+                      <div className="w-16 sm:w-20 h-16 sm:h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <Calendar className="h-8 sm:h-10 w-8 sm:w-10 text-muted-foreground" />
                       </div>
-                      <h3 className="text-2xl font-bold mb-4">Applications Closed</h3>
-                      <p className="text-lg text-muted-foreground mb-6">
-                        The application period for the 2025 <i>FIRST</i> Global Challenge team has ended.
+                      <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Applications Closed</h3>
+                      <p className="text-base sm:text-lg text-muted-foreground mb-4 sm:mb-6">
+                        There are no active application forms at the moment.
                       </p>
-                      <p className="text-sm font-medium text-primary bg-primary/10 py-2 px-4 rounded-full inline-block">
-                        Next cycle opens: January 2026
+                      <p className="text-xs sm:text-sm font-medium text-primary bg-primary/10 py-2 px-4 rounded-full inline-block">
+                        Check back soon for updates
                       </p>
                     </div>
                   </div>
                 )}
                 
-                <div className={applicationsClosed ? 'opacity-50 pointer-events-none filter blur-[1px]' : ''}>
+                <div className={applicationsClosed || loading ? 'opacity-50 pointer-events-none filter blur-[1px]' : ''}>
+                  {/* Active Form Info */}
+                  {!loading && activeForm && !applicationsClosed && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                    >
+                      <div className="flex items-start gap-3">
+                        <Rocket className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-green-800 dark:text-green-200">{activeForm?.title}</h3>
+                          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                            {activeForm?.description}
+                          </p>
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                            Deadline: {activeForm?.closeDate && new Date(activeForm.closeDate).toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  
                   {/* Status Messages */}
                   <div id="form-status" tabIndex={-1} aria-live="polite" aria-atomic="true">
                     <AnimatePresence>

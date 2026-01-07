@@ -63,6 +63,7 @@ model User {
   otpCodes      OTPCode[]
   sessions      Session[]
   applications  Application[]
+  applicationNotes ApplicationNote[]
   auditLogs     AuditLog[]    @relation("UserAuditLogs")
   adminActions  AuditLog[]    @relation("AdminAuditLogs")
   
@@ -86,6 +87,13 @@ model User {
   // Cohort relationships
   cohortMemberships CohortMember[] @relation("CohortMembers")
   
+  // Mentor-specific relationships
+  mentorPermissions MentorPermission[] @relation("MentorPermissions")
+  grantedPermissions MentorPermission[] @relation("GrantedPermissions")
+  mentorRelationships MentorStudent[] @relation("MentorRelationships")
+  studentMentorships MentorStudent[] @relation("StudentMentorships")
+  mentorHistory MentorHistory[] @relation("MentorHistory")
+  
   // Payment tracking (for super admin view)
   payments      Payment[]
   
@@ -96,6 +104,9 @@ model User {
   notificationPreferences NotificationPreference?
   pushSubscriptions PushSubscription[]
   notifications Notification[]
+  
+  // Learning resources created
+  createdLearningResources LearningResource[] @relation("CreatedResources")
 
   @@index([email])
 }
@@ -135,9 +146,90 @@ enum CohortRole {
   STUDENT
 }
 
-// =============================================================================
-// EMAIL SYSTEM (GMAIL-LIKE)
-// =============================================================================
+/// Mentor permissions for specific features and durations
+model MentorPermission {
+  id          String      @id @default(uuid())
+  mentorId    String
+  mentor      User        @relation("MentorPermissions", fields: [mentorId], references: [id], onDelete: Cascade)
+  cohort      String      // Cohort the permission applies to
+  
+  // Permission types
+  canReviewApplications Boolean @default(false)
+  canAccessStudentDetails Boolean @default(true)
+  canApproveContent Boolean @default(false)
+  
+  // Time-based access control
+  reviewAccessGrantedAt DateTime?
+  reviewAccessExpiresAt DateTime?
+  
+  // General permission validity
+  validFrom   DateTime    @default(now())
+  validUntil  DateTime?   // Null means no expiry
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Who granted these permissions
+  grantedById String?
+  grantedBy   User?       @relation("GrantedPermissions", fields: [grantedById], references: [id])
+  
+  @@unique([mentorId, cohort])
+  @@index([cohort])
+  @@index([validUntil])
+}
+
+/// Mentor-Student relationships
+model MentorStudent {
+  id        String      @id @default(uuid())
+  mentorId  String
+  mentor    User        @relation("MentorRelationships", fields: [mentorId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User        @relation("StudentMentorships", fields: [studentId], references: [id], onDelete: Cascade)
+  cohort    String      // Which cohort this mentorship is for
+  
+  assignedAt DateTime   @default(now())
+  endedAt   DateTime?
+  isActive  Boolean     @default(true)
+  
+  // Notes about the mentorship
+  notes     String?
+  
+  @@unique([mentorId, studentId, cohort])
+  @@index([mentorId, cohort])
+  @@index([studentId, cohort])
+  @@index([isActive])
+}
+
+/// Track mentor activities and history
+model MentorHistory {
+  id        String      @id @default(uuid())
+  mentorId  String
+  mentor    User        @relation("MentorHistory", fields: [mentorId], references: [id], onDelete: Cascade)
+  cohort    String
+  
+  // Activity tracking
+  activityType MentorActivityType
+  description String?
+  metadata  Json?       // Additional context for the activity
+  
+  occurredAt DateTime   @default(now())
+  
+  @@index([mentorId, cohort])
+  @@index([activityType])
+  @@index([occurredAt])
+}
+
+enum MentorActivityType {
+  ASSIGNED_AS_MENTOR
+  REMOVED_AS_MENTOR
+  GRANTED_REVIEW_ACCESS
+  REVOKED_REVIEW_ACCESS
+  REVIEWED_APPLICATION
+  APPROVED_CONTENT
+  REJECTED_CONTENT
+  MENTORSHIP_EXPIRED
+  MENTORSHIP_EXTENDED
+}
 
 /// Email messages
 model Email {
@@ -468,6 +560,11 @@ model Application {
   form            ApplicationForm   @relation(fields: [formId], references: [id])
   
   statusHistory   ApplicationStatusHistory[]
+  notes           ApplicationNote[]
+  
+  // New review fields for the enhanced system
+  score           Int?              // Review score 0-100
+  reviewerFeedback String?          // Feedback that goes to applicant
   
   @@unique([userId, season])
   @@index([status])
@@ -506,6 +603,23 @@ model ApplicationStatusHistory {
   application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   
   @@index([applicationId])
+}
+
+/// Application review notes (internal)
+model ApplicationNote {
+  id            String      @id @default(uuid())
+  content       String
+  isPrivate     Boolean     @default(true)  // Private notes vs feedback to applicant
+  createdAt     DateTime    @default(now())
+  
+  // Relations
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdById   String
+  createdBy     User        @relation(fields: [createdById], references: [id])
+  
+  @@index([applicationId])
+  @@index([createdById])
 }
 
 // =============================================================================
@@ -1035,6 +1149,27 @@ enum ResourceCategory {
   COMPETITION_INFO
   RESEARCH
   OTHER
+}
+
+// Learning Resources for Cohorts
+model LearningResource {
+  id          String   @id @default(uuid())
+  slug        String   @unique @default(cuid())
+  title       String
+  description String?
+  link        String
+  cohort      String   // e.g., "FGC2025", "FGC2024"
+  
+  // Created by mentor/admin
+  createdById String
+  createdBy   User     @relation("CreatedResources", fields: [createdById], references: [id])
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([cohort])
+  @@index([createdById])
 }
 
 // =============================================================================

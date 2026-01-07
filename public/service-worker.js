@@ -49,6 +49,17 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // CRITICAL: Only handle requests for this specific app
+  // Skip requests from other localhost apps or different ports
+  if (url.hostname === 'localhost' && url.port !== '3000') {
+    return; // Don't handle requests from other localhost apps
+  }
+
+  // Skip requests to other domains entirely
+  if (url.hostname !== 'localhost' && !url.hostname.includes('fgckenya') && !url.hostname.includes('atote')) {
+    return;
+  }
+
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
