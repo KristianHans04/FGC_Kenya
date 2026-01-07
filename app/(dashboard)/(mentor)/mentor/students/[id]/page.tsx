@@ -229,45 +229,6 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
           </div>
-
-          {/* Progress Stats */}
-          <div className="bg-card rounded-lg border p-6 mt-6">
-            <h3 className="font-semibold mb-4">Progress Overview</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-muted-foreground">Modules</span>
-                  <span>{displayStudent.progress.modulesCompleted}/{displayStudent.progress.totalModules}</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${(displayStudent.progress.modulesCompleted / displayStudent.progress.totalModules) * 100}%` }}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-muted-foreground">Assignments</span>
-                  <span>{displayStudent.progress.assignmentsSubmitted}/{displayStudent.progress.totalAssignments}</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all"
-                    style={{ width: `${(displayStudent.progress.assignmentsSubmitted / displayStudent.progress.totalAssignments) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2 border-t">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Average Score</span>
-                  <span className="font-medium">{displayStudent.progress.averageScore}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Main Content */}
