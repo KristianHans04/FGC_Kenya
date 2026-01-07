@@ -93,14 +93,7 @@ export default function LoginPage() {
     }
   }, [])
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && user && !authLoading) {
-      const dashboardRoute = getDashboardRoute(user.role || 'USER')
-      console.log('Redirecting to:', dashboardRoute, 'User role:', user.role)
-      router.replace(dashboardRoute)
-    }
-  }, [isAuthenticated, user, router, authLoading])
+  // Redirect if already authenticated (removed - handled by successful login only)
 
   // Show loading state while checking authentication
   if (authLoading) {
@@ -218,10 +211,14 @@ export default function LoginPage() {
         sessionStorage.removeItem('otp_sent_at')
         
         // Get redirect URL from response or determine based on role
+        console.log('[LOGIN] Response data:', result.data)
+        console.log('[LOGIN] User role:', result.data?.user?.role)
+        console.log('[LOGIN] Redirect URL from response:', result.data?.redirectUrl)
+        
         const redirectUrl = result.data?.redirectUrl || 
                           (result.data?.user?.role ? getDashboardRoute(result.data.user.role) : '/dashboard')
         
-        console.log('Redirecting to:', redirectUrl)
+        console.log('[LOGIN] Final redirect URL:', redirectUrl)
         
         // Use auth redirect utility for reliable redirection
         setTimeout(() => {

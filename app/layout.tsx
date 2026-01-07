@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/app/components/ThemeProvider'
 import { AuthProvider } from '@/app/lib/contexts/AuthContext'
 import { defaultMetadata } from '@/app/lib/config/metadata'
 import LayoutContent from '@/app/components/LayoutContent'
+import { FlashNotificationProvider } from '@/app/components/FlashNotificationProvider'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -55,7 +56,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
            <AuthProvider>
-             <LayoutContent>{children}</LayoutContent>
+             <FlashNotificationProvider>
+               <LayoutContent>{children}</LayoutContent>
+             </FlashNotificationProvider>
            </AuthProvider>
         </ThemeProvider>
       </body>
