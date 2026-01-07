@@ -12,7 +12,6 @@ import {
   BarChart3,
   BookOpen,
   Award,
-  MessageSquare,
   Briefcase,
   GraduationCap,
   Shield,
@@ -154,11 +153,6 @@ export const MENTOR_NAVIGATION = {
     label: 'Review Articles',
     href: '/mentor/media',
     icon: Edit,
-  },
-  MESSAGES: {
-    label: 'Messages',
-    href: '/mentor/messages',
-    icon: MessageSquare,
   },
   CALENDAR: {
     label: 'Calendar',
